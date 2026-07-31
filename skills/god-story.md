@@ -45,8 +45,11 @@ unit that has no chart.
 
 1. Verify `.godpowers/state.json` exists. If not: `/god-init` first.
 2. Spawn `god-storyteller` agent in fresh context.
-3. Storyteller reads PRD/ARCH for context, validates the format for the
-   requested kind, writes the file.
+3. Storyteller reads PRD/ARCH for context, then validates the format for the
+   requested kind with `lib/story-validator.validateForAuthoring()`. The
+   section contract for that kind is an error at write time, so a malformed
+   unit is surfaced instead of written. Reading an existing unit keeps those
+   findings as warnings, so units written before a rule existed still list.
 4. Report back to user with the new unit ID, kind, and path.
 
 ## Output

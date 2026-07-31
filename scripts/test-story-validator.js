@@ -550,4 +550,108 @@ test('findDanglingDeps is empty when every dep resolves', () => {
   if (validator.findDanglingDeps(tmp).length !== 0) throw new Error('false positive');
 });
 
+// ============================================================================
+// Authoring mode: the agent contract and the validator must agree
+// ============================================================================
+
+test('read mode keeps the slice section contract as warnings', () => {
+  const tmp = mkProject();
+  const file = path.join(tmp, '.godpowers/stories/auth/STORY-auth-050.mdx');
+  fs.writeFileSync(file, `---
+id: STORY-auth-050
+title: "Legacy story"
+status: pending
+owner: tester
+deps: []
+created: 2026-05-10
+---
+
+## Notes
+
+Written before the section contract existed.
+`);
+  const findings = validator.validateStory(validator.parseStory(file));
+  if (findings.filter(f => f.severity === 'error').length > 0) {
+    throw new Error('reading a legacy story produced errors');
+  }
+  if (!findings.find(f => f.kind === 'missing-user-story' && f.severity === 'warning')) {
+    throw new Error('missing-user-story should still be reported as a warning');
+  }
+});
+
+test('authoring mode promotes the slice section contract to errors', () => {
+  const tmp = mkProject();
+  const file = path.join(tmp, '.godpowers/stories/auth/STORY-auth-051.mdx');
+  fs.writeFileSync(file, `---
+id: STORY-auth-051
+title: "New story"
+status: pending
+owner: tester
+deps: []
+created: 2026-05-10
+---
+
+## Notes
+
+No User Story, no Acceptance Criteria.
+`);
+  const story = validator.parseStory(file);
+  const findings = validator.validateForAuthoring(story);
+  for (const kind of ['missing-user-story', 'missing-acceptance']) {
+    const finding = findings.find(f => f.kind === kind);
+    if (!finding) throw new Error(`${kind} not reported`);
+    if (finding.severity !== 'error') throw new Error(`${kind} should be an error when authoring`);
+  }
+  // validateForAuthoring is the documented alias for the explicit option.
+  const viaOption = validator.validateStory(story, { mode: 'authoring' });
+  if (JSON.stringify(viaOption) !== JSON.stringify(findings)) {
+    throw new Error('validateForAuthoring and { mode: authoring } disagree');
+  }
+});
+
+test('authoring mode promotes the decision-unit section contract too', () => {
+  const tmp = mkProject();
+  const file = mkUnit(tmp, 'q', 1, { question: null, answerShape: null });
+  const findings = validator.validateForAuthoring(validator.parseStory(file));
+  for (const kind of ['missing-question', 'missing-answer-shape']) {
+    const finding = findings.find(f => f.kind === kind);
+    if (!finding) throw new Error(`${kind} not reported`);
+    if (finding.severity !== 'error') throw new Error(`${kind} should be an error when authoring`);
+  }
+});
+
+test('authoring mode does not fail a well-formed unit of either shape', () => {
+  const tmp = mkProject();
+  const slice = validator.parseStory(mkStory(tmp, 'auth', 1));
+  const unit = validator.parseStory(mkUnit(tmp, 'q', 1));
+  for (const [label, story] of [['slice', slice], ['decision unit', unit]]) {
+    const errors = validator.validateForAuthoring(story).filter(f => f.severity === 'error');
+    if (errors.length > 0) {
+      throw new Error(`well-formed ${label} rejected: ${errors.map(e => e.kind).join(',')}`);
+    }
+  }
+});
+
+test('resolution findings stay warnings in both modes', () => {
+  const tmp = mkProject();
+  const story = validator.parseStory(
+    mkUnit(tmp, 'q', 1, { status: 'done', owner: 'tester' }));
+  for (const findings of [validator.validateStory(story), validator.validateForAuthoring(story)]) {
+    const finding = findings.find(f => f.kind === 'resolved-without-answer');
+    if (!finding) throw new Error('resolved-without-answer not reported');
+    if (finding.severity !== 'warning') {
+      throw new Error('a unit is written open and answered later; this is not an authoring defect');
+    }
+  }
+});
+
+test('structural findings are errors regardless of mode', () => {
+  const tmp = mkProject();
+  const story = validator.parseStory(mkStory(tmp, 'auth', 1, { status: 'wibbling' }));
+  for (const findings of [validator.validateStory(story), validator.validateForAuthoring(story)]) {
+    const finding = findings.find(f => f.kind === 'invalid-status');
+    if (!finding || finding.severity !== 'error') throw new Error('invalid-status should always be an error');
+  }
+});
+
 report();

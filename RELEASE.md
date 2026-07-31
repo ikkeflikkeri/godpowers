@@ -22,7 +22,9 @@
 
 ## Validation
 
-- [DECISION] `scripts/test-story-validator.js` grows from 18 to 39 behavioral tests covering kinds, the per-kind section contract, closed-with-reason, claim and reclaim, staleness, the frontier, and dangling deps.
+- [DECISION] `scripts/test-story-validator.js` grows from 18 to 45 behavioral tests covering kinds, the per-kind section contract in both modes, closed-with-reason, claim and reclaim, staleness, the frontier, and dangling deps.
+- [DECISION] `lib/story-validator.validateForAuthoring()` makes the per-kind section contract an error at write time, so the have-nots stated in `specialists/god-storyteller.md` and `specialists/god-cartographer.md` now hold; the read path keeps them as warnings so units written before a rule existed still list.
+- [DECISION] `scripts/test-doc-surface-counts.js` guards 37 further count claims across 13 files, derived from disk, closing the gap that let `ARCHITECTURE.md` and `ARCHITECTURE-MAP.md` rot to pre-5.x values unnoticed.
 - [DECISION] The static check, self-project truth, public-surface counts, have-nots tally, golden-artifact tests, and `npm audit --omit=dev` are green on the tagged commit.
 - [DECISION] Count-bearing lines in `ARCHITECTURE.md` and `ARCHITECTURE-MAP.md` that no gate covered had rotted to pre-5.x values and are corrected to current disk truth in this release.
 - [DECISION] The complete release gate and the official Agent Skills validator run in the GitHub publication workflow before the artifact is published.

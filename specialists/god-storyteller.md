@@ -90,7 +90,13 @@ As a [persona], I want [capability] so that [outcome].
    - Generate slice plan with 3-7 steps (5 ideal)
    - For UI-affecting stories AND when impeccable installed: bridge
      to `/impeccable clarify` for the user-facing strings in the story
-5. Validate via `lib/story-validator.validateStory()`.
+5. Validate via `lib/story-validator.validateForAuthoring()`, which is
+   `validateStory(story, { mode: 'authoring' })`. In authoring mode the
+   section contract for the unit's kind is an error, not a warning, so the
+   have-nots below actually block the write. The default read mode keeps them
+   as warnings because it also reads units written before a rule existed, and
+   failing those would make `/god-stories` unusable on any project with
+   history.
 6. If errors: surface to user, do not write.
 7. If clean: write file, update state.json.
 8. Suggest next: `/god-story-build <id>` or `/god-stories` to view all.

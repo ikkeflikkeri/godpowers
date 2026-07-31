@@ -105,6 +105,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still read 120, reference documents 39, docs pages 34, test suites 80) and
   are corrected to current disk truth.
 
+### Fixed
+
+- `specialists/god-storyteller.md` declared a missing `## User Story` or
+  `## Acceptance Criteria` a hard failure while `lib/story-validator.js`
+  emitted both at `severity: 'warning'` and `/god-story` only aborted on
+  errors, so the agent's stated have-nots were unenforceable. Resolved by
+  splitting the two cases rather than picking one: `validateStory` takes
+  `opts.mode`, and the new `validateForAuthoring()` promotes the per-kind
+  section contract to errors. An agent writing a new unit is holding the
+  template and the contract, so a missing section is a defect it is about to
+  commit to disk. The default read path keeps them as warnings because it
+  also reads units written before a rule existed, and failing those would
+  make `/god-stories` unusable on any project with history. Structural
+  findings (bad id, bad status, unclaimed in-progress, closed without a
+  reason) are errors in both modes; `resolved-without-answer` is a warning in
+  both, since a unit is written open and answered later.
+- `scripts/test-doc-surface-counts.js` now guards 37 further count claims
+  across 13 files, derived from disk. The same failure the file's own
+  DOC-001 comment describes had recurred everywhere it did not reach:
+  `ARCHITECTURE.md` still claimed 120 skills and 120 routes, and
+  `ARCHITECTURE-MAP.md` claimed 39 reference documents, 34 docs pages, and 80
+  test suites. Each was true once, none was guarded, so nothing noticed. The
+  new assertions cover the route-topology block and summary table, the
+  repository tree and Numbers table, the prose surfaces in `README.md`,
+  `RELEASE.md`, `docs/`, `skills/god-agent-audit.md`, and the `agents/`
+  Pillars context files that a cold-start agent reads first. Template,
+  reference, docs-page, test-script, and route counts are now derived, and
+  the have-not total is read from `references/HAVE-NOTS.md` rather than
+  recounted so this gate cannot disagree with the tally gate.
+
 ### Not adopted
 
 - Refer-by-name over ids. Godpowers makes ids load-bearing on purpose:

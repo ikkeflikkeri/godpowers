@@ -111,8 +111,10 @@ created: <ISO date>
    three digits.
 7. Wire `deps:` in a second pass, after every unit has an id. An id cannot be
    referenced before it exists.
-8. Validate every unit with `lib/story-validator.validateStory()`. On errors,
-   surface them and do not write.
+8. Validate every unit with `lib/story-validator.validateForAuthoring()`. On
+   errors, surface them and do not write. Authoring mode makes the per-kind
+   section contract an error, so a unit missing `## Question` or
+   `## What Would Answer It` never reaches disk.
 9. Report the frontier via `lib/story-validator.frontier(projectRoot)` and
    stop. Charting resolves nothing by hand.
 
