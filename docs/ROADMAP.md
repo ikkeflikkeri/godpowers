@@ -3,7 +3,7 @@
 > Status: ACTIVE
 > Model: Pure-skill for durable work. CLI provides install plus read-only status helpers.
 > Last updated: 2026-07-13
-> Current source: v5.11.0. Latest published: v5.11.0.
+> Current source: v5.12.0. Latest published: v5.12.0.
 
 This roadmap tracks releases, what's shipped, and what is frozen during the
 3.x public adoption window. Everything user-facing remains slash-command based.
@@ -59,11 +59,11 @@ What works today:
   detection and import, generated and legacy MDX fallback, compiled score and
   coverage signals, typed GA remediation dispatch, managed todo synchronization,
   and JSON-based staleness.
-- **122 slash commands** as thin orchestrators (front door, first-run, demo, surface control, lifecycle, planning,
+- **123 slash commands** as thin orchestrators (front door, first-run, demo, surface control, lifecycle, planning,
   building, shipping, design, runtime, linkage, story-file, suite, recovery,
   observability, capture, knowledge, process, configuration, utility,
   automation, migration, extension management, release support)
-- **40 specialist agents** in fresh contexts
+- **41 specialist agents** in fresh contexts
 - **13 executable workflows** and **44 intent recipes**
 - Optional `@godpowers/mcp` companion package with nine read-only tools:
   `status`, `next`, `gate_check`, `lint_artifact`, `trace_requirement`,

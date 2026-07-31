@@ -13,6 +13,7 @@ Per-tier reference content for Tier 1 (Planning: PRD, Architecture, Roadmap, Sta
 - `ROADMAP-ANATOMY.md`: sequencing, dependency, and milestone structure.
 - `ROADMAP-ANTIPATTERNS.md`: feature-factory, Gantt theater, and shelf-roadmap failures.
 - `DIVERGENCE.md`: widening the candidate pool before a Tier 1 decision converges.
+- `WAYFINDING.md`: charting decisions when the work is too big for one session and too foggy to sequence.
 
 ## Use
 

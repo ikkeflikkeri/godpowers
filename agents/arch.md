@@ -27,7 +27,7 @@ see_also: [quality, deploy]
 - [DECISION] Existing `.godpowers` projects refresh runtime feature awareness through `lib/feature-awareness.js`.
 - [DECISION] `ARCHITECTURE.md` owns the architecture audit playbook for disconnected commands, actions, and workflows.
 - [DECISION] `ARCHITECTURE-MAP.md` renders the same audit as a graph from skills to routes, agents, workflows, recipes, docs, and package checks.
-- [DECISION] `ARCHITECTURE-MAP.md` keeps a complete core command supplement so all 122 shipped skills appear in the human-readable map.
+- [DECISION] `ARCHITECTURE-MAP.md` keeps a complete core command supplement so all 123 shipped skills appear in the human-readable map.
 - [DECISION] Workflow plans use canonical helper IDs such as `source-sync-back` and `pillars-sync-plan`, while `/god-sync` output may show the shorter aliases `source-sync` and `pillars-sync`.
 - [DECISION] Godaudits 2.x interoperability reads `.godaudits/AUDIT.json` as canonical machine state, imports explicit check outcomes, evidence metadata, compliance, accepted risks, open questions, score caps, coverage, findings, and typed GA tasks, and uses generated or legacy AUDIT.mdx only as a fallback.
 - [DECISION] Godplans 1.1 interoperability treats `.godplans/PLAN.mdx` plus the pinned executable `.godplans/validate-plan.sh` as one contract, mirrors structural validation without executing repository shell during import, blocks GP dispatch outside `approved` or `executing`, and requires the official validator to pass immediately before work.

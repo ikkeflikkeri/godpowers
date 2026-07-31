@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/hannsxpeter/godpowers/actions/workflows/ci.yml/badge.svg)](https://github.com/hannsxpeter/godpowers/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-5.11.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.12.0-blue)](CHANGELOG.md)
 [![npm](https://img.shields.io/npm/v/godpowers.svg)](https://www.npmjs.com/package/godpowers)
 
 **Ship fast. Ship right. Ship everything. Ship accountably.**
@@ -14,8 +14,8 @@ trail on disk so you can see exactly what happened. In 5.0 it can also run as an
 autonomous **loop**: it finds the next piece of work, does it, verifies it, and
 decides what to do next, on its own.
 
-The current source surface contains 122 slash commands, 40 specialist agents,
-13 workflows, and 44 recipes. The default core profile exposes 15 commands.
+The current source surface contains 123 slash commands, 41 specialist agents,
+13 workflows, and 45 recipes. The default core profile exposes 15 commands.
 
 If you have never used it before, this page is written for you. Start at
 [New here?](#new-here-start-in-two-minutes) and follow it top to bottom.
@@ -70,7 +70,7 @@ in the tool:
 - **agent** - a specialist worker (a PM, an architect, a reviewer) that Godpowers
   spawns in a fresh context to do one job well.
 - **skill / slash command** - a thing you can invoke, like `/god-build`. There
-  are 122 of them, but you only ever need a few at a time.
+  are 123 of them, but you only ever need a few at a time.
 - **gate** - an automatic, pass-or-fail check (tests, lint, security) that work
   must clear before it counts as done. No gate, no "done".
 - **have-nots** - a named list of failure modes every document must avoid. They
@@ -208,7 +208,7 @@ directory.
 
 ### Pick a profile so the command list stays calm
 
-You do not need all 122 commands visible at once. Profiles install only the ones
+You do not need all 123 commands visible at once. Profiles install only the ones
 that fit your role:
 
 | Journey | Profile |
@@ -413,7 +413,7 @@ and agent contracts install but host-native spawning depends on the tool.
 - [Quick Proof](https://github.com/hannsxpeter/godpowers/blob/main/docs/quick-proof.md)
 - [First 10 Minute Proof Case Study](https://github.com/hannsxpeter/godpowers/blob/main/docs/case-studies/first-10-minute-proof.md)
 - [Adoption Canary](https://github.com/hannsxpeter/godpowers/blob/main/docs/adoption-canary.md)
-- [Command reference (all 122 skills + 40 agents)](https://github.com/hannsxpeter/godpowers/blob/main/docs/reference.md)
+- [Command reference (all 123 skills + 41 agents)](https://github.com/hannsxpeter/godpowers/blob/main/docs/reference.md)
 - [Host capabilities](https://github.com/hannsxpeter/godpowers/blob/main/docs/host-capabilities.md)
 - [Roadmap](https://github.com/hannsxpeter/godpowers/blob/main/docs/ROADMAP.md)
 - [Release Notes](RELEASE.md)

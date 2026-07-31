@@ -28,7 +28,7 @@ Gate -> State. Godpowers implements each stage:
 - **Automation** -> `lib/automation-providers.js` detects 15+ host schedulers and
   records opt-in automations in `.godpowers/automations.json`.
 - **Context** -> the Pillars layer (`AGENTS.md` plus routed `agents/*.md`) and
-  the 122 skills carry durable project knowledge across runs.
+  the 123 skills carry durable project knowledge across runs.
 - **Agent** -> fresh-context specialist agents spawned per sub-step.
 - **Verification** -> the three-axis system: static lint, linkage drift, and
   runtime browser audit.

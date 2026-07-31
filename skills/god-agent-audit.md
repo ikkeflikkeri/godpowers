@@ -51,8 +51,8 @@ opportunities, not failures.
 ```
 Agent audit
 
-40 agents audited
-40 structured contracts
+41 agents audited
+41 structured contracts
 0 errors, 1 warning, 97 infos
 
 Errors:

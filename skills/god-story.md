@@ -20,14 +20,34 @@ Add a new story under `.godpowers/stories/<feature-slug>/`.
 | `/god-story <description>` | Auto-generate ID, write story |
 | `/god-story --feature <slug>` | Attach to a feature (chains to roadmap milestone) |
 | `/god-story --deps STORY-x-001,STORY-y-002` | Declare deps |
+| `/god-story --kind <kind>` | Write a decision unit instead of a build slice |
+
+## Kinds
+
+`--kind` decides what the unit delivers, and therefore which contract it is
+checked against.
+
+| Kind | Delivers | Section contract |
+|---|---|---|
+| `slice` (default) | Code | `## User Story` + `## Acceptance Criteria` |
+| `decision` | A resolved decision | `## Question` + `## What Would Answer It` |
+| `research` | A fact a decision waits on | same |
+| `prototype` | A cheap artifact to react to | same |
+| `grilling` | A decision reached in conversation | same |
+| `task` | Manual work that unblocks a decision | same |
+
+A unit with no `kind` is a slice, so every story written before kinds existed
+still validates. Decision units are usually created by `/god-chart`, which
+charts them against a destination; `--kind` is the manual path for a single
+unit that has no chart.
 
 ## Process
 
 1. Verify `.godpowers/state.json` exists. If not: `/god-init` first.
 2. Spawn `god-storyteller` agent in fresh context.
-3. Storyteller reads PRD/ARCH for context, validates user-story format,
-   writes the file.
-4. Report back to user with the new story ID and path.
+3. Storyteller reads PRD/ARCH for context, validates the format for the
+   requested kind, writes the file.
+4. Report back to user with the new unit ID, kind, and path.
 
 ## Output
 

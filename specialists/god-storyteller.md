@@ -4,9 +4,10 @@ description: |
   Writes a STORY.md from a user prompt or feature decomposition.
   Validates user-story format, generates initial slice plan, ensures
   acceptance criteria are runtime-test-friendly when possible. Lives
-  alongside /god-feature; complements rather than replaces it.
+  alongside /god-feature; complements rather than replaces it. Also
+  writes single decision units when /god-story --kind is used.
 
-  Spawned by: /god-story, /god-feature --with-stories
+  Spawned by: /god-story, /god-story --kind, /god-feature --with-stories
 tools: Read, Write, Bash, Grep
 inputs:
   - "user story prompt"
@@ -44,7 +45,8 @@ Single file at `.godpowers/stories/<feature-slug>/STORY-<NNN>.mdx`:
 ---
 id: STORY-{slug}-{NNN}
 title: "Short noun phrase"
-status: pending
+kind: slice             # slice | decision | research | prototype | grilling | task
+status: pending         # pending | in-progress | blocked | done | closed
 owner: <name>
 deps: []
 requirement: P-MUST-01   # optional; the PRD requirement id this story decomposes
@@ -93,14 +95,43 @@ As a [persona], I want [capability] so that [outcome].
 7. If clean: write file, update state.json.
 8. Suggest next: `/god-story-build <id>` or `/god-stories` to view all.
 
+## Decision units
+
+`/god-story --kind <kind>` writes a unit whose deliverable is a resolved
+decision, not code. The contract changes with the kind, because "As a X, I
+want Y so that Z" cannot express "decide whether the queue is a Postgres
+table" without lying about the format.
+
+| Kind | Sections required | Human in the loop by default |
+|---|---|---|
+| `slice` (default) | `## User Story`, `## Acceptance Criteria` | no |
+| `decision` | `## Question`, `## What Would Answer It` | yes |
+| `research` | same | no |
+| `prototype` | same | yes |
+| `grilling` | same | yes |
+| `task` | same | yes |
+
+For a decision unit:
+- Do not write `## Acceptance Criteria`. A decision unit that carries
+  acceptance criteria is a build slice wearing a decision label.
+- Do not write a `## Slice Plan`. There is nothing to implement.
+- Set `hitl:` explicitly only when it differs from the kind's default.
+- Set `chart: CHART-<slug>` when the unit belongs to a chart.
+
+Charting a whole map is `god-cartographer`'s job, not yours. You write one
+unit at a time when the user asks for one directly.
+
 ## Have-Nots (you fail if)
 
-- You write a STORY without `## User Story` or `## Acceptance Criteria`
-- User-story format ("As a X, I want Y so that Z") not enforced
+- You write a `slice` unit without `## User Story` or `## Acceptance Criteria`
+- User-story format ("As a X, I want Y so that Z") not enforced on a `slice`
+- You write a decision unit without `## Question` or `## What Would Answer It`
+- You give a decision unit acceptance criteria or a slice plan
 - ID format does not match `STORY-{slug}-{NNN}` pattern
 - You decompose a feature into more than 10 stories
 - You write to a path outside `.godpowers/stories/<feature-slug>/`
-- Story status is anything other than: pending, in-progress, blocked, done
+- Unit status is anything other than: pending, in-progress, blocked, done, closed
+- You set status `closed` without a `closed-reason`
 
 ## Linkage participation
 

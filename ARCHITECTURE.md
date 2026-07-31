@@ -1,6 +1,6 @@
 # Godpowers Architecture (v3 Design Target)
 
-> Status: STABLE v5.11.0 published release (Godplans 1.1 two-artifact contracts, lifecycle-safe dispatch, complete GP and requirement traceability, and the existing production runtime surface)
+> Status: STABLE v5.12.0 published release (Godplans 1.1 two-artifact contracts, lifecycle-safe dispatch, complete GP and requirement traceability, and the existing production runtime surface)
 > Authors: Godpowers Team
 > Last updated: 2026-07-13
 
@@ -332,14 +332,14 @@ run sandbox proof, migrate legacy disk state, check gates, and read status or
 next-route information. Durable project mutations remain slash commands inside
 the AI coding tool.
 
-### Route Topology And Automation Audit (2026-05-16)
+### Route Topology And Automation Audit (2026-07-31)
 
-[DECISION] The route graph is currently complete at the file level: 120
-`skills/*.md` command files match 120 `routing/*.yaml` route files, including
+[DECISION] The route graph is currently complete at the file level: 123
+`skills/*.md` command files match 123 `routing/*.yaml` route files, including
 the `god` front door and every shipped `god-*` command.
 
-[DECISION] The source surface also includes 40 `specialists/god-*.md` specialist
-agents, 13 workflow YAML files, and 44 intent recipes.
+[DECISION] The source surface also includes 41 `specialists/god-*.md` specialist
+agents, 13 workflow YAML files, and 45 intent recipes.
 
 [DECISION] The current route graph has 68 built-in or local-runtime command
 routes and 52 agent-routed command routes.
@@ -352,16 +352,16 @@ routes and 52 agent-routed command routes.
 
 [DECISION] All workflow `uses:` targets resolve to shipped agent files.
 
-[DECISION] All 44 recipes contain at least one slash-command route, and every
+[DECISION] All 45 recipes contain at least one slash-command route, and every
 recipe command reference resolves to a shipped command route.
 
 | Surface | Current count | Automation interpretation |
 |---------|---------------|---------------------------|
-| Skills | 120 | Every command has a user-facing skill file |
-| Routes | 120 | Every command has machine-readable routing metadata |
-| Agents | 40 | Spawn targets are available for specialist work |
+| Skills | 123 | Every command has a user-facing skill file |
+| Routes | 123 | Every command has machine-readable routing metadata |
+| Agents | 41 | Spawn targets are available for specialist work |
 | Workflows | 13 | Arc execution has declarative DAGs |
-| Recipes | 43 | Fuzzy intent can route into command sequences |
+| Recipes | 45 | Fuzzy intent can route into command sequences |
 | Built-in routes | 68 | Local helpers need visible concise sync notes or logs |
 | Agent-routed routes | 52 | Spawned work needs visible spawn cards |
 
@@ -935,7 +935,7 @@ Lazy activation: extensions don't load until their skill is invoked.
 
 | Package | Contains |
 |---------|----------|
-| `godpowers` | Core: 122 skills, 40 agents, 13 workflows, base have-nots, 5 external integrations |
+| `godpowers` | Core: 123 skills, 41 agents, 13 workflows, base have-nots, 5 external integrations |
 | `@godpowers/security-pack` | SOC2, HIPAA, PCI auditors |
 | `@godpowers/launch-pack` | Show HN, Product Hunt, Indie Hackers strategists |
 | `@godpowers/data-pack` | Data engineering tier (ETL, ML, dashboards) |

@@ -49,6 +49,19 @@ Beyond what was inherited, godpowers added:
   MIT). No code, prose, or lens text is vendored, there is no runtime
   dependency, and godpowers asserts nothing about its internals or published
   results. The lenses are inverted from godpowers' own antipattern catalogs.
+- **Decision units and fog of war**
+  (`references/planning/WAYFINDING.md`, `/god-chart`), a godpowers-authored
+  planning tier for work too big for one session. The framing of a decision as
+  a trackable unit, the destination-fixes-scope rule, the fog-of-war slot for
+  questions you cannot yet phrase, and terminal out-of-scope closure were
+  influenced by the wayfinder skill by Matt Pocock
+  ([github.com/mattpocock/skills](https://github.com/mattpocock/skills)). No
+  code or prose is vendored and there is no runtime dependency. Godpowers
+  implements these on its own substrate: units are `STORY-*` files on the
+  existing story board rather than issues on an external tracker, and two
+  wayfinder rules were deliberately not adopted (refer-by-name conflicts with
+  the load-bearing stable-id contract that `lib/linkage.js` depends on, and
+  the single-map constraint would require dismantling `/god-reconcile`).
 
 ## Why this is the only mention
 

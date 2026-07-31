@@ -53,6 +53,26 @@
 
 **Wave**: a set of slices that can run in parallel within a build phase.
 
+## Wayfinding concepts
+
+**Chart**: an index of the decisions between here and a named destination, at `.godpowers/charts/<slug>/CHART.mdx`. Written by `/god-chart` when work is too big for one session and too foggy to sequence.
+
+**Destination**: what reaching the end of a chart looks like. An end state, not a restatement of the idea. It fixes the scope, so it is settled before any unit is written.
+
+**Work unit**: a `STORY-<slug>-NNN` file. Its `kind` decides what it delivers.
+
+**Decision unit**: a work unit whose deliverable is a resolved decision, not code. Kinds: `decision`, `research`, `prototype`, `grilling`, `task`. Shares the board, ids, deps, and statuses with build slices.
+
+**Frontier**: the units that are open, unblocked, and unclaimed. The edge of the known. `/god-stories --frontier`.
+
+**Claim**: writing an `owner` and `claimed-at` into a unit before doing any work on it, so a concurrent session skips it. An unheld claim is not a claim. Stale claims are reclaimable, like state locks.
+
+**Fog of war**: in-scope questions you can tell are coming but cannot yet phrase sharply. Lives in `## Not Yet Specified`. Graduates to a unit when you can state the question precisely, not when you can answer it.
+
+**Out of scope**: work ruled beyond the destination. Terminal; never graduates. A mis-scoped unit is closed with a `closed-reason`, not deleted, and stays out of the decisions log.
+
+**HITL unit**: a unit marked `hitl: true`, which resolves only through a live exchange with a human. `--yolo` cannot auto-resolve one.
+
 **Reflog**: append-only log of state-changing operations. Enables /god-undo.
 
 **Trash**: recoverable deletion to `.godpowers/.trash/`.

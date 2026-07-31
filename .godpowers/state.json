@@ -69,7 +69,7 @@
       "sync": {
         "status": "done",
         "artifact": "SYNC-LOG.mdx",
-        "artifact-hash": "sha256:d69ac700958c5227e656ae970111f642cb8331fb7ef63c98fe54c1cb55ee8a82",
+        "artifact-hash": "sha256:902a53b52d61f578a8ccc14342931c3a193a8e7afa7af6f4b24d405151eb0e1e",
         "updated": "2026-07-13T16:09:44.000Z",
         "notes": "Version 5.5.0, surface, authoritative state, GitHub Release assets, npm provenance, registry integrity, and isolated published-install evidence are synchronized."
       }
@@ -102,7 +102,7 @@
       "roadmap": {
         "status": "done",
         "artifact": "roadmap/ROADMAP.mdx",
-        "artifact-hash": "sha256:4cc17112d00f30539656a0547d1607418bd2b12316a4e511fd0df26463dcf3a7",
+        "artifact-hash": "sha256:dab77a0b68aca029c375774f3b35b3c367787048e3f50fc209febb81cebeaf58",
         "updated": "2026-07-13T16:09:44.000Z",
         "notes": "Roadmap provenance is pinned to current source hashes and the published version 5.5.0 release."
       },

@@ -23,7 +23,7 @@ function mkStory(projectRoot, slug, num, fields = {}) {
   const id = fields.id || `STORY-${slug}-${String(num).padStart(3, '0')}`;
   const status = fields.status || 'pending';
   const title = fields.title || `Test story ${num}`;
-  const owner = fields.owner || 'tester';
+  const owner = 'owner' in fields ? fields.owner : 'tester';
   const userStory = fields.userStory ||
     'As a tester, I want to write tests so that things work.';
   const acceptance = fields.acceptance ||
@@ -31,11 +31,17 @@ function mkStory(projectRoot, slug, num, fields = {}) {
 
   const file = path.join(projectRoot, '.godpowers', 'stories', slug, `${id}.md`);
   fs.mkdirSync(path.dirname(file), { recursive: true });
+  const extra = [];
+  if (owner) extra.push(`owner: ${owner}`);
+  if (fields.kind) extra.push(`kind: ${fields.kind}`);
+  if (fields.hitl !== undefined) extra.push(`hitl: ${fields.hitl}`);
+  if (fields.claimedAt) extra.push(`claimed-at: ${fields.claimedAt}`);
+  if (fields.closedReason) extra.push(`closed-reason: "${fields.closedReason}"`);
   fs.writeFileSync(file, `---
 id: ${id}
 title: "${title}"
 status: ${status}
-owner: ${owner}
+${extra.join('\n')}
 deps: ${JSON.stringify(fields.deps || [])}
 created: 2026-05-10
 ---
@@ -56,6 +62,47 @@ ${acceptance}
 ## Notes
 
 ${fields.notes || ''}
+`);
+  return file;
+}
+
+/**
+ * A decision unit: question-shaped, not user-story-shaped.
+ */
+function mkUnit(projectRoot, slug, num, fields = {}) {
+  const id = fields.id || `STORY-${slug}-${String(num).padStart(3, '0')}`;
+  const file = path.join(projectRoot, '.godpowers', 'stories', slug, `${id}.mdx`);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const extra = [];
+  if (fields.owner) extra.push(`owner: ${fields.owner}`);
+  if (fields.hitl !== undefined) extra.push(`hitl: ${fields.hitl}`);
+  if (fields.claimedAt) extra.push(`claimed-at: ${fields.claimedAt}`);
+  if (fields.closedReason) extra.push(`closed-reason: "${fields.closedReason}"`);
+  const sections = [];
+  if (fields.question !== null) {
+    sections.push(`## Question\n\n${fields.question || 'Should the queue be a Postgres table?'}`);
+  }
+  if (fields.answerShape !== null) {
+    sections.push(`## What Would Answer It\n\n${fields.answerShape || 'A throughput measurement at expected peak.'}`);
+  }
+  if (fields.acceptance) {
+    sections.push(`## Acceptance Criteria\n\n${fields.acceptance}`);
+  }
+  if (fields.answer) {
+    sections.push(`## Answer\n\n${fields.answer}`);
+  }
+  fs.writeFileSync(file, `---
+id: ${id}
+title: "${fields.title || `Decision unit ${num}`}"
+kind: ${fields.kind || 'decision'}
+status: ${fields.status || 'pending'}
+${extra.join('\n')}
+deps: ${JSON.stringify(fields.deps || [])}
+chart: CHART-${slug}
+created: 2026-05-10
+---
+
+${sections.join('\n\n')}
 `);
   return file;
 }
@@ -244,6 +291,263 @@ test('linkage addLink/queryByArtifact works for STORY IDs', () => {
   linkage.addLink(tmp, 'STORY-auth-001', 'src/login.ts');
   const files = linkage.queryByArtifact(tmp, 'STORY-auth-001');
   if (!files.includes('src/login.ts')) throw new Error('linkage failed');
+});
+
+// ============================================================================
+// Work-unit kinds
+// ============================================================================
+
+test('a unit with no kind is a slice (backward compatible)', () => {
+  const tmp = mkProject();
+  const file = mkStory(tmp, 'auth', 1);
+  const story = validator.parseStory(file);
+  if (story.kind !== 'slice') throw new Error(`expected slice, got ${story.kind}`);
+  if (validator.isDecisionKind(story.kind)) throw new Error('slice classed as decision');
+});
+
+test('decision kinds are recognized', () => {
+  for (const kind of ['decision', 'research', 'prototype', 'grilling', 'task']) {
+    if (!validator.isDecisionKind(kind)) throw new Error(`${kind} not a decision kind`);
+  }
+  if (validator.isDecisionKind('slice')) throw new Error('slice misclassified');
+});
+
+test('a decision unit is checked against the question contract, not the user story one', () => {
+  const tmp = mkProject();
+  const file = mkUnit(tmp, 'queue', 1);
+  const story = validator.parseStory(file);
+  const findings = validator.validateStory(story);
+  if (findings.find(f => f.kind === 'missing-user-story')) {
+    throw new Error('decision unit judged against the slice contract');
+  }
+  if (findings.find(f => f.kind === 'missing-acceptance')) {
+    throw new Error('decision unit required acceptance criteria');
+  }
+  const errors = findings.filter(f => f.severity === 'error');
+  if (errors.length > 0) throw new Error(`expected 0 errors, got ${errors.map(e => e.kind).join(',')}`);
+});
+
+test('a decision unit missing Question or What Would Answer It is flagged', () => {
+  const tmp = mkProject();
+  const noQuestion = mkUnit(tmp, 'queue', 1, { question: null });
+  const noShape = mkUnit(tmp, 'queue', 2, { answerShape: null });
+  if (!validator.validateStory(validator.parseStory(noQuestion))
+    .find(f => f.kind === 'missing-question')) {
+    throw new Error('missing Question not flagged');
+  }
+  if (!validator.validateStory(validator.parseStory(noShape))
+    .find(f => f.kind === 'missing-answer-shape')) {
+    throw new Error('missing What Would Answer It not flagged');
+  }
+});
+
+test('a decision unit carrying acceptance criteria is flagged as a disguised slice', () => {
+  const tmp = mkProject();
+  const file = mkUnit(tmp, 'queue', 1, { acceptance: '- [DECISION] User sees the queue.' });
+  const findings = validator.validateStory(validator.parseStory(file));
+  if (!findings.find(f => f.kind === 'decision-unit-with-acceptance')) {
+    throw new Error('W-03 shape not flagged');
+  }
+});
+
+test('a resolved decision unit with no Answer is flagged', () => {
+  const tmp = mkProject();
+  const noAnswer = mkUnit(tmp, 'queue', 1, { status: 'done', owner: 'tester' });
+  const withAnswer = mkUnit(tmp, 'queue', 2, {
+    status: 'done', owner: 'tester', answer: 'Postgres table; flip at 5k writes/s.'
+  });
+  if (!validator.validateStory(validator.parseStory(noAnswer))
+    .find(f => f.kind === 'resolved-without-answer')) {
+    throw new Error('resolved-without-answer not flagged');
+  }
+  if (validator.validateStory(validator.parseStory(withAnswer))
+    .find(f => f.kind === 'resolved-without-answer')) {
+    throw new Error('false positive on a unit that has an Answer');
+  }
+});
+
+test('an unrecognized kind is an error but still reads as a slice', () => {
+  const tmp = mkProject();
+  const file = mkStory(tmp, 'auth', 1, { kind: 'wibbling' });
+  const story = validator.parseStory(file);
+  if (story.kind !== 'slice') throw new Error('unknown kind did not degrade to slice');
+  if (!validator.validateStory(story).find(f => f.kind === 'invalid-kind')) {
+    throw new Error('invalid kind not flagged');
+  }
+});
+
+test('listByKind filters to one kind', () => {
+  const tmp = mkProject();
+  mkStory(tmp, 'auth', 1);
+  mkUnit(tmp, 'queue', 1, { kind: 'research' });
+  mkUnit(tmp, 'queue', 2, { kind: 'grilling' });
+  if (validator.listByKind(tmp, 'research').length !== 1) throw new Error('research');
+  if (validator.listByKind(tmp, 'slice').length !== 1) throw new Error('slice');
+  if (validator.listByKind(tmp, 'decision').length !== 0) throw new Error('decision');
+});
+
+// ============================================================================
+// Human in the loop
+// ============================================================================
+
+test('hitl defaults follow the kind', () => {
+  const tmp = mkProject();
+  const research = validator.parseStory(mkUnit(tmp, 'q', 1, { kind: 'research' }));
+  const grilling = validator.parseStory(mkUnit(tmp, 'q', 2, { kind: 'grilling' }));
+  const slice = validator.parseStory(mkStory(tmp, 'auth', 1));
+  if (research.hitl) throw new Error('research should be agent-alone');
+  if (!grilling.hitl) throw new Error('grilling should be human-in-the-loop');
+  if (slice.hitl) throw new Error('slice should be agent-alone');
+});
+
+test('explicit hitl overrides the kind default', () => {
+  const tmp = mkProject();
+  const forced = validator.parseStory(mkUnit(tmp, 'q', 1, { kind: 'research', hitl: true }));
+  const relaxed = validator.parseStory(mkUnit(tmp, 'q', 2, { kind: 'grilling', hitl: false }));
+  if (!forced.hitl) throw new Error('explicit hitl:true ignored');
+  if (relaxed.hitl) throw new Error('explicit hitl:false ignored');
+});
+
+// ============================================================================
+// Closed: terminal out-of-scope state
+// ============================================================================
+
+test('closed is a valid status and requires a reason', () => {
+  const tmp = mkProject();
+  const withReason = mkUnit(tmp, 'q', 1, {
+    status: 'closed', closedReason: 'beyond the destination'
+  });
+  const withoutReason = mkUnit(tmp, 'q', 2, { status: 'closed' });
+  if (validator.validateStory(validator.parseStory(withReason))
+    .find(f => f.kind === 'invalid-status')) {
+    throw new Error('closed rejected as a status');
+  }
+  const findings = validator.validateStory(validator.parseStory(withoutReason));
+  const finding = findings.find(f => f.kind === 'closed-without-reason');
+  if (!finding) throw new Error('closed without reason not flagged');
+  if (finding.severity !== 'error') throw new Error('should be an error');
+});
+
+test('close() writes the reason; setStatus refuses to close without one', () => {
+  const tmp = mkProject();
+  const file = mkUnit(tmp, 'q', 1);
+  validator.close(file, 'sits past the destination');
+  const reread = validator.parseStory(file);
+  if (reread.status !== 'closed') throw new Error('not closed');
+  if (!reread.closedReason.includes('past the destination')) throw new Error('reason not written');
+
+  let threw = false;
+  try { validator.setStatus(mkUnit(tmp, 'q', 2), 'closed'); } catch (e) { threw = true; }
+  if (!threw) throw new Error('setStatus closed without a reason should throw');
+});
+
+// ============================================================================
+// Claim before work
+// ============================================================================
+
+test('in-progress with no owner is an error, not a warning', () => {
+  const tmp = mkProject();
+  const file = mkStory(tmp, 'auth', 1, { status: 'in-progress', owner: '' });
+  const finding = validator.validateStory(validator.parseStory(file))
+    .find(f => f.kind === 'unclaimed-in-progress');
+  if (!finding) throw new Error('unclaimed in-progress not flagged');
+  if (finding.severity !== 'error') throw new Error('should be an error');
+});
+
+test('claim records the holder and the timestamp', () => {
+  const tmp = mkProject();
+  const file = mkStory(tmp, 'auth', 1, { owner: '' });
+  validator.claim(file, 'alice');
+  const reread = validator.parseStory(file);
+  if (reread.status !== 'in-progress') throw new Error('status not set');
+  if (reread.owner !== 'alice') throw new Error('owner not recorded');
+  if (!reread.claimedAt) throw new Error('claimed-at not stamped');
+});
+
+test('claim refuses to steal a live claim but takes a stale one', () => {
+  const tmp = mkProject();
+  const live = mkStory(tmp, 'auth', 1, {
+    status: 'in-progress', owner: 'alice', claimedAt: new Date().toISOString()
+  });
+  let threw = false;
+  try { validator.claim(live, 'bob'); } catch (e) { threw = true; }
+  if (!threw) throw new Error('live claim was stolen');
+
+  const stale = mkStory(tmp, 'auth', 2, {
+    status: 'in-progress', owner: 'alice',
+    claimedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+  });
+  validator.claim(stale, 'bob');
+  if (validator.parseStory(stale).owner !== 'bob') throw new Error('stale claim not reclaimed');
+});
+
+test('isClaimStale treats an untimed claim as stale and a fresh one as live', () => {
+  const tmp = mkProject();
+  const untimed = validator.parseStory(
+    mkStory(tmp, 'auth', 1, { status: 'in-progress', owner: 'alice' }));
+  const fresh = validator.parseStory(mkStory(tmp, 'auth', 2, {
+    status: 'in-progress', owner: 'alice', claimedAt: new Date().toISOString()
+  }));
+  const pending = validator.parseStory(mkStory(tmp, 'auth', 3));
+  if (!validator.isClaimStale(untimed)) throw new Error('untimed claim treated as live');
+  if (validator.isClaimStale(fresh)) throw new Error('fresh claim treated as stale');
+  if (validator.isClaimStale(pending)) throw new Error('pending unit reported as a stale claim');
+});
+
+test('release returns a claimed unit to the frontier', () => {
+  const tmp = mkProject();
+  const file = mkStory(tmp, 'auth', 1, { owner: '' });
+  validator.claim(file, 'alice');
+  validator.release(file);
+  const reread = validator.parseStory(file);
+  if (reread.status !== 'pending') throw new Error('not returned to pending');
+  if (reread.owner) throw new Error('owner not cleared');
+  if (reread.claimedAt) throw new Error('claimed-at not cleared');
+});
+
+// ============================================================================
+// Frontier and dangling deps
+// ============================================================================
+
+test('frontier is pending AND unblocked AND unclaimed', () => {
+  const tmp = mkProject();
+  mkStory(tmp, 'auth', 1, { status: 'done', owner: 'alice' });      // resolved dep
+  mkStory(tmp, 'auth', 2, { deps: ['STORY-auth-001'], owner: '' }); // takeable
+  mkStory(tmp, 'auth', 3, { deps: ['STORY-auth-004'], owner: '' }); // blocked
+  mkStory(tmp, 'auth', 4, { owner: '' });                           // takeable
+  mkStory(tmp, 'auth', 5, { owner: 'bob' });                        // claimed
+
+  const ids = validator.frontier(tmp).map(s => s.id).sort();
+  const expected = ['STORY-auth-002', 'STORY-auth-004'];
+  if (JSON.stringify(ids) !== JSON.stringify(expected)) {
+    throw new Error(`expected ${expected.join(',')}, got ${ids.join(',')}`);
+  }
+});
+
+test('a dep closed as out of scope no longer blocks', () => {
+  const tmp = mkProject();
+  mkUnit(tmp, 'q', 1, { status: 'closed', closedReason: 'past the destination' });
+  mkStory(tmp, 'q', 2, { deps: ['STORY-q-001'], owner: '' });
+  const ids = validator.frontier(tmp).map(s => s.id);
+  if (!ids.includes('STORY-q-002')) throw new Error('closed dep still blocking');
+});
+
+test('a dangling dep keeps a unit off the frontier and is reported', () => {
+  const tmp = mkProject();
+  mkStory(tmp, 'auth', 1, { deps: ['STORY-auth-999'], owner: '' });
+  if (validator.frontier(tmp).length !== 0) {
+    throw new Error('unit with a dangling dep was treated as unblocked');
+  }
+  const dangling = validator.findDanglingDeps(tmp);
+  if (dangling.length !== 1) throw new Error(`expected 1 dangling dep, got ${dangling.length}`);
+  if (dangling[0].dep !== 'STORY-auth-999') throw new Error('wrong dep reported');
+});
+
+test('findDanglingDeps is empty when every dep resolves', () => {
+  const tmp = mkProject();
+  mkStory(tmp, 'auth', 1);
+  mkStory(tmp, 'auth', 2, { deps: ['STORY-auth-001'] });
+  if (validator.findDanglingDeps(tmp).length !== 0) throw new Error('false positive');
 });
 
 report();

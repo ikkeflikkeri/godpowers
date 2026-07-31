@@ -96,6 +96,15 @@ mode and logged as YOLO decisions.
 to `/god-reconcile Release Truth And Safe Sync`. If harden has unresolved
 Critical findings, pause even under `--yolo`.
 
+`--yolo` also does not resolve a work unit marked `hitl: true`. A
+human-in-the-loop unit (`grilling`, `prototype`, `decision`, and usually
+`task`) resolves only through a live exchange with the human. An agent that
+answers its own grilling questions has not produced a decision; it has
+produced a guess with a timestamp, and the chart then reads as settled when it
+is not. Skip such units, leave them unclaimed, and report them in the closeout
+so the human knows what is waiting. See
+`references/planning/WAYFINDING.md`.
+
 For brownfield and bluefield, `--yolo` still runs `/god-preflight` first when
 `.godpowers/preflight/PREFLIGHT.mdx` is absent. The orchestrator then follows
 the preflight report's safest recommended route automatically, logging that

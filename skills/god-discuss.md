@@ -45,6 +45,24 @@ The brief and glossary get passed to the next planning command. The glossary is
 preparation context, not a replacement for PRD, ARCH, ROADMAP, STACK, or Pillars
 files.
 
+## Register the discussion on the board
+
+A discussion resolves a decision, and a resolved decision that nobody's board
+can see cannot be found by the next session or a parallel one. When the
+project has a chart (`.godpowers/charts/`) or any decision units on the board:
+
+1. If the discussion was launched from a unit (`/god-chart --work <id>` with
+   `kind: grilling` or `decision`), write the resolution into that unit's
+   `## Answer` section, set its status `done`, and append one line to the
+   chart's Decisions so far.
+2. If the discussion was launched standalone and a chart exists, create a
+   `kind: grilling` unit whose `## Question` is the topic and whose
+   `## Answer` links the brief.
+3. If no chart exists, skip this. The brief stands on its own.
+
+Link the brief; do not restate it in the unit or the chart. The decision lives
+in exactly one place.
+
 ## Domain Glossary Rules
 
 - Create `.godpowers/domain/GLOSSARY.mdx` lazily from `templates/DOMAIN-GLOSSARY.mdx`

@@ -164,8 +164,13 @@ Scope and No-Gos section is empty or missing. Fail.
 #### P-08 Open question without owner
 An open question has no named owner. Fail.
 
+Exempt: a `## Not Yet Specified` section (fog of war). A question you cannot
+yet phrase sharply cannot be assigned. See `references/planning/WAYFINDING.md`.
+
 #### P-09 Open question without due date
 An open question has no due date. "TBD" is not a date. Fail.
+
+Exempt: a `## Not Yet Specified` section, for the same reason as P-08.
 
 #### P-10 Solution-first PRD
 Problem statement names the solution. The PRD frames the problem; the
@@ -290,6 +295,45 @@ Roadmap written once, never consulted. Must show update timestamps. Fail.
 
 #### R-10 Roadmap theater
 Gantt aesthetics with no actual commitments. Fail.
+
+### Wayfinding Have-Nots
+
+Apply to charts (`.godpowers/charts/<slug>/CHART.mdx`) and the decision units
+they index. See `references/planning/WAYFINDING.md`.
+
+#### W-01 Destination restates the idea
+The Destination section repeats the request instead of naming an end state the
+chart can be judged complete against. "Figure out notifications" is not a
+destination. Fail.
+
+#### W-02 Chart restates its units
+A decision is written out in the chart body rather than gisted with a link to
+the unit that holds it. The chart is an index; a second copy drifts. Fail.
+
+#### W-03 Decision unit ships behavior
+A unit whose kind is not `slice` carries acceptance criteria, a slice plan, or
+implementation work. That is a build slice wearing a decision label. Fail.
+
+#### W-04 Fog pre-sliced
+Not Yet Specified holds unit-sized, sharply phrased entries. If it can be
+stated precisely it is a unit, not fog. Fail.
+
+#### W-05 Out-of-scope work filed as fog
+Work ruled beyond the destination sits in Not Yet Specified, where it will
+graduate. Out of scope is terminal and belongs in Out of Scope. Fail.
+
+#### W-06 Unit worked without a claim
+Work started on a unit that was never claimed, or claimed with no `owner`. An
+unheld claim cannot be told apart from another session's. Fail.
+
+#### W-07 Agent answers a human-only unit
+A unit marked `hitl: true` was resolved without the human, including under
+`--yolo`. An agent that answers its own grilling questions produced a guess
+with a timestamp. Fail.
+
+#### W-08 Unit deleted instead of closed
+A unit ruled out of scope was deleted rather than closed with a
+`closed-reason`. Deleting discards the evidence the judgement was made. Fail.
 
 ### Stack Have-Nots
 
@@ -637,6 +681,7 @@ Updates applied without reading changelog for breaking changes. Fail.
 - Tier 1 PRD: 15
 - Tier 1 Architecture: 13
 - Tier 1 Roadmap: 10
+- Tier 1 Wayfinding: 8
 - Tier 1 Stack: 5
 - Tier 1 Domain Glossary: 5
 - Tier 2 Repo: 8
@@ -651,7 +696,7 @@ Updates applied without reading changelog for breaking changes. Fail.
 - Workflow Docs: 5
 - Workflow Deps: 6
 
-**Total: 158 named have-nots.**
+**Total: 166 named have-nots.**
 
 Each is grep-testable. Each is a documented failure mode. Together they form
 the mechanical quality definition for Godpowers output.

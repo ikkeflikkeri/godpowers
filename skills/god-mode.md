@@ -159,9 +159,9 @@ workflow.
        after each tier skill returns and before starting the downstream tier
        for PRD, design when required, architecture, roadmap, stack, repo,
        build, and harden. A non-zero exit pauses the project run for repair.
-     - Instruction that `--yolo` cannot bypass safe sync blockers or
-       unresolved Critical harden findings. These are release-truth gates, not
-       preference pauses.
+     - Instruction that `--yolo` cannot bypass safe sync blockers, unresolved
+       Critical harden findings, or any work unit marked `hitl: true`. These
+       are release-truth and human-only gates, not preference pauses.
      - Instruction to run `npx godpowers gate --tier=<tier> --project=.` after
        each completed `god-prd`, `god-design`, `god-arch`, `god-roadmap`,
        `god-stack`, `god-repo`, `god-build`, and `god-harden` tier skill and

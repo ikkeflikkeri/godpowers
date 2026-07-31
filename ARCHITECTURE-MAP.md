@@ -1,8 +1,8 @@
 # Godpowers Architecture Map
 
 > Visual reference for how everything connects.
-> 4 layers, 122 slash commands, 40 agents, 13 workflows, 44 recipes, executable release gates.
-> (122 = 121 `god-*` commands + the `/god` natural-language front door.)
+> 4 layers, 123 slash commands, 41 agents, 13 workflows, 45 recipes, executable release gates.
+> (123 = 122 `god-*` commands + the `/god` natural-language front door.)
 
 ---
 
@@ -165,6 +165,8 @@ source-sync-back      -> shown as source-sync in /god-sync output
 /god-discuss      -> god-explorer (mode=scoping)
 /god-list-assumptions -> god-explorer (mode=assumptions)
 /god-explore      -> god-explorer (mode=ideation)
+/god-chart        -> god-cartographer           writes charts/<slug>/CHART.md
+                                                + stories/<slug>/STORY-*.md units
 ```
 
 ### Tier 2: Building
@@ -640,23 +642,23 @@ godpowers/
 ├── README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, USERS.md
 ├── ARCHITECTURE.md                <- Design doc
 ├── ARCHITECTURE-MAP.md            <- This file
-├── package.json (v5.11.0)
+├── package.json (v5.12.0)
 ├── .github/workflows/              <- CI + npm publish workflows
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
 │
-├── skills/                        <- 122 slash-command skill files
+├── skills/                        <- 123 slash-command skill files
 │   ├── god-mode.md, god-init.md, god-prd.md, god-arch.md, ...
 │   └── (one .md per slash command)
 │
-├── agents/                        <- 40 core specialist agents
+├── agents/                        <- 41 core specialist agents
 │   ├── god-orchestrator.md, god-pm.md, god-architect.md, ...
 │   └── (one .md per agent)
 │
 ├── workflows/                     <- 13 executable workflow YAMLs
 │   ├── full-arc.yaml, feature-arc.yaml, hotfix-arc.yaml, ...
 │
-├── templates/                     <- 14 artifact templates
+├── templates/                     <- 15 artifact templates
 │   ├── PRD.mdx, ARCH.mdx, ROADMAP.mdx, ...
 │
 ├── references/
@@ -736,27 +738,27 @@ godpowers/
 
 ---
 
-## Numbers (as of v5.11.0)
+## Numbers (as of v5.12.0)
 
 | Component | Count |
 |-----------|-------|
 | Layers | 4 |
 | Tiers | 4 (0-3) |
 | Sub-steps (per tier) | 13: PRD, ARCH, ROADMAP, STACK, **DESIGN, PRODUCT**, REPO, BUILD, DEPLOY, OBSERVE, LAUNCH, HARDEN, plus orchestration |
-| Slash commands | 122 |
-| Specialist agents | 40 |
+| Slash commands | 123 |
+| Specialist agents | 41 |
 | Workflows (core YAMLs) | 13 |
-| Intent recipes | 44 |
-| Have-nots | 158 documented + 30+ mechanically validated by linter |
-| Templates | 14 |
-| Reference documents | 39 |
+| Intent recipes | 45 |
+| Have-nots | 166 documented + 30+ mechanically validated by linter |
+| Templates | 15 |
+| Reference documents | 51 |
 | JSON Schemas | 7 |
 | **JS runtime modules** | **100** |
 | **External integrations** | **5** (all detect-and-delegate; none vendored): Google Labs design.md, Impeccable, awesome-design-md, SkillUI, vercel-labs/agent-browser + Playwright |
 | Hooks | 2 |
 | Dogfood scenarios | 5 |
-| Documentation pages | 34 under docs/ plus reference material |
-| **Test suites** | **80 script files plus integration tests** |
+| Documentation pages | 35 under docs/ plus reference material |
+| **Test suites** | **91 script files plus integration tests** |
 | **Tests** | **Full behavioral suite gated by npm test** |
 | Supported AI runtimes | 15+ |
 | Verification axes | **3**: static (lint, design-spec, have-nots), linkage (drift, reverse-sync), runtime (headless browser audit + functional test) |

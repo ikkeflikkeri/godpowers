@@ -1,14 +1,14 @@
 # Godpowers Reference
 
-Complete command, agent, and artifact reference for v5.11.0.
+Complete command, agent, and artifact reference for v5.12.0.
 
-## Slash commands (122 total)
+## Slash commands (123 total)
 
-The 122 total is 121 `god-*` commands plus the `/god` natural-language front
+The 123 total is 122 `god-*` commands plus the `/god` natural-language front
 door (a thin router that classifies intent rather than doing work itself).
 
 ### Command families
-All 120 commands remain direct entry points, but the user-facing map starts
+All 123 commands remain direct entry points, but the user-facing map starts
 with likely next moves and families:
 
 | Family | Purpose |
@@ -155,6 +155,7 @@ diff churn that cannot be traced to the request or slice plan.
 ### Planning tier (Tier 1)
 - `/god-discuss` - Adaptive Socratic discussion before planning.
 - `/god-explore` - Open-ended Socratic ideation.
+- `/god-chart` - Chart a decision map for work too big for one session.
 - `/god-list-assumptions` - Surface assumptions before they cement.
 - `/god-prd` - Write Product Requirements Document.
 - `/god-arch` - Design system architecture.
@@ -298,7 +299,7 @@ First-party packs on npm:
 - `@godpowers/launch-pack` - Show HN, Product Hunt, Indie Hackers, OSS strategists
 - `@godpowers/data-pack` - ETL, ML feature, dashboard specialists
 
-## Specialist agents (40 total)
+## Specialist agents (41 total)
 
 ### Tier 0 - Orchestration
 - `god-orchestrator` - Autonomous arc runner (Quarterback).
@@ -313,6 +314,7 @@ First-party packs on npm:
 - `god-designer` - DESIGN.md + PRODUCT.md lifecycle owner.
 - `god-design-reviewer` - Two-stage design gate (spec + quality).
 - `god-explorer` - Pre-init Socratic ideator.
+- `god-cartographer` - Decision-map charter for oversized, foggy work.
 
 ### Tier 2 - Building agents
 - `god-repo-scaffolder` - Repo bootstrap.

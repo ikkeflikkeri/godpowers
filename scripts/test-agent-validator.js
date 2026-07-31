@@ -428,11 +428,11 @@ test('auditAll on real godpowers/specialists covers 30+ agents', () => {
 
 test('auditAll on real godpowers/specialists has structured contracts for every shipped agent', () => {
   const result = validator.auditAll('.');
-  if (result.summary.agentCount !== 40) {
-    throw new Error(`expected 40 agents, got ${result.summary.agentCount}`);
+  if (result.summary.agentCount !== 41) {
+    throw new Error(`expected 41 agents, got ${result.summary.agentCount}`);
   }
-  if (result.summary.structuredContractCount !== 40) {
-    throw new Error(`expected 40 structured contracts, got ${result.summary.structuredContractCount}`);
+  if (result.summary.structuredContractCount !== 41) {
+    throw new Error(`expected 41 structured contracts, got ${result.summary.structuredContractCount}`);
   }
   const contractFindings = result.allFindings.filter(f => f.kind && f.kind.includes('contract-frontmatter'));
   if (contractFindings.length !== 0) {

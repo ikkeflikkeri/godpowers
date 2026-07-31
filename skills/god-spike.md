@@ -62,6 +62,25 @@ The agent:
 
 The spike answers a question. That's it.
 
+## Register the spike on the board
+
+A spike answers a question, and a question that nobody's board can see is a
+decision made in private. When the project has a chart (`.godpowers/charts/`)
+or any decision units on the board, register the spike as one:
+
+1. If the spike was launched from a unit (`/god-chart --work <id>` with
+   `kind: research`), write the finding into that unit's `## Answer` section,
+   set its status `done`, and append one line to the chart's Decisions so far.
+2. If the spike was launched standalone and a chart exists, create a
+   `kind: research` unit under `.godpowers/stories/<chart-slug>/` whose
+   `## Question` is the spike question and whose `## Answer` links the
+   SPIKE.mdx. The unit indexes; the SPIKE.mdx holds the evidence.
+3. If no chart exists, skip this. A standalone spike in a project with no
+   decision board stays a standalone artifact.
+
+Link the SPIKE.mdx from the unit. Do not paste the findings into it: the
+evidence lives in exactly one place.
+
 ## After the Spike
 
 The user reviews the SPIKE.md and decides:

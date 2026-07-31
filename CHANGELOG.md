@@ -7,6 +7,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.12.0] - 2026-07-31
+
+### Added
+
+- Decision units. A work unit's `kind` now decides what it delivers, so a
+  decision can be tracked as work. `lib/story-validator.js` accepts `slice`
+  (the historical default), `decision`, `research`, `prototype`, `grilling`,
+  and `task`, and picks the section contract from the kind: a `slice` is
+  checked for `## User Story` and `## Acceptance Criteria` as before,
+  everything else for `## Question` and `## What Would Answer It`. Before
+  this, every board-shaped unit was schema-forced to be a build slice
+  (`USER_STORY_PATTERN` required "As a X, I want Y so that Z"), so
+  "decide whether the queue is a Postgres table" could not be written as a
+  unit without lying about the format. Decision work lived in
+  `.godpowers/spikes/` and `.godpowers/discussions/`, invisible to
+  `/god-stories`, to dependency resolution, and to a second parallel session.
+  A unit with no `kind` is a slice, so nothing written before this release
+  changed meaning.
+- `/god-chart` and the `god-cartographer` specialist. Charts the decisions
+  between here and a named destination when work is too big for one session
+  and too foggy to sequence. The destination is settled before any unit is
+  written, because it is what every later scope judgement is made against.
+  Charting produces decisions, never deliverables: the pull to skip a unit
+  and just build it is the signal the chart has ended, not a reason to widen
+  it. The chart at `.godpowers/charts/<slug>/CHART.mdx` is an index, not a
+  store: each decision lives in exactly one place, its unit, and the chart
+  gists it and links.
+- Fog of war. `## Not Yet Specified` on charts and on `templates/ROADMAP.mdx`
+  holds in-scope questions you can tell are coming but cannot yet phrase
+  sharply. The graduation test is whether you can state the question
+  precisely now, not whether you can answer it. This needed an explicit
+  carve-out: have-nots P-08 and P-09 require every open question to carry a
+  named owner and a real due date, which is correct for a PRD and structurally
+  forbids a known-unknown. A question you cannot yet phrase cannot be assigned
+  or dated, so the honest answer previously had to be sharpened, dropped, or
+  fail the gate. P-08 and P-09 now exempt `## Not Yet Specified` and apply
+  everywhere else unchanged.
+- Terminal out-of-scope closure. `closed` joins the status vocabulary,
+  requiring a `closed-reason`. Work ruled beyond the destination is closed,
+  not deleted, so the evidence that the judgement was made survives and the
+  next session does not rediscover the same dead end. Closed units are
+  excluded from done counts, because counting a scope boundary as completed
+  work overstates progress, and they stay out of the chart's Decisions so
+  far, which records the route actually walked. This is deliberately not the
+  backlog: `/god-add-backlog promote` and `/god-plant-seed harvest` are
+  deferral pipelines with a promotion path, and out of scope is terminal.
+- Claim before work. `lib/story-validator.claim()` writes an `owner` and a
+  `claimed-at` stamp, and `in-progress` with no owner is now an error rather
+  than a warning. Previously `/god-story-build` set status `in-progress` but
+  recorded no holder, so two sessions running `--next` could not tell their
+  own claim from another's and an abandoned claim never expired. `claim()`
+  refuses to steal a live claim; `isClaimStale()` reports an abandoned one,
+  reclaimable on the same terms as the state locks in
+  `references/shared/LOCKING.md`. `release()` returns an aborted unit to the
+  frontier.
+- `lib/story-validator.frontier()` and `/god-stories --frontier`: the units
+  that are open, unblocked, and unclaimed. A dep closed as out of scope no
+  longer blocks the work waiting on it. A dep naming a unit that does not
+  exist does not count as satisfied, because treating a map error as clear
+  would silently open work whose prerequisite was never charted;
+  `findDanglingDeps()` surfaces those, which were previously silent.
+- `references/planning/WAYFINDING.md`, the doctrine reference, and have-nots
+  W-01 through W-08 covering destination-restates-the-idea, chart-restates-
+  its-units, decision-unit-ships-behavior, fog-pre-sliced, out-of-scope-filed-
+  as-fog, unit-worked-without-a-claim, agent-answers-a-human-only-unit, and
+  unit-deleted-instead-of-closed. The catalog total moves from 158 to 166.
+- `templates/CHART.mdx` and the `chart-the-fog` intent recipe.
+
+### Changed
+
+- `--yolo` cannot auto-resolve a unit marked `hitl: true`, alongside the two
+  gates it already could not bypass (safe-sync blockers and unresolved
+  Critical harden findings). A human-in-the-loop unit resolves only through a
+  live exchange; an agent that answers its own grilling questions has produced
+  a guess with a timestamp, and the chart then reads as settled when it is
+  not. `grilling`, `prototype`, `decision`, and `task` default to
+  human-in-the-loop; `research` and `slice` do not.
+- `/god-story-build --next` now selects from the frontier instead of scanning
+  for the first pending story, which resolves a contradiction with its own
+  step 2: the named-id form still pauses on an unmet dep (the user asked for
+  that story), but `--next` does not, because a blocked unit is not on the
+  frontier in the first place. It also refuses decision units and routes them
+  to `/god-chart --work`.
+- `/god-spike` and `/god-discuss` register their result as a `research` or
+  `grilling` unit when the project has a chart, linking the SPIKE.mdx or the
+  brief rather than restating it, so decision work reaches the same board as
+  build work.
+- `/god-story --kind` writes a single decision unit without a chart, and
+  `specialists/god-storyteller.md` documents the per-kind section contract.
+- `references/planning/ROADMAP-ANATOMY.md` states the fog graduation test, and
+  `references/shared/GLOSSARY.md` defines chart, destination, work unit,
+  decision unit, frontier, claim, fog of war, out of scope, and HITL unit.
+- Surface counts move to 123 slash commands, 41 specialist agents, and 45
+  intent recipes. Several count-bearing lines in `ARCHITECTURE.md` and
+  `ARCHITECTURE-MAP.md` that no gate covered had rotted (skills and routes
+  still read 120, reference documents 39, docs pages 34, test suites 80) and
+  are corrected to current disk truth.
+
+### Not adopted
+
+- Refer-by-name over ids. Godpowers makes ids load-bearing on purpose:
+  `lib/code-scanner.js` and `lib/linkage.js` scan for `P-MUST-01`,
+  `M-billing`, and `STORY-auth-001` to build the linkage map. Ids are slugged
+  rather than numeric and every rendered board pairs the id with the title.
+- A single map artifact. Godpowers runs many surfaces and has
+  `/god-reconcile` for the contradictions that creates; collapsing to one
+  artifact would mean dismantling the reconciler, which is the more valuable
+  of the two.
+
 ## [5.11.0] - 2026-07-23
 
 ### Added
