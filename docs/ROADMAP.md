@@ -16,9 +16,11 @@ This roadmap tracks releases, what's shipped, and what is frozen during the
 
 4.0.0 is a breaking release: the canonical artifact extension changed from
 `.md` to `.mdx` (reads keep a legacy `.md` fallback; installed runtimes must
-be refreshed with `npx godpowers install`). It also ships the sibling
-superskill interop: detection and import of `.godplans/PLAN.mdx` and
-`.godaudits/AUDIT.mdx`, plan-aware arcs, GA-task remediation dispatch,
+be refreshed with `npx godpowers install`). It also ships interop with two
+optional companion projects, godplans (which plans a project before code) and
+godaudits (which scores a finished one): detection and import of
+`.godplans/PLAN.mdx` and `.godaudits/AUDIT.mdx`, plan-aware arcs, remediation
+dispatch for open audit findings,
 managed `GODPOWERS-SYNC.mdx` sync-back companions, and import staleness drift
 checks via `lib/sibling-artifacts.js`, plus an MDX-safety artifact lint
 (have-not U-13) and gap fixes (safe-sync gate wiring, quarterback review
@@ -48,7 +50,8 @@ What works today:
 - **Arc-Ready 1.1 leverage**: six product forms, four-axis domain composition,
   OWASP 2025 routing, hash-bound pre-publication checks, read-only tier-artifact
   import, and managed `.arc-ready/GODPOWERS-SYNC.md` sync-back.
-- **Pillars 1.1 conformance**: path identities, portable matching, nested
+- **Project context conformance** (the Pillars 1.1 layout): path identities,
+  portable matching, nested
   scopes, cataloged absences, exclusions, dependency and budget validation,
   specialist-source separation, and all official routing fixtures.
 - **Godplans 1.1 interoperability**: PLAN plus pinned executable validator

@@ -17,7 +17,7 @@ New to Godpowers? Read these in roughly this order.
 - [host-capabilities.md](./host-capabilities.md) - what each AI tool can and cannot do.
 - [mcp.md](./mcp.md) - the optional read-only `@godpowers/mcp` companion.
 - [brownfield-bluefield.md](./brownfield-bluefield.md) - adopting Godpowers in an existing repo or org.
-- [planning-system-migration.md](./planning-system-migration.md) - importing a godplans plan, a godaudits report, or a foreign planning system.
+- [planning-system-migration.md](./planning-system-migration.md) - starting from work another tool left on disk: a plan, an audit report, or a foreign planning system.
 - [automation-providers.md](./automation-providers.md) - opt-in host automation.
 - [design-md.md](./design-md.md) - the DESIGN.md / PRODUCT.md design contract.
 - [agent-specs.md](./agent-specs.md) - the specialist agents and what each owns.

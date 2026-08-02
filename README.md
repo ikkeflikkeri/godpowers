@@ -93,9 +93,12 @@ action**, so the project can be inspected, resumed, and trusted.
 
 It fuses several disciplines into one workflow:
 
-- **Native project context** - every Godpowers project is a Pillars project: a
-  root `AGENTS.md` plus routed `agents/*.md` files hold durable project truth
-  before any command touches code.
+- **Native project context** - durable project truth lives in files, not in the
+  chat. A root `AGENTS.md` plus a set of routed `agents/*.md` notes (one per
+  area: auth, data, deploy, and so on) record what is true about your project,
+  and a command loads only the ones its task needs before touching any code.
+  That layout follows [Pillars](https://github.com/hannsxpeter/pillars), an open
+  convention for structuring those files so any AI tool can find them.
 - **Form-first execution** - one primary product form selects the vertical
   slice before archetype, industry, or regulatory constraints are composed.
 - **Artifact discipline** - every sentence in every document is a labeled
@@ -111,18 +114,22 @@ It fuses several disciplines into one workflow:
 - **Publication integrity** - public activation is bound to a fresh hardening
   hash, timestamp, and Critical-finding policy.
 
-It is the builder in a three-part family: [godplans](https://github.com/hannsxpeter/godplans)
-plans everything up front (`.godplans/PLAN.mdx` plus its self-contained
-validator), [godaudits](https://github.com/hannsxpeter/godaudits)
-scores what was built (canonical `.godaudits/AUDIT.json` plus a generated
-`AUDIT.mdx` report), and Godpowers builds, imports
-either one when it finds it, and ships. Its own artifacts live under
-`.godpowers/` as `.mdx`, human-readable and machine-parseable, with a legacy
-`.md` fallback for projects created before 4.0.
+Godpowers writes its own work under `.godpowers/` as `.mdx` files: readable by
+you, parseable by tools, with a `.md` fallback for projects created before 4.0.
+You need nothing else installed.
 
-Godpowers also imports Arc-Ready 1.1 tier artifacts as read-only migration
-evidence and writes progress back only through
-`.arc-ready/GODPOWERS-SYNC.md`.
+It also picks up work other tools left behind, so you are not starting from
+zero if a project already has planning or audit output on disk. When it finds
+one of these, it imports it instead of asking you to retype it:
+
+| If your project already has | Godpowers does this |
+|---|---|
+| A plan from [godplans](https://github.com/hannsxpeter/godplans), a companion tool that decides a project's architecture, roadmap, and tasks before any code is written | Imports the plan and its tasks rather than re-planning |
+| A report from [godaudits](https://github.com/hannsxpeter/godaudits), a companion tool that scores a finished codebase and lists what is wrong | Turns each open finding into a tracked remediation task |
+| Artifacts from Arc-Ready, an earlier tier-based workflow | Reads them as migration evidence and writes progress back to one sync file |
+
+None of these is required. They are separate projects, and a Godpowers run that
+finds none of them behaves exactly the same, minus the import step.
 
 ### Two ways to drive
 

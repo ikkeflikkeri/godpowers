@@ -115,14 +115,17 @@ visual extraction (`--ultra`). Output cached at
 
 ### Option 3: Build from scratch
 
+[Impeccable](https://github.com/pbakaus/impeccable) is a separate design skill
+pack. It is optional: Godpowers produces a design either way, and only the depth
+of the guidance changes.
+
 ```bash
-/god-design teach        # if Impeccable installed
+/god-design teach        # if Impeccable is installed
 /god-design              # if not (uses minimal builder + 7 internal refs)
 ```
 
-When [Impeccable](https://github.com/pbakaus/impeccable) is installed,
-its `teach` command runs an interactive interview to produce both
-PRODUCT.md (strategic) and DESIGN.md (visual).
+When Impeccable is installed, its `teach` command runs an interactive interview
+to produce both PRODUCT.md (strategic) and DESIGN.md (visual).
 
 When Impeccable is absent, godpowers falls back to its 7 internal
 domain references:

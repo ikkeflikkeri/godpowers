@@ -25,6 +25,9 @@ orchestration state, not counted as artifact categories.
 
 These are produced sequentially as the arc progresses:
 
+Impeccable is an optional third-party design skill pack. Rows that name it
+apply only when it is installed; every other row runs regardless.
+
 | Tier | Sub-step | Artifact path | Created by | Conditional? |
 |------|----------|---------------|------------|---|
 | 0 | Orchestration | `.godpowers/state.json` | god-orchestrator | always |
@@ -35,7 +38,7 @@ These are produced sequentially as the arc progresses:
 | 1 | Roadmap | `.godpowers/roadmap/ROADMAP.mdx` | god-roadmapper | always |
 | 1 | Stack | `.godpowers/stack/DECISION.mdx` | god-stack-selector | always |
 | 1 | **Design** | `DESIGN.md` (project root, Google Labs spec) | god-designer | **UI projects only** |
-| 1 | **Product** | `PRODUCT.md` (project root) | impeccable teach | **UI + impeccable installed** |
+| 1 | **Product** | `PRODUCT.md` (project root) | Impeccable `teach` | **UI + Impeccable installed** |
 | 2 | Repo | `.godpowers/repo/AUDIT.mdx` + repo source | god-repo-scaffolder | always |
 | 2 | Build | `.godpowers/build/PLAN.mdx` + `.godpowers/state.json` + code | god-planner + god-executor | always |
 | 3 | Deploy | `.godpowers/state.json` deploy evidence | god-deploy-engineer | always |

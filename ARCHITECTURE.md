@@ -60,18 +60,26 @@ contexts to produce mechanically-verified artifacts on disk.
 - Single CLI surface: `npx godpowers` for install, uninstall, read-only status,
   executable tier gates, dogfood, and extension scaffolding
 - Hooks for SessionStart and PreToolUse
-- Native Pillars project context in `AGENTS.md` and `agents/*.md`
+- Portable project context in `AGENTS.md` and `agents/*.md` (Pillars 1.1 layout)
 - Disk-authoritative state in `.godpowers/`
 
 ---
 
 ## 2. Native Context And Load-Bearing Artifacts
 
-Godpowers separates portable project context from workflow state. Pillars
-files describe durable project truth any coding agent can read. `.godpowers`
-files describe the Godpowers workflow, artifacts, and execution history.
+Godpowers separates portable project context from workflow state. The context
+files describe durable project truth any coding agent can read, whether or not it
+knows anything about Godpowers. The `.godpowers` files describe the Godpowers
+workflow, artifacts, and execution history.
 
-Native Pillars context:
+The context layout follows [Pillars](https://github.com/hannsxpeter/pillars), an
+open convention for splitting project truth into a root protocol file plus
+per-area notes so a tool can load only what a task needs. Nothing is installed
+for it; the files are plain markdown. Godpowers implements the 1.1 spec and runs
+that project's own routing fixtures in its release gate, so this stays
+compatible rather than drifting into a private dialect.
+
+Portable project context:
 
 | File | Role | Pattern source |
 |------|------|---------------|
@@ -81,7 +89,7 @@ Native Pillars context:
 | `agents/*.md` | **Routed context**: task-specific project truth | Pillars |
 | `agents/catalog.yaml` | **Absent inventory**: known concerns not yet authored | Pillars 1.1 |
 
-Pillars 1.1 routing uses path-derived identities, portable ASCII token
+Routing under that spec uses path-derived identities, portable ASCII token
 matching, direct dependency depth, conditional soft references, scoped
 exclusions, and root-to-target nested scope precedence. Specialist source
 contracts are separate under `specialists/` and install into each host's
@@ -98,7 +106,8 @@ Godpowers workflow state:
 | `.godpowers/REQUIREMENTS.mdx` | **Deliverables**: which requirements are done, in progress, or not started (derived by `lib/requirements.js`, cached in `state.json` `deliverables`) | Requirements traceability matrix |
 
 Every other architectural decision falls out from how these two layers relate:
-Pillars carries portable context, while `.godpowers` carries workflow state.
+The `agents/` files carry portable context that any tool can read, while
+`.godpowers` carries Godpowers-specific workflow state.
 
 ### `.godpowers/intent.yaml` (Intent)
 
@@ -1098,10 +1107,19 @@ v0.3 commands keep working. v1.0 freezes the public API.
 
 ---
 
-## 17. Sibling Superskill Interop and Artifact Extension Policy
+## 17. Companion Tool Interop and Artifact Extension Policy
 
-Godpowers consumes the artifacts of its two sibling superskills without owning
-them.
+Godpowers reads the output of two separate companion projects without owning
+them. Neither is required to run Godpowers, and neither depends on Godpowers.
+
+- **godplans** decides a project's product, architecture, roadmap, stack, and
+  tasks before code is written, and leaves a machine-checked master plan on disk.
+- **godaudits** scores a finished codebase against a catalog of checks and leaves
+  a validated report with typed remediation tasks.
+
+Godpowers builds. When it finds either artifact it imports it rather than asking
+the user to retype the same decisions, and it never writes into their
+directories.
 
 [DECISION] The consumed contract is `.godplans/PLAN.mdx` plus the executable,
 pinned `.godplans/validate-plan.sh` companion (Godplans 1.1 master plan), and

@@ -895,7 +895,7 @@ Notion, etc.).
 1. `/god-design suggest` - scans PRD for known site mentions
 2. `/god-design from <site>` - fetches curated DESIGN.md from awesome-design-md
 3. god-design-reviewer gates the change (two-stage spec + quality)
-4. `/god-design polish` - refine with impeccable if installed
+4. `/god-design polish` - refine with the optional Impeccable design pack, if installed
 5. Reverse-sync wires component implementations as `/god-build` proceeds
 
 71 curated sites available; cached per-project on first fetch.
@@ -924,7 +924,7 @@ or `npm install playwright`.
 **Sequence**:
 1. `/god-design scan <url>` - SkillUI extracts a DESIGN.md via static
    analysis (or `--ultra` for Playwright-driven visual extraction)
-2. `/god-design polish` - refine with impeccable if installed
+2. `/god-design polish` - refine with the optional Impeccable design pack, if installed
 3. god-design-reviewer gates the result
 4. PASS verdict applies the DESIGN.md to project root
 

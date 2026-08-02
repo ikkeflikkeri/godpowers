@@ -51,7 +51,7 @@ existing patterns, miss tribal knowledge.
 
 **Workflow**:
 ```
-1. /god-preflight       <- intake audit before arc-ready and pillars
+1. /god-preflight       <- read-only intake audit before anything is written
 2. /god-archaeology     <- deep history + decisions + risks
 3. /god-reconstruct     <- derive PRD/ARCH/ROADMAP/STACK from code
 4. /god-tech-debt       <- assess and prioritize debt
@@ -109,7 +109,7 @@ audit failures, fighting org standards.
 **Workflow**:
 ```
 1. /god-org-context init   <- capture org-level standards
-2. /god-preflight          <- inspect inherited context before arc-ready and pillars
+2. /god-preflight          <- inspect inherited context before anything is written
 3. /god-init               <- detects bluefield mode
 4. /god-mode               <- arc constrained by org context
 ```
