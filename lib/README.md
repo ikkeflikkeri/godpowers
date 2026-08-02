@@ -77,6 +77,7 @@ package-level integrations.
 | `voice-lint.js` | Detect sycophancy and gratitude-loop filler (have-not U-14); backs the artifact linter and the shipped-prose self-dogfood. |
 | `meta-linter.js` | Validate Godpowers documentation and skill metadata. |
 | `story-validator.js` | Validate story artifacts and story lifecycle state. |
+| `style-stats.js` | Measure the style genome: comment density, naming-casing histograms, and function-length distribution per language, so `CODEDNA.md` carries measured numbers instead of estimates. |
 
 ## Design, context, and integrations
 

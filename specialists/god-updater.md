@@ -313,9 +313,24 @@ Next:
   Why: confirm the disk-derived project state after sync.
 ```
 
+## Evidence artifacts are append-only
+
+Before touching any document, check its durability in
+`references/building/DOCUMENTATION-PROFILE.md`. A `durability: evidence` row
+(post-mortems, operational readiness reviews, scan and audit outputs, approved
+closeout reports) is never edited in place. Sync appends a new dated instance and
+leaves the existing one exactly as it was; an accepted ADR is superseded by a new
+number rather than rewritten. Editing one destroys the only property that made it
+evidence, which is that it says what was true on a date (DC-09).
+
+When a sync would otherwise change an evidence artifact, record the delta in the
+sync log and name the new instance that carries it.
+
 ## Have-Nots
 
 Sync FAILS if:
+- It rewrote a `durability: evidence` artifact instead of appending a dated
+  instance beside it
 - An artifact the reconciler said "needs update" wasn't touched
 - An artifact was touched but didn't pass have-nots after
 - SYNC-LOG.mdx not updated (no audit trail)

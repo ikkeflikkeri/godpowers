@@ -642,7 +642,7 @@ godpowers/
 ├── README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, USERS.md
 ├── ARCHITECTURE.md                <- Design doc
 ├── ARCHITECTURE-MAP.md            <- This file
-├── package.json (v5.12.0)
+├── package.json (v5.13.0)
 ├── .github/workflows/              <- CI + npm publish workflows
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
@@ -675,7 +675,7 @@ godpowers/
 │   ├── events.v1.json
 │   └── workflow.v1.json
 │
-├── lib/                           <- Real JS runtime (100 modules)
+├── lib/                           <- Real JS runtime (101 modules)
 │   ├── state.js                   <- state model + drift detection
 │   ├── events.js                  <- OTel-shape event log + hash chain
 │   ├── router.js                  <- command routing
@@ -738,7 +738,7 @@ godpowers/
 
 ---
 
-## Numbers (as of v5.12.0)
+## Numbers (as of v5.13.0)
 
 | Component | Count |
 |-----------|-------|
@@ -749,16 +749,16 @@ godpowers/
 | Specialist agents | 41 |
 | Workflows (core YAMLs) | 13 |
 | Intent recipes | 45 |
-| Have-nots | 166 documented + 30+ mechanically validated by linter |
+| Have-nots | 179 documented + 30+ mechanically validated by linter |
 | Templates | 15 |
-| Reference documents | 51 |
+| Reference documents | 52 |
 | JSON Schemas | 7 |
-| **JS runtime modules** | **100** |
+| **JS runtime modules** | **101** |
 | **External integrations** | **5** (all detect-and-delegate; none vendored): Google Labs design.md, Impeccable, awesome-design-md, SkillUI, vercel-labs/agent-browser + Playwright |
 | Hooks | 2 |
 | Dogfood scenarios | 5 |
 | Documentation pages | 35 under docs/ plus reference material |
-| **Test suites** | **91 script files plus integration tests** |
+| **Test suites** | **92 script files plus integration tests** |
 | **Tests** | **Full behavioral suite gated by npm test** |
 | Supported AI runtimes | 15+ |
 | Verification axes | **3**: static (lint, design-spec, have-nots), linkage (drift, reverse-sync), runtime (headless browser audit + functional test) |

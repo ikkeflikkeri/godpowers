@@ -657,4 +657,37 @@ test('U-13 findings surface through lintFile on any artifact type', () => {
   if (!hasFinding(result.findings, 'U-13')) throw new Error('lintFile did not run MDX safety');
 });
 
+test('DC-07 flags a not-applicable row with no evidence state and no tripwire', () => {
+  const content = '| Doc | Verdict | Reason |\n| Incident response plan | not-applicable | no on-call rotation |\n';
+  const findings = validator.runChecks(content, 'docmanifest');
+  const codes = findings.filter((f) => f.code === 'DC-07');
+  if (codes.length !== 2) throw new Error(`expected state and tripwire findings, got ${codes.length}`);
+});
+
+test('DC-08 refuses an unknown evidence state as grounds for not-applicable', () => {
+  const content = '| Threat model | not-applicable | unknown: nobody checked; revisit when: auth lands |\n';
+  const findings = validator.runChecks(content, 'docmanifest');
+  if (!hasFinding(findings, 'DC-08')) throw new Error('unknown state was accepted');
+});
+
+test('DC-10 flags a tripwire predicate nobody could observe', () => {
+  const content = '| Runbook | not-applicable | by-design: no service; revisit when: later |\n';
+  const findings = validator.runChecks(content, 'docmanifest');
+  if (!hasFinding(findings, 'DC-10')) throw new Error('vague tripwire was accepted');
+});
+
+test('a complete not-applicable row passes every manifest check', () => {
+  const content = '| User guide | not-applicable | by-design: internal tool with no external reader; revisit when: an account outside the team is onboarded |\n';
+  const findings = validator.runChecks(content, 'docmanifest');
+  const manifest = findings.filter((f) => ['DC-07', 'DC-08', 'DC-10'].includes(f.code));
+  if (manifest.length !== 0) throw new Error(`expected no manifest findings, got ${JSON.stringify(manifest)}`);
+});
+
+test('manifest checks do not fire on artifacts that merely mention not-applicable', () => {
+  const content = '# Notes\n\nSome rows end up not-applicable when the form excludes them.\n';
+  const findings = validator.runChecks(content, 'prd');
+  const manifest = findings.filter((f) => ['DC-07', 'DC-08', 'DC-10'].includes(f.code));
+  if (manifest.length !== 0) throw new Error('manifest checks leaked into another artifact type');
+});
+
 report();

@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.13.0] - 2026-08-02
+
+Two disciplines ported from sibling projects, by copy in both directions.
+Godpowers depends on neither at runtime and neither depends on Godpowers; fixes
+travel between the repositories as edits, never as references.
+
+From docdna, the engine that decides which documents a repository owes and then
+defends every absence. From codedna, the style fingerprint that two Godpowers
+agents already consumed as an input without anything ever producing it.
+
+### Added
+
+- `references/building/STYLE-GENOME.md` and an owner for `CODEDNA.md`.
+  `god-executor` reads the style profile while editing and
+  `god-quality-reviewer` reviews against it, and both were forbidden from
+  creating one, so the profile existed only if the user had installed a separate
+  tool and run it. A documented input to two agents was an accident of the
+  user's toolbox. `god-repo-scaffolder` owns it now at the repo tier, next to the
+  other dev standards it already writes, and `lib/artifact-map.js` records it as
+  a non-required repo artifact so a prototype that legitimately owes none still
+  passes its gate.
+- `lib/style-stats.js`, the measured layer the genome asks for: comment density,
+  naming-casing histograms per identifier kind, function-length median and p90,
+  identifier-length medians, quote and indentation habits, and documentation
+  coverage, per language. Before this, a numeric style norm could only be
+  estimated from a handful of files. Vendored and generated trees are skipped,
+  an unlisted extension is skipped rather than guessed at, and a truncated sample
+  says so rather than reading as complete.
+- The 15 catalogued AI tells, enumerated in the style genome reference. Have-not
+  U-01 named "AI-slop" as a failure and left it a judgement call; numbers 9 and
+  10 were already mechanical as U-08 and U-09, and `god-quality-reviewer` now
+  checks a diff against the list instead of freehand. It flags only tells the
+  profile says this project actually deviates on, because a false tell costs as
+  much trust as a missed one.
+- Four-state have-not ledger: `pass`, `fail`, `unknown`, `not-applicable`. The
+  godaudits sibling already reported on this ledger and Godpowers wrote only pass
+  and fail, so a check that never ran and a check that came back clean were the
+  same row. A summary printing two numbers was hiding the third.
+- Evidence states on the documentation profile. A not-applicable row now records
+  what licensed it: `absent` when something checked and the reason names what
+  checked, or `by-design` when the project decided. `unknown` and `hint` may not
+  mark a row not-applicable, because "we did not look" and "we decided this does
+  not apply" read identically and have opposite consequences a year later.
+- Tripwires on every not-applicable row. A reason explains a decision at the
+  moment it was made and never reopens it, so a document correctly skipped at
+  prototype scale stayed skipped forever. Each row now carries a `revisit when`
+  predicate naming an observable event, and `god-reconciler` re-evaluates every
+  one on the way in and leads with the ones firing.
+- Lifecycle stage and durability on the profile. Stage is where a document first
+  becomes load-bearing; durability decides the update contract, and it has three
+  values because two is one short. A `durability: evidence` row (post-mortems,
+  readiness reviews, scan outputs, approved closeouts) is append-only:
+  `god-updater` and `/god-sync` sweep artifacts on every feature, and editing one
+  destroys the only property that made it evidence.
+- Lifecycle metadata (`stage`, `durability`, `owner`, `system_of_record`,
+  `status`, `review_cadence`, `covers`) on every drafted document, and four
+  independent staleness verdicts: drift-stale, calendar-stale, expiry-stale, and
+  unverifiable. Godpowers detected drift-stale and nothing else. `unverifiable`
+  is the honest state for most `frame` and `govern` documents: a business case has
+  no code to hash, so reporting it as drift-stale is theater.
+- The verdict-by-state lattice, so the action on an existing repository is a
+  lookup rather than a judgement: `adopt` (present and current, add metadata, do
+  not rewrite), `refresh`, `complete`, `confirm`, `draft`, and `orphan`.
+  `lib/linkage.js` reported orphan artifact IDs and nothing reported an orphan
+  document, which is where doc rot starts. An orphan gets a row and a question,
+  never a deletion task.
+- System of record per row plus a boundary statement on every rendered manifest.
+  One false "missing" for a document that lives in a wiki discredits every other
+  row on the page.
+- Six documentation have-nots (DC-06 through DC-11) and seven style-genome
+  have-nots (SG-01 through SG-07), bringing the catalog to 179. The five existing
+  documentation have-nots were all about docs that lie; none was about a document
+  that should exist and does not, or an exclusion nobody explained.
+- DC-07, DC-08, and DC-10 are mechanical in `lib/have-nots-validator.js` under a
+  new `docmanifest` artifact type: a not-applicable row missing its evidence
+  state or tripwire, a row resting on an unknown state, and a tripwire predicate
+  nobody could observe.
+
+### Changed
+
+- `god-executor` states that `CODEDNA.md` has an owner rather than only that it
+  must not write one, and records that the dialect of the file being edited beats
+  the global profile. Flattening a file's local convention is itself catalogued
+  AI tell number 6.
+- `/god-docs` reports the manifest: tripwires fired, adopted, orphans, and
+  not-applicable rows with their evidence, with the four staleness verdicts kept
+  separate and the repository boundary stated.
+
 ## [5.12.0] - 2026-07-31
 
 ### Added
