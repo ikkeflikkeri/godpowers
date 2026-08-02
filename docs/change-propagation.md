@@ -76,7 +76,8 @@ code change committed
   -> lib/drift-detector.detectAll
        checks: design tokens still defined? STACK versions match?
        ARCH container responsibilities preserved?
-  -> if impeccable installed and UI files touched:
+  -> if Impeccable (an optional third-party design skill pack) is
+     installed and UI files were touched:
        npx impeccable detect (anti-pattern findings)
   -> lib/reverse-sync.appendFooters
        writes fenced "Implementation Linkage" sections to PRD/ARCH/

@@ -1,33 +1,41 @@
-# Planning System And Sibling Superskill Migration
+# Starting From Work Another Tool Left Behind
 
-Godpowers does not require you to start from a blank repo. If planning already
-exists, from a Godpowers sibling superskill or from another tool, Godpowers
-detects it, imports the useful signals, builds on them instead of starting over,
-and can write its own progress back.
+Godpowers does not require a blank repo. If your project already has planning or
+audit output on disk, Godpowers detects it, imports the useful signals, builds on
+them instead of starting over, and can write its own progress back.
 
-Two kinds of prior planning are supported:
+**You do not need any of the tools named here.** They are separate projects. If
+none is present, a Godpowers run behaves exactly the same, minus the import step.
+Read this page only when something already put files in your repo and you would
+rather not retype them.
 
-1. **Sibling superskills** (first-class, structured, machine-authored):
-   - [godplans](https://github.com/hannsxpeter/godplans) 1.1 emits
-     `.godplans/PLAN.mdx` plus executable `.godplans/validate-plan.sh`, a
-     two-artifact master-plan contract with `GP-` checkbox tasks,
-     `R-<DOM>-n` requirements, lifecycle state, and embedded executor rules.
-   - [godaudits](https://github.com/hannsxpeter/godaudits) emits canonical
-     `.godaudits/AUDIT.json` plus generated `.godaudits/AUDIT.mdx`, with
-     `A-<DOM>-n` checks, `F-<DOM>-n` findings, compiled score and coverage, and
-     typed `GA-` remediation tasks.
-2. **Adjacent and foreign systems** (evidence-based import): Arc-Ready, legacy
-   planning, BMAD, and Superpowers.
+## What Godpowers can import
 
-## Why the siblings are different
+Two kinds, and the difference is how much Godpowers trusts what it finds.
 
-godplans, godaudits, and Godpowers share one design. godplans inverts every
-audit check into a plan-time requirement; godaudits runs those same checks
-forward against code; Godpowers builds. They share the 18 domain codes and a
-mirrored id scheme, so `A-SEC-3` audits what `R-SEC-3` planned. Because the
-complete Godplans two-artifact emission is authored, structurally checked
-intent, and `AUDIT.json` is validated, evidence-backed machine state, Godpowers
-trusts them more than it trusts a foreign document:
+**1. Structured output from two companion tools.** These are separate projects
+built alongside Godpowers, so their files have a contract Godpowers can check
+rather than interpret.
+
+| Tool | What it is, in one line | What it leaves on disk |
+|---|---|---|
+| [godplans](https://github.com/hannsxpeter/godplans) | decides a project's product, architecture, roadmap, stack, and tasks before any code is written | `.godplans/PLAN.mdx`, a master plan of `GP-` checkbox tasks and `R-<DOM>-n` requirements, plus `validate-plan.sh` that machine-checks it |
+| [godaudits](https://github.com/hannsxpeter/godaudits) | scores a finished codebase against a catalog of checks and lists what is wrong | `.godaudits/AUDIT.json` with `A-<DOM>-n` checks, `F-<DOM>-n` findings, a score, and typed `GA-` remediation tasks |
+
+**2. Anything else** (evidence-based import, treated with more caution):
+Arc-Ready, legacy planning documents, BMAD, and Superpowers.
+
+## Why those two get more trust
+
+The three projects share one design. godplans turns every audit check into a
+plan-time requirement, godaudits runs the same checks forward against code, and
+Godpowers builds. They use the same 18 domain codes and a mirrored id scheme, so
+`A-SEC-3` audits exactly what `R-SEC-3` planned.
+
+That matters for import because both artifacts arrive machine-checked: a plan
+comes with a validator that proved its structure, and an audit report is
+validated, evidence-backed state rather than prose. A foreign document is neither,
+so it is read as a hint rather than as fact:
 
 - A complete Godplans 1.1 contract seeds the PRD, architecture, roadmap,
   stack, and build-state tiers as

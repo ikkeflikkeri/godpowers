@@ -131,16 +131,22 @@ See [validation.md](./validation.md) for the complete picture.
 
 ## Five external integrations (detect-and-delegate, none vendored)
 
-- **Google Labs design.md** - format spec for DESIGN.md
-- **Impeccable** - design intelligence (7 domain refs + 23 commands)
-- **awesome-design-md** - 71-site curated catalog
-- **SkillUI** - static-analysis fallback for arbitrary URLs
-- **vercel-labs/agent-browser + Playwright** - runtime verification
+These are other people's tools. Godpowers works without every one of them; when
+one is installed, Godpowers hands the relevant job over instead of doing a worse
+version of it itself.
 
-Each is detected via `lib/<name>-detector` or `lib/<name>-bridge`.
-None of their content is vendored; we delegate when present and fall
-back gracefully when absent (light-impeccable internal references for
-design; no-backend message for runtime).
+| Tool | What it is | What Godpowers uses it for |
+|---|---|---|
+| Google Labs design.md | a published format spec for describing a design system in one file | the shape of `DESIGN.md` |
+| Impeccable | a design skill pack (7 domain references, 23 commands) | deeper design guidance during `/god-design` |
+| awesome-design-md | a curated catalog of 71 sites with published design systems | source material for `/god-design from <site>` |
+| SkillUI | a static analyzer that reads a site's design out of its markup | extracting a design from an arbitrary URL |
+| agent-browser (or Playwright) | a headless browser driver | actually loading the built app to verify it renders |
+
+Each is detected via `lib/<name>-detector` or `lib/<name>-bridge`. None of their
+content is copied into Godpowers. When one is absent, the run continues on a
+reduced internal path: a smaller built-in design reference, or a message saying
+runtime verification needs a browser driver.
 
 ## The three load-bearing artifacts (designed for v0.5+)
 

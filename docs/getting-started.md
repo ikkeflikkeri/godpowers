@@ -68,14 +68,22 @@ cover T3 users automatically.
 
 ### Optional: full design pipeline
 
-For UI work, install these (godpowers detects each lazily; works without
-them via the internal fallback path):
+For UI work you can install three optional third-party tools. Godpowers detects
+each one lazily and works without all of them, on a reduced internal path:
 
 ```bash
-npm install -g agent-browser           # runtime verification (preferred)
+# a headless browser driver, so Godpowers can load the built app and check
+# that it actually renders rather than trusting the tests
+npm install -g agent-browser
 agent-browser install                  # downloads Chrome for Testing
-npm install -g skillui                 # extract DESIGN.md from any URL
-npx skills add https://github.com/pbakaus/impeccable   # design intelligence
+
+# reads a live site's design system out of its markup, so /god-design can
+# start from a URL instead of a blank page
+npm install -g skillui
+
+# a design skill pack: extra domain references and commands that /god-design
+# hands off to when it is installed
+npx skills add https://github.com/pbakaus/impeccable
 ```
 
 Catalog (no install): the 71-site awesome-design-md catalog at

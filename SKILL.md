@@ -300,7 +300,8 @@ Run these local runtime helpers automatically when their trigger is present:
 - `lib/checkpoint.syncFromState` after every `state.json` mutation or
   managed progress view refresh.
 - Lightweight reverse-sync or linkage scan after code or artifact edits.
-- Pillars sync planning after durable artifact truth changes.
+- Project-context sync planning (the `agents/*.md` files) after durable
+  artifact truth changes.
 - `lib/planning-systems.importPlanningContext` when legacy planning, BMAD,
   Superpowers, or Arc-Ready planning context is detected during `/god-init` or
   `/god-migrate`.

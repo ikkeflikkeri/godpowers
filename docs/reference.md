@@ -86,14 +86,14 @@ recommendation signals. Longer runs use `/god-metrics`, `/god-trace`, and
 - `/god-status --locate` - Orient a fresh AI session from checkpoint, handoff, and disk evidence.
 - `/god-progress` - Deliverable progress: which requirements and roadmap increments are done, in progress, or not started. Refreshes `.godpowers/REQUIREMENTS.mdx`.
 - `/god-plan` - Route planning intent to PRD, design, architecture, roadmap, stack, or reconstruction.
-- `/god-fix` - Route bug and outage intent to debug or hotfix, including typed open godaudits GA remediation tasks from canonical `.godaudits/AUDIT.json`.
+- `/god-fix` - Route bug and outage intent to debug or hotfix. Picks up unresolved findings from an audit report on disk (`.godaudits/AUDIT.json`) as typed remediation tasks.
 - `/god-ship` - Route shipping intent to deploy, observe, or launch.
 - `/god-capture` - Route notes, todos, backlog items, and seeds.
 - `/god-extend` - Route extension authoring, install, inspection, removal, and testing.
 - `/god-automation-status` - Show host automation provider support.
 - `/god-automation-setup` - Prepare opt-in automation setup.
 - `/god-surface` - Preview or apply a runtime command surface profile after install.
-- `/god-migrate` - Detect legacy planning, BMAD, Superpowers, Arc-Ready, godplans, and godaudits context, import seeds, and sync back progress.
+- `/god-migrate` - Detect work another tool already left on disk (a plan, an audit report, or context from an earlier workflow such as BMAD, Superpowers, or Arc-Ready), import it as seeds, and sync progress back.
 
 ### Installer CLI helpers
 - `godpowers status --project .` - Render the shared dashboard from disk state.
@@ -161,7 +161,7 @@ diff churn that cannot be traced to the request or slice plan.
 - `/god-arch` - Design system architecture.
 - `/god-roadmap` - Sequence work into milestones.
 - `/god-stack` - Pick the technology stack.
-- `/god-design` - DESIGN.md / PRODUCT.md lifecycle (Google Labs spec + impeccable).
+- `/god-design` - DESIGN.md and PRODUCT.md lifecycle. Follows the Google Labs design.md format spec, and hands off to the Impeccable design skill pack when it is installed.
 - `/god-design-impact` - Predict impact of a proposed DESIGN.md change.
 - `/god-org-context` - Bluefield org-level context (standards, conventions, infra).
 
@@ -209,7 +209,7 @@ diff churn that cannot be traced to the request or slice plan.
 - `/god-review-changes` - Walk REVIEW-REQUIRED.mdx interactively.
 - `/god-reconcile` - Comprehensive reconciliation across all impacted artifacts.
 - `/god-reconstruct` - Reverse-engineer planning artifacts from existing code.
-- `/god-migrate` - Convert adjacent planning-system context (including Arc-Ready artifacts, the Godplans 1.1 PLAN plus pinned validator contract, and canonical `.godaudits/AUDIT.json`) into Godpowers prep and seed artifacts, with lifecycle-safe GP routing and open GA tasks synchronized to managed todos.
+- `/god-migrate` - Convert context another planning or audit tool left behind into Godpowers prep and seed artifacts, with lifecycle-safe routing and open findings synchronized to managed todos. Recognized sources: Arc-Ready tier artifacts, a godplans 1.1 plan with its pinned validator, and a godaudits report (`.godaudits/AUDIT.json`). None is required.
 
 ### Verification
 - `/god-lint` - Mechanical validation against have-nots catalog.
@@ -217,7 +217,7 @@ diff churn that cannot be traced to the request or slice plan.
 - `/god-test-runtime` - Headless browser verification (design audit + flow assertions).
 - `/god-dogfood` - Run messy-repo dogfood scenarios for migration, host, extension, and suite readiness.
 - `/god-preflight` - Read-only intake audit before arc-ready and pillars.
-- `/god-audit` - Score existing artifacts against all have-nots, cross-referencing prior `.godaudits/AUDIT.json` score, coverage, findings, and remediation state when present.
+- `/god-audit` - Score existing artifacts against all have-nots. When an earlier audit report is on disk (`.godaudits/AUDIT.json`), cross-reference its score, coverage, findings, and remediation state instead of starting fresh.
 - `/god-agent-audit` - Validate every agents/*.md against the agent contract.
 
 ### Recovery
@@ -356,16 +356,26 @@ First-party packs on npm:
 - `god-roadmap-reconciler` - Legacy compatibility adapter for roadmap overlap checks.
 - `god-roadmap-updater` - Roadmap update after work.
 
-## Native Pillars context
+## Project context files
 
-Every Godpowers project is also a Pillars project. Commands load
-`agents/context.md` and `agents/repo.md` in every applicable scope, then route
-task-specific pillar files with the Pillars 1.1 portable matcher. Primaries add
-direct `must_read_with` dependencies at depth 1. `see_also` targets load only
-when their own identity, triggers, or covers match the task.
+Godpowers keeps durable project truth in files rather than in the chat, so any
+command in any session starts from the same facts. The layout follows
+[Pillars](https://github.com/hannsxpeter/pillars), an open convention for
+structuring those files; a "pillar" is one of the per-area notes below. You do
+not install anything for this, and the files are plain markdown you can edit.
+
+The point of splitting them by area is that a command loads only what its task
+needs. A database migration reads `agents/data.md`; it does not pay the context
+cost of the deploy or UI notes.
+
+Commands load `agents/context.md` and `agents/repo.md` in every applicable
+scope, then route task-specific files with the portable matcher from the Pillars
+1.1 spec. A file may declare direct `must_read_with` dependencies, loaded one
+level deep. `see_also` targets load only when their own identity, triggers, or
+covers match the task.
 
 ```
-AGENTS.md              Pillars loading protocol plus Godpowers managed fence
+AGENTS.md              Loading protocol plus the Godpowers managed fence
 agents/catalog.yaml    Optional local inventory of known absent concerns
 agents/context.md      Always-loaded project identity and invariants
 agents/repo.md         Always-loaded repository layout and naming
@@ -378,14 +388,16 @@ agents/auth.md         Identity, sessions, roles, and access control
 agents/quality.md      Testing, errors, style, and naming
 agents/deploy.md       Environments, promotion, rollback, and release process
 agents/observe.md      Logs, metrics, tracing, alerts, and runbooks
-agents/<area>/*.md     Path-qualified sub-pillars such as auth/registration
+agents/<area>/*.md     Path-qualified sub-files such as auth/registration
 ```
 
-Nested scopes contain both `AGENTS.md` and `agents/`. Godpowers loads outer
-scopes first, applies the nearest scope last, and respects local exclusions.
-The repository release gate executes the official Pillars routing fixtures.
+A monorepo can nest these: any directory containing both `AGENTS.md` and
+`agents/` is its own scope. Godpowers loads outer scopes first, applies the
+nearest scope last, and respects local exclusions. The repository release gate
+runs the Pillars project's own routing fixtures, so this stays compatible with
+the published spec rather than drifting into a private dialect.
 
-Existing `.godpowers` projects are Pillar-ized on resume and sync. Current
+Existing `.godpowers` projects gain these files on resume and sync. Current
 Godpowers artifacts become managed source references in the relevant pillar
 files, with labeled decisions, hypotheses, and open questions extracted when
 available.
@@ -400,7 +412,7 @@ available.
   intent.yaml              Project intent
   links/                   Requirement-to-code linkage map
   prep/INITIAL-FINDINGS.md Godpowers init scan and suggested next rationale
-  prep/IMPORTED-CONTEXT.md Optional legacy planning / Superpowers / BMAD preparation context
+  prep/IMPORTED-CONTEXT.md Optional context imported from an earlier planning workflow
 
   prd/PRD.md               Product Requirements
   domain/GLOSSARY.md       Domain vocabulary and resolved ambiguities
