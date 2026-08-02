@@ -51,8 +51,24 @@ Scaffold the repository.
    - .gitignore (idiomatic for the stack)
    - .editorconfig
    - Dependabot or equivalent
-7. Run an audit of the scaffold
-8. Write `.godpowers/repo/AUDIT.mdx`
+7. Style genome: write `CODEDNA.md` per `references/building/STYLE-GENOME.md`.
+   Two agents already consume it as an input (`god-executor` while editing,
+   `god-quality-reviewer` while reviewing), and until it exists both fall back to
+   matching whatever code happens to be nearby. Derive it in evidence order:
+   - Map the configs written in steps 3 and 4. Whatever the formatter and linter
+     settle is enforced ground truth; the profile says "run X" and never restates
+     it.
+   - Measure with `lib/style-stats.js` when source already exists, and quote the
+     run: comment density, casing histogram per identifier kind, function-length
+     median and p90. Greenfield has nothing to measure, so state the numbers as
+     chosen targets and name the wave that confirms them.
+   - Close-read 5 to 10 files for what no counter sees: comment voice, error
+     posture, extraction threshold, idiom vocabulary.
+   Tag every rule `enforced` or `observed`, pair every observed rule with a real
+   2-4 line snippet, stamp a version and date, and include only the anti-tells
+   this project actually deviates on.
+8. Run an audit of the scaffold
+9. Write `.godpowers/repo/AUDIT.mdx`
 
 ## Have-Nots
 
@@ -63,9 +79,16 @@ Scaffold the repository.
 - .gitignore is missing or generic
 - SECURITY.md is absent
 - Source code uses placeholders (lorem ipsum, foo/bar)
+- `CODEDNA.md` is absent at internal-tool scale or above, so the two agents that
+  read it fall back to guessing
+- A profile rule restates what the formatter or linter already settles (SG-01)
+- A numeric norm appears with no `lib/style-stats.js` run behind it (SG-02)
+- An observed rule ships with no snippet from this repository (SG-03)
+- The profile carries no version and date stamp (SG-07)
 
 ## Done Criteria
 
 - All scaffold files created
+- `CODEDNA.md` exists, stamped, with every rule tagged enforced or observed
 - `.godpowers/repo/AUDIT.mdx` documents what was created
 - CI passes on the empty scaffold

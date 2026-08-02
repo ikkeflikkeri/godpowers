@@ -124,8 +124,14 @@ loadout, read it before editing:
   with the slice plan.
 - Treat formatter, linter, tests, and explicit project conventions as
   higher-priority evidence when they conflict with the profile.
-- Do not invent or generate a `CODEDNA.md` profile in executor scope.
+- Do not invent or generate a `CODEDNA.md` profile in executor scope. It is
+  owned by `god-repo-scaffolder` at the repo tier; if it is missing on a project
+  past prototype scale, say so once rather than filling the gap here.
 - If no profile exists, continue by matching the surrounding code directly.
+- The dialect of the file being edited beats the global profile. A file that
+  consistently does something else is a local convention, not a defect to
+  normalize; flattening it is catalogued AI tell number 6 in
+  `references/building/STYLE-GENOME.md`.
 - Preserve required `// Implements: P-...` annotations even when the profile
   prefers fewer comments.
 

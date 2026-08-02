@@ -7,6 +7,28 @@
 This document is the canonical source. If a have-not appears in an agent file
 that contradicts this document, this document wins.
 
+## Ledger states
+
+A have-not is scored into one of four states, never two. The godaudits sibling
+already reports on this ledger; godpowers now writes it the same way, so a
+finding means the same thing on both sides of the handoff.
+
+| State | What the checker is saying |
+|---|---|
+| `pass` | the check ran and the artifact satisfies it |
+| `fail` | the check ran and the artifact violates it |
+| `unknown` | the check did not run, or the evidence needed to decide it was not available |
+| `not-applicable` | the check cannot apply here, with the reason recorded |
+
+**`unknown` is not `pass`, and it is not `not-applicable`.** A check that never
+ran reported as a pass is how a clean score gets manufactured, and reported as
+not-applicable is how a gap becomes a decision nobody made. When a checker cannot
+reach the evidence, it says `unknown` and names what it would need. A summary that
+prints only pass and fail counts is hiding the third number.
+
+`not-applicable` carries a reason. An unexplained `not-applicable` is worse than a
+`fail`, because a fail is visible and arguable and this is not.
+
 ---
 
 ## Universal Have-Nots (apply to ALL artifacts and code)
@@ -651,6 +673,37 @@ Runbook in docs has never been executed. Fail.
 Diagrams reflect what was, not what is, or what's planned, not what's
 shipped. Fail.
 
+#### DC-06 Required document silently absent
+The documentation profile marks a document required and no drafting pass produced
+it, and nothing in the manifest records the gap. Fail. A required document that
+was consciously deferred is a row with a reason, not a blank.
+
+#### DC-07 Not-applicable without evidence state, reason, or tripwire
+A manifest row marked not-applicable is missing any of the three: the evidence
+state that licensed it (`absent` or `by-design`), a project-specific reason, or a
+`revisit when` predicate. Fail. All three are mandatory, because an unexplained
+exclusion launders a gap into a decision and nothing ever reopens it.
+
+#### DC-08 Unknown reported as not-applicable
+A row is marked not-applicable on an `unknown` or `hint` evidence state, so "we
+did not look" is recorded as "we decided this does not apply". Fail. The row
+becomes required, or it becomes an open question with a recommended default.
+
+#### DC-09 Evidence artifact edited in place
+A sync, update, or docs pass rewrote a `durability: evidence` document (a
+post-mortem, a readiness review, a scan output) instead of appending a new dated
+instance. Fail. Editing one destroys the only property that made it evidence.
+
+#### DC-10 Vague tripwire
+A `revisit when` predicate reads "later", "eventually", "post-MVP", "if needed",
+or "TBD". Fail. None of those is an event anybody could notice, so the row is
+permanent by accident.
+
+#### DC-11 Boundary unstated
+A rendered manifest reports documents as missing without saying it can only see
+what is committed to this repository. Fail. One false "missing" for a document
+that lives in a wiki discredits every other row on the page.
+
 ### Deps Have-Nots
 
 #### DP-01 Critical CVE not addressed
@@ -671,6 +724,45 @@ Dep changes committed but lockfile not updated or not staged. Fail.
 
 #### DP-06 Changelog not consulted
 Updates applied without reading changelog for breaking changes. Fail.
+
+### Style Genome Have-Nots
+
+The style genome is `CODEDNA.md`, owned by god-repo-scaffolder and contracted in
+`references/building/STYLE-GENOME.md`. Two agents consume it as an input, so a
+wrong profile is worse than none: god-executor will match it.
+
+#### SG-01 Formatter parroting
+A profile rule restates a convention the config map already assigns to a
+formatter or linter (indentation, quotes, semicolons, line width, import order).
+Fail. The genome says "run X" and spends its lines on what no tool settles.
+
+#### SG-02 Numeric norm without measurement
+A function-size norm, comment density, or naming split appears with no
+`lib/style-stats.js` run behind it. Fail. An estimate with a decimal point in it
+is an adjective wearing a number.
+
+#### SG-03 Observed rule without a snippet
+A rule tagged `observed` ships with no real 2-4 line excerpt from this repository.
+Fail. Enforced rules cite their config; observed rules cite the code.
+
+#### SG-04 Generic profile
+A profile line survives the substitution test: it would read identically for a
+different project. Fail.
+
+#### SG-05 False anti-tell
+The anti-tells section lists a tell this project does not actually deviate on, so
+the check would flag conforming code. Fail. A false tell costs as much trust as a
+missed one.
+
+#### SG-06 Uniformity enforced over local dialect
+The profile flattens a file's characteristic convention into the global rule
+instead of recording it as a known inconsistency. Fail; this is itself catalogued
+AI tell number 6.
+
+#### SG-07 Stale stamp
+The profile carries no version and date, or its date predates a formatter,
+framework, or convention change. Fail. A stale profile silently mismatches every
+new file, and god-executor trusts it.
 
 ---
 
@@ -693,10 +785,11 @@ Updates applied without reading changelog for breaking changes. Fail.
 - Workflow Postmortem: 8
 - Workflow Spike: 5
 - Workflow Migration: 7
-- Workflow Docs: 5
+- Workflow Docs: 11
 - Workflow Deps: 6
+- Style Genome: 7
 
-**Total: 166 named have-nots.**
+**Total: 179 named have-nots.**
 
 Each is grep-testable. Each is a documented failure mode. Together they form
 the mechanical quality definition for Godpowers output.

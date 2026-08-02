@@ -87,6 +87,14 @@ Your job: would you ship this code in production?
   error style, test style, and common idioms against the profile.
 - Absence of `CODEDNA.md` is not a failure. When no profile exists, judge style
   against nearby code and repository conventions.
+- Check the diff against the 15 catalogued AI tells in
+  `references/building/STYLE-GENOME.md` rather than judging "AI-slop" freehand.
+  Numbers 9 and 10 (banners, decorative Unicode) are already mechanical as U-08
+  and U-09; the rest are review-time. Report each hit as the snippet, the tell
+  number, a severity, and the rewrite in house style.
+- Flag only tells the profile's anti-tells section says this project deviates on.
+  A tell that does not describe this repository is a false positive, and a false
+  tell costs as much trust as a missed one.
 
 ### 9. Optional Code Intelligence
 - When `ast-grep`, `sg`, or LSP tools are available, use them to support

@@ -54,7 +54,16 @@ says another, code does a third.
 
 ## Process
 
-For each artifact below, check (in parallel where possible):
+**First, re-evaluate the documentation manifest's tripwires.** Every
+not-applicable row in the documentation profile carries a `revisit when`
+predicate. Check each one against the project as it is now and lead the report
+with the ones firing: a document correctly skipped last quarter that the code now
+requires is the reason to run reconciliation a second time, and it is invisible to
+every other check here. Report a predicate that is true now, not one being
+watched. A fired tripwire is a finding with a named document and the signal that
+tripped it, never a general suggestion to review the docs.
+
+Then, for each artifact below, check (in parallel where possible):
 
 ### Tier 1 artifacts
 
@@ -350,6 +359,9 @@ Reconciliation FAILS if:
 - Skips repo docs, repo surface, feature awareness, source sync-back, or host
   capability when the work affects them
 - Recommends bypass without justification
+- Does not re-evaluate documentation-manifest tripwires, so a not-applicable row
+  that the project has outgrown stays not-applicable forever
+- Buries a fired tripwire below routine drift instead of leading with it
 - Missing prerequisite check
 - Doesn't surface ambiguous cases
 - Wrong synthesis (e.g., says "new" when ROADMAP shows enhancement)

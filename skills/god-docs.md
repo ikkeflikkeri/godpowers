@@ -35,22 +35,36 @@ surfaces disagree before prose claims are rewritten.
 Spawn **god-docs-writer** in fresh context.
 
 The agent:
-1. Inventories existing docs vs code surface
-2. Verifies every claim in existing docs against code
-3. Identifies gaps and drift
-4. Writes/updates docs
-5. Substitution test + three-label test on every claim
-6. Writes UPDATE-LOG.md summarizing changes
+1. Builds the manifest from `references/building/DOCUMENTATION-PROFILE.md`:
+   which documents this project owes, which it does not and on what evidence
+2. Re-evaluates every not-applicable row's `revisit when` tripwire and leads
+   with the ones now firing
+3. Inventories existing docs vs code surface, crossing verdict with state so the
+   action is a lookup: adopt, refresh, complete, confirm, draft, or orphan
+4. Verifies every claim in existing docs against code
+5. Writes or updates docs, never rewriting a `durability: evidence` artifact
+6. Substitution test + three-label test on every claim
+7. Writes UPDATE-LOG.md summarizing changes
 
 ## On Completion
 
 ```
 Docs updated.
 
+Tripwires fired: N (a not-applicable document the project now owes)
 Verified: N claims across M docs
 Drift found and corrected: N
 New docs created: N
+Adopted (existing and current, metadata added): N
 Existing docs updated: N
+Orphans (present, nothing in the profile justifies them): N
+Not applicable: N, each with an evidence state and a tripwire
+
+Staleness, reported separately and never merged: drift-stale N,
+calendar-stale N, expiry-stale N, unverifiable N.
+
+This covers documentation committed to this repository. Anything held in a wiki,
+an intranet, or a compliance platform is marked present-elsewhere.
 
 Update log: .godpowers/docs/UPDATE-LOG.mdx
 
