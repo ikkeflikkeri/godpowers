@@ -96,11 +96,14 @@ those decisions to where they are made.
 
 ### Security
 
-- `fast-uri` is pinned to `^3.1.5` through the root `overrides` block. It
-  reaches the tree as `@godpowers/mcp` -> `@modelcontextprotocol/sdk` -> `ajv`
-  -> `fast-uri`, and versions below 3.1.5 carry GHSA-7p8r-x3mc-p8w7 (host
-  confusion via a backslash authority introducer, CVSS 7.5). `npm audit
-  --omit=dev` is back to zero findings.
+- `fast-uri` is pinned to `^3.1.5` and `ip-address` to `^10.3.1` through the
+  root `overrides` block. Both reach the tree under `@godpowers/mcp` ->
+  `@modelcontextprotocol/sdk`: `fast-uri` via `ajv`, carrying
+  GHSA-7p8r-x3mc-p8w7 (host confusion via a backslash authority introducer,
+  CVSS 7.5); `ip-address` via `express-rate-limit`, carrying three SSRF and
+  trust-boundary bypass advisories at or below 10.3.0 (GHSA-mwp4-54f8-5fhr,
+  GHSA-4xrf-jv44-h6hh, GHSA-22jq-vg5j-6vgg). `npm audit --omit=dev` is back to
+  zero findings.
 
 ### Changed
 

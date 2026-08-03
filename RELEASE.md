@@ -20,7 +20,7 @@
 - [DECISION] Six have-not totals had each rotted to a different wrong number with nothing watching: 200 in the glossary (a total the catalog never reached), 158 twice, 115 in the orchestrator runbook, 99 in `/god-lint`. `scripts/test-doc-surface-counts.js` now derives the total from the catalog, the mechanical count from the check registries, and the architecture range from the catalog's top A-code.
 - [DECISION] `scripts/test-have-nots-tally.js` now checks that every code in a route's `standards.have-nots` exists in the catalog and that a route claiming a prefix claims all of it; this caught `/god-docs` still checking `DC-01..DC-05` after 5.13.0 added six more, and `/god-roadmap-update` stopping at `R-07` against a ten-entry tier.
 - [DECISION] `specialists/god-auditor.md` scored seven architecture have-nots and silently skipped A-08 through A-13, so the retroactive auditor never once scored architecture theater, cargo-cult cloud-native, stackitecture, resume-driven architecture, paper-tiger architecture, or ADR inflation.
-- [DECISION] `fast-uri` is pinned to `^3.1.5` in the root `overrides` block; it arrives through `@godpowers/mcp` to `@modelcontextprotocol/sdk` to `ajv`, and earlier versions carry GHSA-7p8r-x3mc-p8w7 at CVSS 7.5, which was failing `npm audit --omit=dev` inside the release gate.
+- [DECISION] `fast-uri` is pinned to `^3.1.5` and `ip-address` to `^10.3.1` in the root `overrides` block; both arrive under `@godpowers/mcp` through `@modelcontextprotocol/sdk`, and both were failing `npm audit --omit=dev` inside the release gate: `fast-uri` on GHSA-7p8r-x3mc-p8w7 at CVSS 7.5, `ip-address` on three SSRF and trust-boundary bypass advisories at or below 10.3.0.
 
 ## Validation
 
