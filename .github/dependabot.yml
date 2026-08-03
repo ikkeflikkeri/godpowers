@@ -1,4 +1,23 @@
 version: 2
+
+# Scope note, because the two halves of Dependabot behave differently and the
+# difference decides what this file can and cannot fix:
+#
+#   Security updates are alert-driven. They ignore `schedule` and
+#   `open-pull-requests-limit` entirely, and they fire within about a minute of
+#   an advisory being published. Nothing in this file makes them faster.
+#
+#   Version updates are what `schedule` and the limit govern.
+#
+# A `groups` block applies to version updates by default; a group that should
+# batch security fixes has to say so with `applies-to: security-updates`.
+# Without one, a day that publishes advisories against three packages produces
+# three separate pull requests.
+#
+# The npm entry at "/" also covers packages/mcp: Dependabot reads the root
+# `workspaces` field and fetches each workspace manifest. Do not add a second
+# entry for packages/mcp; directories must not overlap within one ecosystem.
+
 updates:
   - package-ecosystem: "npm"
     directory: "/"
@@ -8,9 +27,14 @@ updates:
     open-pull-requests-limit: 5
     groups:
       minor-and-patch:
+        applies-to: version-updates
         update-types:
           - "minor"
           - "patch"
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
     labels:
       - "dependencies"
       - "needs-triage"
@@ -19,6 +43,15 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
     labels:
       - "dependencies"
       - "ci"

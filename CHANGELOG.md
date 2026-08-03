@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The npm `overrides` block is gone. Four of its five entries were never
+  load-bearing: the patched `hono`, `ip-address`, `fast-uri`, and
+  `brace-expansion` releases were already inside the ranges their parents
+  declared, so npm selects them unaided and a lockfile refresh was the entire
+  fix. The fifth, `@hono/node-server`, was genuinely required while
+  `@modelcontextprotocol/sdk` 1.29.0 declared `^1.19.9` and no 1.x release was
+  ever patched for GHSA-frvp-7c67-39w9; sdk 1.30.0 widens that to
+  `^1.19.9 || ^2.0.5` and retires it. With the block removed the tree resolves
+  to `@hono/node-server` 2.0.11, `hono` 4.13.0, `ip-address` 10.4.0, `fast-uri`
+  3.1.5, `brace-expansion` 5.0.9 and audits clean in both scopes.
+
+### Added
+
+- `.github/workflows/security-audit.yml` runs `npm audit` daily in both the
+  production and full-tree scopes. CI already runs `npm run test:audit` on every
+  push and pull request, but that leaves two holes: nothing evaluates the tree
+  between pushes, which is why GHSA-8j4g-w8fx-2239 first surfaced as a failed
+  publish run rather than a notification; and `test:audit` audits with
+  `--omit=dev`, so a development-scope advisory can never fail CI at any point.
+  All three `brace-expansion` advisories were development scope and Dependabot
+  was the only thing in the system that saw them.
+- `scripts/test-dependency-overrides.js` fails the suite when an npm override is
+  missing from the lockfile, missing an advisory id in `overrides-rationale`, or
+  no longer load-bearing because every declaring parent has caught up. An
+  override is a permanent major-version ceiling, and Dependabot reads them: one
+  that caps resolution below a fix produces no pull request, only an error
+  against the alert, so the repository looks patched while pinned to a
+  vulnerable version.
+- `.github/dependabot.yml` gains `applies-to: security-updates` groups for both
+  ecosystems, so a day that publishes advisories against several packages
+  produces one pull request rather than one per package. Security updates ignore
+  `schedule` and `open-pull-requests-limit` entirely, so grouping is the only
+  lever this file has over them.
+
 ## [5.14.1] - 2026-08-03
 
 A dependency patch with no behavior change. It exists so the published

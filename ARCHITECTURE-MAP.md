@@ -758,7 +758,7 @@ godpowers/
 | Hooks | 2 |
 | Dogfood scenarios | 5 |
 | Documentation pages | 35 under docs/ plus reference material |
-| **Test suites** | **92 script files plus integration tests** |
+| **Test suites** | **93 script files plus integration tests** |
 | **Tests** | **Full behavioral suite gated by npm test** |
 | Supported AI runtimes | 15+ |
 | Verification axes | **3**: static (lint, design-spec, have-nots), linkage (drift, reverse-sync), runtime (headless browser audit + functional test) |

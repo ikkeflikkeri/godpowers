@@ -82,6 +82,35 @@ Examples:
 - `feat(cost): split live vs estimated source`
 - `fix(otel): handle missing span_id gracefully`
 
+## Dependencies and advisories
+
+Dependabot owns the advisory response. Alerts and automated security fixes are
+enabled, and Dependabot opens a pull request within about a minute of an
+advisory being published. The default action on an advisory is to merge that
+pull request, not to fix it by hand.
+
+`.github/workflows/security-audit.yml` runs `npm audit` on a daily cron in both
+scopes, because CI closes only half the gap. `npm run test:audit` does run on
+every push and pull request, but nothing evaluates the tree between pushes, and
+it audits with `--omit=dev`, so a development-scope advisory can never fail CI
+at any point. Both halves bit during 5.14.x: the `hono` advisory surfaced as a
+failed publish run, and all three `brace-expansion` advisories were visible only
+to Dependabot.
+
+Reach for an npm `override` in exactly one case: the patched version sits
+outside the range every parent declares, so no resolution can reach it. In every
+other case npm already selects the highest in-range version and a lockfile
+refresh is the whole fix. An override is permanent, invisible, and pins a major:
+`fast-uri: "^3.1.5"` caps at 3.x no matter what upstream does. Dependabot reads
+overrides, and one that caps resolution below a fix produces no pull request at
+all, only an error against the alert, which is how a repository ends up looking
+patched while pinned to a vulnerable version.
+
+When an override really is required, record the advisory id in
+`overrides-rationale` next to it. `scripts/test-dependency-overrides.js` fails
+the suite when an override is unjustified, absent from the lockfile, or no
+longer load-bearing because its parents have caught up.
+
 ## Releasing
 
 Releases are explicit, and publication is tag-triggered so the npm artifact

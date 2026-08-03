@@ -11,6 +11,7 @@ const TEST_COMMANDS = [
   [node, ['scripts/validate-skills.js']],
   [node, ['scripts/static-check.js']],
   [node, ['scripts/test-doc-surface-counts.js']],
+  [node, ['scripts/test-dependency-overrides.js']],
   [node, ['scripts/test-self-project-truth.js']],
   [node, ['scripts/test-have-nots-tally.js']],
   [node, ['scripts/test-skill-source-sync.js']],
