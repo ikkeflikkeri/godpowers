@@ -111,6 +111,16 @@ your context on the interpretive ones the linter cannot do.
 - "Scalable" appears without numbers
 - Trust boundary missing for external integration
 - Data model has no ownership assignments
+- Diagrams exist but no load-bearing decision is documented
+- Complexity imported from a scale the PRD never reaches
+- Stack selection presented as architecture
+- Choice motivated by resume value rather than fit for the PRD
+- Robust on paper, no worst-case analysis behind any NFR
+- An ADR records a decision that is easy to reverse or obvious without context
+- Boundary-crossing flow has no ordered interaction
+- Capacity number has no input behind it and no source for that input
+- Dependency has no timeout, no retry stance, and no degraded state
+- Container whose loss stops the system is neither addressed nor accepted
 
 ### Roadmap Have-Nots
 - Milestone goal passes substitution test

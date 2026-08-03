@@ -33,6 +33,27 @@ Single-binary CLI. No external services. Reads stdin or file; writes formatted r
 | `parser` | Detect CI format, locate FAILED step | Go (regex + state machine) |
 | `formatter` | Render focused report with context | Go (no external lib) |
 
+## Critical Flows
+
+```
+Focused failure report (crosses the untrusted-input boundary, touches 3 containers)
+
+1. cli        -> cli         parse argv, resolve source (file path or stdin)
+2. cli        -> parser      stream lines in 64 KB reads
+3. parser     -> parser      sniff the first 100 lines for a format marker
+4. parser     -> parser      scan for the FAILED step, holding 40 lines of context
+5. parser     -> formatter   emit the matched step and its context window
+6. formatter  -> stdout      render the report
+7. cli        -> caller      exit 1 on a located failure, 0 on none, 2 on unreadable input
+```
+
+| Flow | Crosses | Writes at | Fails visibly at |
+|------|---------|-----------|------------------|
+| Focused failure report | untrusted-input boundary | nowhere; the tool holds no state | 7 (exit code 2 and a message on stderr) |
+
+[DECISION] Nothing in this flow writes, so a retry is always free and no step
+needs an idempotency key.
+
 ## Architecture Decision Records
 
 ### ADR-001: Go for the implementation
@@ -67,6 +88,26 @@ Single-binary CLI. No external services. Reads stdin or file; writes formatted r
 
 [DECISION] Every NFR from PRD has an architectural choice mapped above.
 
+## Capacity Envelope
+
+| Input | Today | At the PRD horizon | Source |
+|-------|-------|--------------------|--------|
+| Log size per invocation | 2 MB median | 10 MB | PRD NFR states the latency budget at 10 MB |
+| Invocations per CI run | 1 | 1 | one report per failed job, by design |
+| Context lines retained | 40 | 40 | ring buffer size, fixed at compile time |
+
+Derived, per container:
+
+| Container | Derived load | Headroom on the chosen shape |
+|-----------|--------------|------------------------------|
+| `parser` | 10 MB in 500 ms = 20 MB/s sustained scan | [HYPOTHESIS] a line scanner with no hot-loop allocation sustains 20 MB/s on the CI runner class; validate with a 10 MB benchmark before the first release |
+| `formatter` | one report, bounded by the 40-line window | constant |
+| memory | 64 KB read buffer plus 40 retained lines, about 128 KB | independent of input size (ADR-003) |
+
+[DECISION] Saturates first: nothing at the PRD horizon. The binding constraint
+is single-invocation latency, not throughput, so ADR-003's flip point is a
+latency regression rather than a volume.
+
 ## Trust Boundaries
 
 ```
@@ -82,8 +123,37 @@ Single-binary CLI. No external services. Reads stdin or file; writes formatted r
 The tool reads but never executes. Logs may contain malicious content; we
 output them verbatim only after format-validating.
 
+## Failure and Degradation
+
+| Dependency | Timeout | On failure | Idempotent | User sees |
+|------------|---------|------------|------------|-----------|
+| stdin | 30s idle read | Abort, exit 2 | Yes; the tool holds no state | "no input received after 30s" on stderr |
+| Input file | none; local read | Abort, exit 2, emit no partial report | Yes | the path and the OS error on stderr |
+| Unrecognized log format | none | Fall back to generic FAIL matching | Yes | a "format not recognized, using generic matching" note above the report |
+
+[DECISION] Backpressure: none to design. One input per invocation against a
+fixed 64 KB buffer, so a larger log costs time and never memory.
+
+[DECISION] Recovery: there is no persistent state to recover. Every invocation
+starts clean, so rerunning the command is the recovery procedure.
+
+For each container, what happens if it dies:
+
+| Container | If it dies | Verdict |
+|-----------|-----------|---------|
+| `cli` | The invocation exits non-zero and prints nothing | SPOF by construction; accepted, because a single-process CLI has no partial-availability mode |
+| `parser` | Same process, same exit | Not separable from `cli` |
+| `formatter` | Same process, same exit | Not separable from `cli` |
+
+[DECISION] A single static binary is one failure domain, and recording that is
+the point: availability belongs to the CI job that invokes the tool, not to
+this architecture.
+
 ## Have-Nots Checklist
 - [x] Every container has a clear single responsibility
 - [x] Every NFR from PRD has an architectural mapping
 - [x] Every ADR has a flip point
+- [x] Every boundary-crossing flow has an ordered interaction
+- [x] Every capacity number traces to an input with a source
+- [x] Every dependency has a timeout, a failure path, and a degraded state
 - [x] No external services required

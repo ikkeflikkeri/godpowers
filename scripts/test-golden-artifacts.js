@@ -118,6 +118,34 @@ test('CLI ARCH references at least one ADR', () => {
   assert(adrCount >= 1, `no ADR references in CLI ARCH; got ${adrCount}`);
 });
 
+// --- A-14 / A-15 / A-16 sections are demonstrated, not just documented ---
+// The mechanical checks report warnings so an ARCH written before 5.14.0 does
+// not fail its gate. That leniency would let the shipped examples quietly stop
+// demonstrating the standard, so the examples assert on the checks directly.
+
+const validator = require('../lib/have-nots-validator');
+
+for (const [name, dir] of [['SaaS', SAAS], ['CLI', CLI]]) {
+  test(`${name} ARCH carries Critical Flows, Capacity Envelope, and Failure and Degradation`, () => {
+    const txt = read(`${dir}/.godpowers/arch/ARCH.mdx`);
+    for (const heading of ['Critical Flows', 'Capacity Envelope', 'Failure and Degradation']) {
+      assert(new RegExp(`^##\\s*(?:\\d+\\.\\s*)?${heading}\\s*$`, 'm').test(txt),
+        `${name} ARCH has no "${heading}" section`);
+    }
+  });
+
+  test(`${name} ARCH satisfies A-14, A-15, and A-16`, () => {
+    const txt = read(`${dir}/.godpowers/arch/ARCH.mdx`);
+    const findings = [
+      ...validator.checkArchCriticalFlows(txt),
+      ...validator.checkArchCapacityEnvelope(txt),
+      ...validator.checkArchFailureDegradation(txt)
+    ];
+    assert(findings.length === 0,
+      `${name} ARCH trips the new architecture checks: ${JSON.stringify(findings.map(f => `${f.code}: ${f.message}`))}`);
+  });
+}
+
 // --- PRD requirement IDs referenced by ROADMAP --------------------------
 
 test('SaaS ROADMAP has milestone IDs (M-N)', () => {

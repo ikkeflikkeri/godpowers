@@ -85,7 +85,18 @@ From the code, derive:
 - **ADRs**: infer from major decisions visible in code
   - Each ADR must have a flip point; if you can't infer one, mark "[OPEN QUESTION]"
 - **NFR-to-architecture map**: trace from observability/limits back to architectural choices
+- **Critical flows**: from route handlers, job definitions, and call graphs;
+  reconstruct the order, and mark the write steps from the actual persistence
+  calls
+- **Capacity envelope**: from configured limits, page sizes, cron cadences, and
+  connection-pool settings. These are what the running system assumes, not what
+  anyone chose; label every reconstructed input `[HYPOTHESIS]` and name the
+  config file it came from
 - **Trust boundaries**: from auth code, API gateways, network config
+- **Failure and degradation**: from client timeout settings, retry wrappers,
+  circuit-breaker config, and any fallback branch in the code. Where a
+  dependency call has no timeout in code, record that as the finding it is
+  rather than inventing one
 - **Data model**: from schema files, migrations, ORM definitions
 
 Write to `.godpowers/arch/ARCH.mdx` with reconstruction warning.

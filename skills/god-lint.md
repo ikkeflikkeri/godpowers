@@ -21,7 +21,9 @@ have-nots catalog. Real validation, not self-attestation. Catches:
 - Generic claims that fail the substitution test (U-01)
 - PRD have-nots: metric without timeline / method, empty no-gos, open
   questions without owner / due date (P-04, P-05, P-07, P-08, P-09)
-- ARCH have-nots: NFR not mapped to architectural choice (A-04)
+- ARCH have-nots: NFR not mapped to architectural choice, undiagrammed
+  boundary-crossing flow, capacity number without a source, dependency without
+  a timeout or degraded state (A-03, A-14, A-15, A-16)
 - Domain glossary have-nots: missing avoided aliases, implementation details,
   unresolved ambiguities, undefined relationship terms, behavior-heavy
   definitions (DG-01..DG-05)
@@ -119,9 +121,9 @@ sense") remain the responsibility of `god-auditor` (retroactive scoring)
 and `god-spec-reviewer` / `god-quality-reviewer` (per-artifact two-stage
 review).
 
-The catalog of 99 have-nots is split:
-- ~30 mechanical (cataloged in `lib/have-nots-validator.js`)
-- ~69 interpretive (delegated to agents)
+The catalog of 183 have-nots is split:
+- 25 mechanical (cataloged in `lib/have-nots-validator.js`)
+- 158 interpretive (delegated to agents)
 
 This split is published in `references/HAVE-NOTS.md` per check.
 

@@ -17,7 +17,7 @@ outputs:
   - ".godpowers/arch/ARCH.mdx"
   - ".godpowers/arch/adr/"
 gates:
-  - "A-01 through A-13 have-nots"
+  - "A-01 through A-17 have-nots"
   - "npx godpowers gate --tier=arch --project=."
 handoff:
   - "return architecture artifact and pause only for tied load-bearing decisions"
@@ -118,7 +118,13 @@ ADRs to `.godpowers/arch/adr/`.
 3. **Container Diagram (C4 L2)** - major runtime containers with single clear
    responsibilities. No shared responsibility without justification.
 
-4. **Architecture Decision Records (ADRs)** - one per significant decision
+4. **Critical Flows** - an ordered interaction for every flow that crosses a
+   trust boundary or touches more than two containers. Number the steps, name
+   the caller and callee at each one, and mark the steps that write state; a
+   retry must not repeat them. A flow that fails visibly nowhere gets a row in
+   Failure and Degradation below.
+
+5. **Architecture Decision Records (ADRs)** - one per significant decision
    that is hard to reverse, surprising without context, and the result of a
    real tradeoff:
    - Context (what forced the decision)
@@ -128,16 +134,31 @@ ADRs to `.godpowers/arch/adr/`.
    - **Flip point** (under what conditions this reverses)
    - Consequences (what this makes easier/harder)
 
-5. **NFR-to-Architecture Map** - every PRD NFR maps to an architectural choice.
+6. **NFR-to-Architecture Map** - every PRD NFR maps to an architectural choice.
    Where a decision serves a specific PRD functional requirement, reference its
    id (P-MUST-NN / P-SHOULD-NN / P-COULD-NN) so the rationale traces back to the
    requirement it supports.
 
-6. **Trust Boundaries** - every external integration has a boundary. Auth/authz
+7. **Capacity Envelope** - the load inputs each NFR target is measured under,
+   each with a source, plus the arithmetic from those inputs to per-container
+   load and the name of the container that saturates first. A guessed input is
+   labeled `[HYPOTHESIS]` with the plan that validates it. This is where A-05
+   gets its numbers and A-12 gets its worst case.
+
+8. **Trust Boundaries** - every external integration has a boundary. Auth/authz
    model documented. Data classification (sensitive vs public).
 
-7. **Data Model** - core entities, relationships, ownership (which service owns
-   which entity), consistency model (strong/eventual/per-entity).
+9. **Failure and Degradation** - for every external dependency, and every
+   internal container whose loss is partial: the timeout as a number, the retry
+   stance with the key that makes the write idempotent, and the user-visible
+   degraded state. Plus the backpressure limit and the rate the backlog drains
+   at. Trust Boundaries covers that edge being breached; this covers it being
+   slow, down, or wrong. Close it with the internal question: for each container
+   in the container diagram, what happens if it dies. Every "everything stops"
+   answer is addressed or accepted in writing.
+
+10. **Data Model** - core entities, relationships, ownership (which service owns
+    which entity), consistency model (strong/eventual/per-entity).
 
 ## Quality Gates
 
@@ -155,6 +176,12 @@ Architecture FAILS if:
 - "Scalable" appears without numbers
 - A trust boundary is missing for an external integration
 - Data model has no ownership assignments
+- A flow crossing a trust boundary or more than two containers has no ordered
+  interaction
+- A capacity number has no input behind it and no source for that input
+- A dependency has no timeout, no retry stance, and no degraded state
+- A container whose loss stops the system is neither addressed nor accepted in
+  writing with its blast radius named
 - Any sentence unlabeled
 
 ## Pause Conditions

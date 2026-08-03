@@ -50,3 +50,34 @@ is "everything stops," it's a SPOF. Address it or document it.
 
 **Fix**: Add the flip point. "Reverse this decision when [specific
 condition]." Without it, the decision is forever and unfalsifiable.
+
+## 9. Static-Only Architecture
+Boxes and arrows, no time. The diagram says the API server talks to Postgres
+and to Stripe. It never says in what order, so nobody notices that the OAuth
+nonce is written before the token exchange and never cleaned up when the
+exchange fails.
+
+**Fix**: Draw an ordered interaction for every flow that crosses a trust
+boundary or touches more than two containers, and mark the steps that write
+state. Those are the steps a retry must not repeat.
+
+## 10. Numbers Without Inputs
+> "Handles 10K concurrent users at p99 < 200ms."
+
+Real numbers derived from nothing. This one clears antipattern 4 (it is
+quantified) and still decides nothing, because the load the target is measured
+under was never written down. The first load test then argues about the test
+instead of the result.
+
+**Fix**: A capacity envelope. Inputs with sources, arithmetic from those inputs
+to per-container load, and the name of the container that saturates first.
+
+## 11. Happy-Path Architecture
+Every arrow assumes the far end answers. No timeout, no retry stance, no
+statement of what the user sees while Stripe is down. This is not antipattern 7:
+the redundancy may be fine and every replica healthy: what is missing is the
+caller's behavior when the answer does not come back.
+
+**Fix**: For each dependency, write the timeout in seconds, the retry stance
+with the key that makes the write idempotent, and the user-visible degraded
+state. Then the backpressure limit and the rate the backlog drains at.

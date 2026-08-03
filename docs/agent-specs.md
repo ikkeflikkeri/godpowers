@@ -78,7 +78,7 @@ Each agent has these fields:
 | **Outputs** | `.godpowers/arch/ARCH.mdx`, `.godpowers/arch/adr/<n>-<title>.mdx` |
 | **Downstream consumers** | god-roadmapper, god-stack-selector, god-planner, god-deploy-engineer, god-harden-auditor |
 | **Artifact awareness** | PRD requirements, NFRs, optional org-context.yaml (bluefield), domain glossary, imported preparation context as supporting evidence |
-| **Handoff** | Returns when ARCH passes have-nots A-01..A-13. Pauses on tied architectures, human-constraint flip points. |
+| **Handoff** | Returns when ARCH passes have-nots A-01..A-17. Pauses on tied architectures, human-constraint flip points. |
 | **Standards check** | YES |
 
 ### god-roadmapper
@@ -478,7 +478,7 @@ Each agent has these fields:
                               |
                               v
                       god-standards-check
-                       (A-01..A-12)
+                       (A-01..A-17)
                               |
                   ┌───────────┼───────────┐
                   |                       |
@@ -646,7 +646,7 @@ Which agents trigger god-standards-check after running:
 | Agent | Standards check runs after? | Have-nots checked |
 |---|---|---|
 | god-pm | YES | P-01..P-15 |
-| god-architect | YES | A-01..A-12 |
+| god-architect | YES | A-01..A-17 |
 | god-roadmapper | YES | R-01..R-10 |
 | god-stack-selector | YES | S-01..S-05 |
 | god-repo-scaffolder | YES | RP-01..RP-08 |

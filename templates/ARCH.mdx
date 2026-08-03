@@ -47,6 +47,26 @@ Novelty is not a scoring axis.
 |-----------|----------------------|------------|
 | [Name] | [One sentence. Single thing it owns.] | [Language/framework] |
 
+## Critical Flows
+
+An ordered interaction for every flow that crosses a trust boundary or touches
+more than two containers. Number each step; mark the steps that write state,
+because those are the steps a retry must not repeat.
+
+```
+[Flow name] (crosses [boundary], touches [N] containers)
+
+1. [Caller]  -> [Callee]   [operation]
+2. [Caller]  -> [Callee]   WRITE [what]
+3. [Caller]  -> [Callee]   [operation]
+```
+
+| Flow | Crosses | Writes at | Fails visibly at |
+|------|---------|-----------|------------------|
+| [Name] | [Boundary] | [step numbers] | [step, or "nowhere"] |
+
+A flow that fails visibly nowhere needs a row in Failure and Degradation below.
+
 ## Architecture Decision Records
 
 Only create an ADR when all three are true: the decision is hard to reverse,
@@ -73,6 +93,27 @@ surprising without context, and the result of a real tradeoff.
 Every NFR from PRD MUST appear here. If an NFR has no corresponding choice,
 flag it.
 
+## Capacity Envelope
+
+The NFR map states the targets. This states the load they are measured under,
+and where each number came from.
+
+| Input | Today | At the PRD horizon | Source |
+|-------|-------|--------------------|--------|
+| [What drives load] | [N] | [N] | [PRD metric / measurement / [HYPOTHESIS] + validation plan] |
+
+Derived, per container:
+
+| Container | Derived load | Headroom on the chosen shape |
+|-----------|--------------|------------------------------|
+| [Name] | [arithmetic from the inputs above] | [how much room is left] |
+
+**Saturates first**: [container], at [the number that triggers it]. That number,
+not a round user count, is what the relevant ADR flip point should name.
+
+Every number is an input with a source or arithmetic over inputs with sources.
+An unlabeled guess is a have-not (A-15).
+
 ## Trust Boundaries
 
 ```
@@ -88,6 +129,30 @@ For each external integration:
 - **Auth model**: [How identity is established]
 - **Data classification**: [What flows across; sensitive or public]
 - **Failure mode**: [What happens if the boundary is breached]
+
+## Failure and Degradation
+
+Trust Boundaries covers the edge being breached. This covers the same edge being
+slow, down, or wrong.
+
+| Dependency | Timeout | On failure | Idempotent | User sees |
+|------------|---------|------------|------------|-----------|
+| [External service] | [Ns connect, Ns read] | [retry count, backoff, terminal state] | [Yes, on what key / No, why] | [the degraded state, in words] |
+| [Datastore] | [Ns] | [fail closed / fail open] | [n/a] | [what the caller returns] |
+
+**Backpressure**: [the queue depth or rate at which new work is rejected rather
+than accepted]. A queue with no rejection point is an outage with a delay.
+
+**Recovery**: [the capped rate the backlog drains at after the dependency
+returns].
+
+For each container in the container diagram, what happens if it dies:
+
+| Container | If it dies | Verdict |
+|-----------|-----------|---------|
+| [Name] | [blast radius, in words] | [SPOF, addressed by X / SPOF, accepted because Y / degrades only] |
+
+Every "everything stops" row is addressed or accepted in writing (A-17).
 
 ## Data Model
 
@@ -114,4 +179,8 @@ Before declaring done, verify:
 - [ ] "Scalable" never appears without numbers
 - [ ] Every external integration has a trust boundary
 - [ ] Every data entity has an ownership assignment
+- [ ] Every boundary-crossing flow has an ordered interaction
+- [ ] Every capacity number traces to an input with a source
+- [ ] Every dependency has a timeout, a retry stance, and a degraded state
+- [ ] Every container whose loss stops the system is addressed or accepted
 - [ ] No sentence is unlabeled

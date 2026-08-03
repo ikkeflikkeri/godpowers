@@ -148,6 +148,56 @@ if (validatorCount !== declaredTotal) {
   );
 }
 
+// --- Route standards blocks must not drift from the catalog ---------------
+// A `standards.have-nots` list in routing/*.yaml is the contract the gate
+// reads, and nothing checked it. Two lists had already rotted: /god-docs still
+// named DC-01..DC-05 after 5.13.0 added DC-06..DC-11, and /god-roadmap-update
+// stopped at R-07. The rule is deliberately blunt: a route that claims a
+// prefix claims all of it, so adding a have-not to a tier cannot silently
+// leave the command that authors that tier's artifact checking fewer.
+const catalogCodes = new Set();
+for (const match of body.matchAll(/^#{3,4}\s+([A-Z]{1,3}-\d{2})\b/gm)) {
+  catalogCodes.add(match[1]);
+}
+const codesByPrefix = new Map();
+for (const code of catalogCodes) {
+  const prefix = code.slice(0, code.lastIndexOf('-'));
+  if (!codesByPrefix.has(prefix)) codesByPrefix.set(prefix, []);
+  codesByPrefix.get(prefix).push(code);
+}
+
+const routingDir = path.join(root, 'routing');
+let routesChecked = 0;
+for (const name of fs.readdirSync(routingDir).sort()) {
+  if (!name.endsWith('.yaml')) continue;
+  const routeSrc = fs.readFileSync(path.join(routingDir, name), 'utf8');
+  const listMatch = routeSrc.match(/have-nots:\s*\[([^\]]*)\]/);
+  if (!listMatch) continue;
+  const listed = listMatch[1].split(',').map((code) => code.trim()).filter(Boolean);
+  if (listed.length === 0) continue;
+  routesChecked += 1;
+
+  const phantom = listed.filter((code) => !catalogCodes.has(code));
+  if (phantom.length > 0) {
+    throw new Error(
+      `routing/${name} lists have-not(s) that do not exist in ${HAVE_NOTS}: ${phantom.join(', ')}.`
+    );
+  }
+
+  const prefixes = [...new Set(listed.map((code) => code.slice(0, code.lastIndexOf('-'))))];
+  for (const prefix of prefixes) {
+    const missing = (codesByPrefix.get(prefix) || []).filter((code) => !listed.includes(code));
+    if (missing.length > 0) {
+      throw new Error(
+        `routing/${name} checks the ${prefix}-* have-nots but omits ${missing.join(', ')}.`
+      );
+    }
+  }
+}
+
 console.log(
   `  + HAVE-NOTS reference tally matches body: ${countingSections.length} sections, ${declaredTotal} named have-nots; validator header in sync`
+);
+console.log(
+  `  + ${routesChecked} routing have-not lists resolve to the catalog with no prefix gaps`
 );

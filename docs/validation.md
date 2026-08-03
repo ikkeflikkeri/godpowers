@@ -102,7 +102,10 @@ PRD-specific:
 - **P-09** open question without due date
 
 ARCH-specific:
-- **A-04** PRD NFR not mapped to architectural choice
+- **A-03** PRD NFR not mapped to architectural choice
+- **A-14** boundary-crossing flow with no ordered interaction
+- **A-15** capacity number with no input or no source for it
+- **A-16** dependency with no timeout, retry stance, or degraded state
 
 DESIGN-specific (via `lib/design-spec`):
 - **D-NAME** frontmatter missing `name` field
@@ -113,11 +116,11 @@ DESIGN-specific (via `lib/design-spec`):
 
 ### Mechanical vs interpretive
 
-Of the 158 documented have-nots in `references/HAVE-NOTS.md`:
-- **~30 are mechanical** (regex-checkable; in `lib/have-nots-validator.js`)
-- **~127 are interpretive** (judgment-required; documented for human + AI review)
+Of the 183 documented have-nots in `references/HAVE-NOTS.md`:
+- **25 are mechanical** (regex-checkable; in `lib/have-nots-validator.js`)
+- **158 are interpretive** (judgment-required; documented for human + AI review)
 
-The mechanical 30 are caught by `/god-lint`. The interpretive checks are
+The mechanical 25 are caught by `/god-lint`. The interpretive checks are
 the responsibility of `god-auditor` (retroactive scoring) and the
 two-stage code review (`god-spec-reviewer` + `god-quality-reviewer`).
 
@@ -278,7 +281,7 @@ catches breakage.
 - `lib/browser-bridge.js` - runtime backend cascade
 - `lib/runtime-audit.js` - design verification on rendered DOM
 - `lib/runtime-test.js` - PRD acceptance flow assertions
-- `references/HAVE-NOTS.md` - the catalog of 158 named failure modes
+- `references/HAVE-NOTS.md` - the catalog of 183 named failure modes
 - [change-propagation.md](./change-propagation.md) - how findings flow
 - [linkage.md](./linkage.md) - stable IDs and discovery mechanisms
 - [design-md.md](./design-md.md) - DESIGN.md format and lifecycle

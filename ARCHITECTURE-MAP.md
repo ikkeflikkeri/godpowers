@@ -642,7 +642,7 @@ godpowers/
 ├── README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, USERS.md
 ├── ARCHITECTURE.md                <- Design doc
 ├── ARCHITECTURE-MAP.md            <- This file
-├── package.json (v5.13.0)
+├── package.json (v5.14.0)
 ├── .github/workflows/              <- CI + npm publish workflows
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
@@ -662,7 +662,7 @@ godpowers/
 │   ├── PRD.mdx, ARCH.mdx, ROADMAP.mdx, ...
 │
 ├── references/
-│   ├── HAVE-NOTS.md               <- 158 named failure modes (canonical)
+│   ├── HAVE-NOTS.md               <- 183 named failure modes (canonical)
 │   ├── orchestration/             <- Mode/scale detection patterns
 │   ├── planning/                  <- PRD/ARCH/ROADMAP/STACK anatomies + antipatterns
 │   ├── building/                  <- Vertical slices, waves
@@ -738,7 +738,7 @@ godpowers/
 
 ---
 
-## Numbers (as of v5.13.0)
+## Numbers (as of v5.14.0)
 
 | Component | Count |
 |-----------|-------|
@@ -749,7 +749,7 @@ godpowers/
 | Specialist agents | 41 |
 | Workflows (core YAMLs) | 13 |
 | Intent recipes | 45 |
-| Have-nots | 179 documented + 30+ mechanically validated by linter |
+| Have-nots | 183 documented + 25 mechanically validated by linter |
 | Templates | 15 |
 | Reference documents | 52 |
 | JSON Schemas | 7 |

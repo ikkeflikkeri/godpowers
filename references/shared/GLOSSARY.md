@@ -17,7 +17,7 @@
 
 **Gate**: a passing upstream artifact required for a downstream sub-step.
 
-**Have-not**: a named, grep-testable failure mode. 200 in the catalog.
+**Have-not**: a named, grep-testable failure mode. 183 in the catalog.
 
 **Mode**: a run flavor (greenfield A, gap-fill B, audit C, multi-repo D-future).
 

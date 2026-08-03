@@ -14,7 +14,7 @@ description: |
 license: MIT
 compatibility: "Works with Agent Skills compatible file-system agents. Supported hosts include Claude Code, Codex, Cursor, Windsurf, Gemini, OpenCode, Copilot, Augment, Trae, Cline, Kilo, Antigravity, Qwen, CodeBuddy, and Pi."
 metadata:
-  version: "5.13.0"
+  version: "5.14.0"
   updated: "2026-07-13"
   changelog: "CHANGELOG.md"
   tier: "full-arc"
@@ -523,9 +523,12 @@ Silence is not a status. Every tier must have an explicit entry.
 3. Produce architecture with:
    - System context diagram (C4 Level 1)
    - Container diagram (C4 Level 2)
+   - Critical flows (ordered interactions across boundaries)
    - Key architectural decisions (ADRs) with rationale and flip points
    - Non-functional requirements mapped to architectural choices
+   - Capacity envelope (the load inputs those targets are measured under)
    - Trust boundaries
+   - Failure and degradation (timeouts, retries, degraded states, SPOFs)
    - Data model (entities, relationships, ownership)
 4. Run have-nots check
 5. Write to `.godpowers/arch/ARCH.mdx`
@@ -538,6 +541,11 @@ Silence is not a status. Every tier must have an explicit entry.
 - ADR has no flip point (condition under which the decision reverses)
 - Trust boundary is absent for any external integration
 - "Scalable" appears without numbers
+- A boundary-crossing flow has no ordered interaction
+- A capacity number has no input behind it and no source for that input
+- A dependency has no timeout, retry stance, or user-visible degraded state
+- A container whose loss stops the system is neither made redundant nor
+  recorded as an accepted risk
 
 **Pause conditions**:
 - Two architectures score equally with no objective tiebreaker

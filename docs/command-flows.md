@@ -124,7 +124,7 @@ Each command has:
 
 **Standards check**:
 - Substitution test, three-label test
-- Have-nots: A-01 through A-12
+- Have-nots: A-01 through A-17
 - Gate-on-failure: pause-for-user
 
 **Success path**: `/god-roadmap`

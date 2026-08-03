@@ -52,7 +52,7 @@ After feature work, every artifact that was impacted needs to reflect reality.
 - Add new ADR with flip point
 - Update C4 diagrams if structurally needed
 - Update NFR-to-architecture map
-- Validate have-nots A-01 through A-12
+- Validate have-nots A-01 through A-17
 
 ### ROADMAP update (always after feature work)
 - Spawn god-roadmap-updater (existing)

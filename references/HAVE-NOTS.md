@@ -265,6 +265,30 @@ worst-case analysis. Fail.
 An ADR records a decision that is easy to reverse, obvious without context, or
 not the result of a real tradeoff. Fail.
 
+#### A-14 Critical flow undiagrammed
+A flow that crosses a trust boundary or touches more than two containers has no
+ordered interaction showing who calls whom, in what order, and at which steps
+state is written. Fail.
+
+#### A-15 Capacity number without an input
+A throughput, latency, or volume target appears with no input it was derived
+from and no source for that input. Distinct from A-05: A-05 fires on the word
+"scalable" carrying no number, A-15 fires on a number carrying nothing
+underneath it. Fail.
+
+#### A-16 Dependency without failure behavior
+An external dependency, or an internal container whose loss is partial, has no
+documented behavior for being slow, down, or wrong: no timeout with a number, no
+retry stance naming the key that makes the write idempotent, no user-visible
+degraded state. Distinct from A-06, which covers that same edge being breached
+rather than being unavailable. Fail.
+
+#### A-17 Single point of failure unaddressed
+A container whose loss stops the system is neither made redundant nor recorded
+as an accepted risk with the blast radius named. Fail. A-16 asks what a caller
+does when a dependency stops answering; this asks which of our own containers
+takes everything with it when it dies.
+
 ### Domain Glossary Have-Nots
 
 #### DG-01 Canonical term without avoided aliases
@@ -771,7 +795,7 @@ new file, and god-executor trusts it.
 - Universal: 14
 - Tier 0 Orchestration: 10
 - Tier 1 PRD: 15
-- Tier 1 Architecture: 13
+- Tier 1 Architecture: 17
 - Tier 1 Roadmap: 10
 - Tier 1 Wayfinding: 8
 - Tier 1 Stack: 5
@@ -789,7 +813,7 @@ new file, and god-executor trusts it.
 - Workflow Deps: 6
 - Style Genome: 7
 
-**Total: 179 named have-nots.**
+**Total: 183 named have-nots.**
 
 Each is grep-testable. Each is a documented failure mode. Together they form
 the mechanical quality definition for Godpowers output.

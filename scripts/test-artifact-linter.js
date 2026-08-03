@@ -293,10 +293,10 @@ test('P-08/09 accept fully filled open question', () => {
 });
 
 // ============================================================================
-// A-04 NFR mapping
+// A-03 NFR mapping
 // ============================================================================
 
-test('A-04 catches missing NFR-to-Architecture Map section', () => {
+test('A-03 catches missing NFR-to-Architecture Map section', () => {
   const archContent = `## System Context
 
 Some context here.`;
@@ -306,10 +306,10 @@ Some context here.`;
 |----------|-------------|--------|
 | Latency | p99 < 100ms | [DECISION] |`;
   const findings = validator.checkArchNfrMap(archContent, { prdContent });
-  if (!hasFinding(findings, 'A-04')) throw new Error('missing map section not caught');
+  if (!hasFinding(findings, 'A-03')) throw new Error('missing map section not caught');
 });
 
-test('A-04 catches NFR not mapped', () => {
+test('A-03 catches NFR not mapped', () => {
   const archContent = `## NFR-to-Architecture Map
 
 | PRD NFR | Architectural Choice | ADR Reference |
@@ -322,10 +322,10 @@ test('A-04 catches NFR not mapped', () => {
 | Latency | p99 < 100ms | [DECISION] |
 | Security | OAuth 2.0 | [DECISION] |`;
   const findings = validator.checkArchNfrMap(archContent, { prdContent });
-  if (!hasFinding(findings, 'A-04')) throw new Error('Security NFR not flagged');
+  if (!hasFinding(findings, 'A-03')) throw new Error('Security NFR not flagged');
 });
 
-test('A-04 accepts complete mapping', () => {
+test('A-03 accepts complete mapping', () => {
   const archContent = `## NFR-to-Architecture Map
 
 | PRD NFR | Choice | ADR |
@@ -340,6 +340,129 @@ test('A-04 accepts complete mapping', () => {
 | Security | OAuth 2.0 |`;
   const findings = validator.checkArchNfrMap(archContent, { prdContent });
   if (findings.length !== 0) throw new Error(`expected 0, got ${findings.length}`);
+});
+
+// ============================================================================
+// A-14..A-16 critical flows, capacity envelope, failure and degradation
+// ============================================================================
+
+const GOOD_FLOWS = `## 4. Critical Flows
+
+\`\`\`
+1. Browser SPA  -> API Server  GET /connect/stripe
+2. API Server   -> Postgres    WRITE oauth_state
+\`\`\`
+`;
+
+const GOOD_CAPACITY = `## 7. Capacity Envelope
+
+| Input | At horizon | Source |
+|-------|-----------|--------|
+| Connected accounts | 10,000 | PRD success metric |
+`;
+
+const GOOD_FAILURE = `## 9. Failure and Degradation
+
+| Dependency | Timeout | On failure | Idempotent |
+|------------|---------|------------|------------|
+| Stripe API | 30s read | 3 retries, then dead-letter | Yes, on event id |
+`;
+
+test('A-14 catches a missing Critical Flows section', () => {
+  const findings = validator.checkArchCriticalFlows('## System Context\n\nBoxes only.');
+  if (!hasFinding(findings, 'A-14')) throw new Error('missing section not caught');
+});
+
+test('A-14 catches a Critical Flows section with no ordered steps', () => {
+  const findings = validator.checkArchCriticalFlows(
+    '## Critical Flows\n\nThe SPA talks to the API, which talks to Stripe.\n'
+  );
+  if (!hasFinding(findings, 'A-14')) throw new Error('prose-only flow section not caught');
+});
+
+test('A-14 accepts numbered steps, with or without a section number', () => {
+  if (validator.checkArchCriticalFlows(GOOD_FLOWS).length !== 0) {
+    throw new Error('numbered section heading rejected');
+  }
+  const unnumbered = GOOD_FLOWS.replace('## 4. Critical Flows', '## Critical Flows');
+  if (validator.checkArchCriticalFlows(unnumbered).length !== 0) {
+    throw new Error('unnumbered section heading rejected');
+  }
+});
+
+test('A-15 catches a missing Capacity Envelope section', () => {
+  const findings = validator.checkArchCapacityEnvelope('## NFR-to-Architecture Map\n\nRows.');
+  if (!hasFinding(findings, 'A-15')) throw new Error('missing section not caught');
+});
+
+test('A-15 catches a Capacity Envelope with no numbers', () => {
+  const findings = validator.checkArchCapacityEnvelope(
+    '## Capacity Envelope\n\nWe expect heavy load at launch.\n'
+  );
+  if (!hasFinding(findings, 'A-15')) throw new Error('numberless envelope not caught');
+});
+
+test('A-15 catches numbers that name no source', () => {
+  const findings = validator.checkArchCapacityEnvelope(
+    '## Capacity Envelope\n\nWe expect 10,000 accounts and 46 events per second.\n'
+  );
+  if (!hasFinding(findings, 'A-15')) throw new Error('sourceless numbers not caught');
+});
+
+test('A-15 accepts numbers with a source, and accepts a labeled hypothesis', () => {
+  if (validator.checkArchCapacityEnvelope(GOOD_CAPACITY).length !== 0) {
+    throw new Error('sourced envelope rejected');
+  }
+  const hypothesis = '## Capacity Envelope\n\n3 loads per account per day. [HYPOTHESIS] validate at 100 accounts.\n';
+  if (validator.checkArchCapacityEnvelope(hypothesis).length !== 0) {
+    throw new Error('labeled hypothesis rejected');
+  }
+});
+
+test('A-16 catches a missing Failure and Degradation section', () => {
+  const findings = validator.checkArchFailureDegradation('## Trust Boundaries\n\nOAuth bearer.');
+  if (!hasFinding(findings, 'A-16')) throw new Error('missing section not caught');
+});
+
+test('A-16 catches a timeout with no number', () => {
+  const findings = validator.checkArchFailureDegradation(
+    '## Failure and Degradation\n\nCalls use a reasonable timeout and fail closed.\n'
+  );
+  if (!hasFinding(findings, 'A-16')) throw new Error('adjective timeout not caught');
+});
+
+test('A-16 catches retries with no idempotency stance', () => {
+  const findings = validator.checkArchFailureDegradation(
+    '## Failure and Degradation\n\nStripe times out at 30s, then we retry three times.\n'
+  );
+  if (!hasFinding(findings, 'A-16')) throw new Error('retry without idempotency not caught');
+});
+
+test('A-16 accepts a timeout plus an idempotency key, and stays quiet without retries', () => {
+  if (validator.checkArchFailureDegradation(GOOD_FAILURE).length !== 0) {
+    throw new Error('complete failure table rejected');
+  }
+  const noRetry = '## Failure and Degradation\n\nPostgres has a 5s statement timeout; the request fails closed.\n';
+  if (validator.checkArchFailureDegradation(noRetry).length !== 0) {
+    throw new Error('idempotency demanded where no retry is claimed');
+  }
+});
+
+test('arch artifact type runs all four architecture checks', () => {
+  const codes = validator.ARTIFACT_CHECKS.arch.map((c) => c.code);
+  for (const expected of ['A-03', 'A-14', 'A-15', 'A-16']) {
+    if (!codes.includes(expected)) throw new Error(`${expected} not registered for arch`);
+  }
+  const findings = validator.runChecks('# ARCH\n\nNothing here.\n', 'arch');
+  for (const expected of ['A-14', 'A-15', 'A-16']) {
+    if (!hasFinding(findings, expected)) throw new Error(`${expected} did not surface via runChecks`);
+  }
+  // Warnings, not errors: an error would fail the arch gate for every artifact
+  // written before these sections existed.
+  const newSectionFindings = findings.filter((f) => ['A-14', 'A-15', 'A-16'].includes(f.code));
+  if (newSectionFindings.some((f) => f.severity !== 'warning')) {
+    throw new Error('new arch section checks must report warnings, not errors');
+  }
 });
 
 // ============================================================================

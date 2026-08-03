@@ -7,6 +7,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.14.0] - 2026-08-03
+
+The architecture tier could describe a system but not its behavior. C4 Levels 1
+and 2 are static topologies: they say what exists and what connects to what, and
+they cannot say in what order, under what load, or what happens when one end
+stops answering. Four later tiers already consumed answers to those questions.
+`references/shipping/HARDEN-OWASP-WORKSHEETS.md` opens by demanding an inventory
+of every external dependency that no earlier tier produced. `references/building/
+API-DESIGN.md` says idempotency and backpressure postures should be settled "at
+architecture time" and is not in god-architect's inputs. The observe runbooks
+tell an operator to "enable degraded mode" and the deploy health contract returns
+`status: "degraded"`, neither of which anything designed. This release moves
+those decisions to where they are made.
+
+### Added
+
+- Three sections in `references/planning/ARCH-ANATOMY.md`, with matching blocks
+  in `templates/ARCH.mdx` and matching required sections in
+  `specialists/god-architect.md`. **Critical Flows** is an ordered interaction
+  per flow that crosses a trust boundary or touches more than two containers,
+  with the writing steps marked, because those are the steps a retry must not
+  repeat. **Capacity Envelope** is the load inputs each NFR target is measured
+  under, each with a source, the arithmetic from those inputs to per-container
+  load, and the name of the container that saturates first. **Failure and
+  Degradation** is the timeout, retry stance, idempotency key, and user-visible
+  degraded state per dependency, then backpressure, recovery rate, and what
+  happens when each of our own containers dies.
+- Four architecture have-nots, moving the catalog from 179 to 183. A-14 a
+  boundary-crossing flow with no ordered interaction. A-15 a capacity number
+  with no input behind it and no source for that input, which is distinct from
+  A-05: A-05 fires on the word "scalable" carrying no number, A-15 on a number
+  carrying nothing underneath it. A-16 a dependency with no timeout, no retry
+  stance, and no degraded state, which is distinct from A-06: A-06 covers that
+  same edge being breached, A-16 covers it being unavailable. A-17 a container
+  whose loss stops the system and is neither addressed nor accepted in writing.
+- Mechanical checks for A-14, A-15, and A-16 in `lib/have-nots-validator.js`,
+  registered on the `arch` artifact type and proven by 12 tests in
+  `scripts/test-artifact-linter.js`. They report `warning`, not `error`, because
+  `lib/gate.js` blocks a tier on lint errors and an ARCH written before this
+  release is missing all three sections through no fault of its author.
+- The two shipped example projects now carry all three sections, and
+  `scripts/test-golden-artifacts.js` asserts both that the sections exist and
+  that the checks pass on them, so the warning severity cannot let the examples
+  quietly stop demonstrating the standard.
+- Three antipatterns in `references/planning/ARCH-ANTIPATTERNS.md`: static-only
+  architecture, numbers without inputs, and happy-path architecture. A-17 also
+  gives antipattern 7, "Hidden Single Points of Failure", the have-not code it
+  has never had; it was the only entry in that file with no code behind it.
+- `specialists/god-reconstructor.md` reconstructs the three new sections from
+  code, and says what it cannot honestly reconstruct: a dependency call with no
+  timeout in the source is recorded as the finding it is rather than filled in.
+
+### Fixed
+
+- The mechanical NFR-map check emitted code `A-04`, but `A-04` is "ADR without
+  flip point" in the canonical catalog and "NFR not mapped" is `A-03`. A reader
+  who looked up the code they were shown got a different failure mode than the
+  one that fired. Corrected in `lib/have-nots-validator.js`, `docs/validation.md`,
+  `skills/god-lint.md`, and the linter tests.
+- Six have-not counts that had each rotted to a different wrong number, none of
+  them guarded: `references/shared/GLOSSARY.md` said 200, a total the catalog
+  never reached; `docs/validation.md` and `ARCHITECTURE-MAP.md` said 158;
+  `references/orchestration/GOD-ORCHESTRATOR-RUNBOOK.md` said 115;
+  `skills/god-lint.md` said 99; `docs/concepts.md` said 158. The
+  mechanical-versus-interpretive split was quoted alongside three of them and
+  was also wrong. `scripts/test-doc-surface-counts.js` now derives the total
+  from the catalog and the mechanical count from the check registries, and
+  asserts all of them.
+- Four files still described the architecture have-nots as `A-01..A-12` after
+  A-13 shipped: `specialists/god-updater.md`, `docs/command-flows.md`, and two
+  places in `docs/agent-specs.md`. The range is now derived from the catalog in
+  `scripts/test-doc-surface-counts.js`.
+- `routing/god-docs.yaml` still checked `DC-01..DC-05` after 5.13.0 added
+  `DC-06..DC-11`, and `routing/god-roadmap-update.yaml` stopped at `R-07` while
+  the roadmap tier has ten. `scripts/test-have-nots-tally.js` now verifies that
+  every code in a route's `standards.have-nots` exists in the catalog and that a
+  route claiming a prefix claims all of it.
+- `specialists/god-auditor.md` listed seven architecture have-nots and silently
+  omitted A-08 through A-13, so the retroactive auditor never scored
+  architecture theater, cargo-cult cloud-native, stackitecture, resume-driven
+  architecture, paper-tiger architecture, or ADR inflation.
+- `CONTRIBUTING.md` still documented the pre-provenance release flow
+  (`npm version patch`, `npm pack`, `npm publish <tarball>`), contradicting
+  `scripts/release.sh`, `docs/RELEASE-CHECKLIST.md`, and
+  `.github/workflows/publish.yml`. It now documents the tag-triggered flow and
+  names the manual tarball path as the provenance-unavailable fallback.
+
+### Security
+
+- `fast-uri` is pinned to `^3.1.5` through the root `overrides` block. It
+  reaches the tree as `@godpowers/mcp` -> `@modelcontextprotocol/sdk` -> `ajv`
+  -> `fast-uri`, and versions below 3.1.5 carry GHSA-7p8r-x3mc-p8w7 (host
+  confusion via a backslash authority introducer, CVSS 7.5). `npm audit
+  --omit=dev` is back to zero findings.
+
+### Changed
+
+- Product names in `README.md`, `ARCHITECTURE.md`, `SKILL.md`, and the docs set
+  are explained where a reader first meets them, rather than assumed. This
+  landed on main after 5.13.0 was tagged and ships here.
+
 ## [5.13.0] - 2026-08-02
 
 Two disciplines ported from sibling projects, by copy in both directions.

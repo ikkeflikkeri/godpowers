@@ -1333,7 +1333,7 @@ For preflight auto-routing, append:
 
 ## Have-Nots Reference
 
-The canonical have-nots catalog lives at `references/HAVE-NOTS.md` (115 named
+The canonical have-nots catalog lives at `references/HAVE-NOTS.md` (183 named
 failure modes). When verifying an artifact, run the relevant tier's have-nots
 against it. When the route has `standards.gate-command`, run that exact command
 after have-nots and block on any non-zero exit. When in doubt, spawn

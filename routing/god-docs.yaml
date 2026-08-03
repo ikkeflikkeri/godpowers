@@ -20,7 +20,7 @@ execution:
 standards:
   substitution-test: true
   three-label-test: true
-  have-nots: [DC-01, DC-02, DC-03, DC-04, DC-05]
+  have-nots: [DC-01, DC-02, DC-03, DC-04, DC-05, DC-06, DC-07, DC-08, DC-09, DC-10, DC-11]
   gate-on-failure: pause-for-user
 
 success-path:

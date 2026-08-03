@@ -84,21 +84,32 @@ Examples:
 
 ## Releasing
 
-Releases are manual and explicit:
+Releases are explicit, and publication is tag-triggered so the npm artifact
+carries provenance. Pushing the tag is what publishes; do not run `npm publish`
+by hand.
+
 ```
-npm version patch --no-git-tag-version
+npm run release:prepare -- <patch|minor|major>
+# then write the CHANGELOG entry and rewrite RELEASE.md by hand
 npm run release:check
-rm -f godpowers-*.tgz
-npm cache clean --force
-npm pack
+npm run lint
+npm run version:check
 git add -A
-git commit -m "Release godpowers X.Y.Z"
-git tag -a vX.Y.Z -m "Godpowers X.Y.Z"
+git commit -m "<type>(<scope>): <summary>"
 git push origin main
-git push origin vX.Y.Z
+bash scripts/release.sh X.Y.Z          # tags vX.Y.Z and pushes the tag
 gh release create vX.Y.Z --title "vX.Y.Z" --notes-file RELEASE.md
-npm publish godpowers-X.Y.Z.tgz --access public
 ```
+
+`.github/workflows/publish.yml` fires on the `v*` tag. It verifies that the tag
+version matches both `package.json` files and that the tagged commit is an
+ancestor of `origin/main`, re-runs the release and pre-publication gates, then
+publishes `godpowers` and `@godpowers/mcp` with `--provenance`. The GitHub
+Release itself is created by hand, as above.
+
+A manual `npm pack` plus `npm publish` remains the fallback for when the
+workflow cannot run. It produces no provenance attestation, so record the
+release as provenance-unavailable when you use it.
 
 Repo documentation sync must be clean before publishing. It keeps README
 badges, public surface counts, release references, contribution guidance,

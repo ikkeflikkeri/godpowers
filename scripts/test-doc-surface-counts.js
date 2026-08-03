@@ -59,6 +59,31 @@ if (!haveNotsMatch) {
 }
 counts.haveNots = Number(haveNotsMatch[1]);
 
+// The mechanical/interpretive split was quoted in four places and derived from
+// nothing, so it rotted independently in each: "99 have-nots" in god-lint,
+// "158" twice in docs/validation.md, "115" in the orchestrator runbook. Derive
+// the mechanical count from the registries that actually run.
+const validator = require(path.join(root, 'lib', 'have-nots-validator.js'));
+const mechanicalCodes = new Set([
+  ...validator.UNIVERSAL_CHECKS.map((c) => c.code),
+  ...Object.values(validator.ARTIFACT_CHECKS).flat().map((c) => c.code),
+  // U-13 (MDX safety) lives in lib/artifact-linter.js rather than the registry,
+  // but it runs on every linted artifact, so it counts as mechanical.
+  'U-13'
+]);
+counts.mechanicalHaveNots = mechanicalCodes.size;
+counts.interpretiveHaveNots = counts.haveNots - counts.mechanicalHaveNots;
+
+// Six files quote the architecture have-not range in prose, and four of them
+// still said A-01..A-12 after A-13 shipped. Derive the top code from the
+// catalog so the range strings cannot drift from it again.
+const archCodes = [...read(path.join('references', 'HAVE-NOTS.md'))
+  .matchAll(/^#{3,4}\s+(A-\d{2})\b/gm)].map((m) => m[1]).sort();
+if (archCodes.length === 0) {
+  throw new Error('references/HAVE-NOTS.md has no A-NN architecture have-nots');
+}
+const archTop = archCodes[archCodes.length - 1];
+
 const version = pkg.version;
 const surface = `${counts.skills} skills, ${counts.agents} agents`;
 const commandSurface = `${counts.skills} slash commands`;
@@ -139,6 +164,37 @@ const derivedSurfaceClaims = [
   ['skills/god-agent-audit.md', `${counts.agents} agents audited`],
   ['skills/god-agent-audit.md', `${counts.agents} structured contracts`],
   ['agents/arch.md', `all ${counts.skills} shipped skills`],
+
+  // The glossary's have-not count was the third wave of DOC-001: it read "200
+  // in the catalog" while the catalog held 179, and no test looked at it. The
+  // four claims below were the same failure, each stale at a different number.
+  ['references/shared/GLOSSARY.md',
+    `a named, grep-testable failure mode. ${counts.haveNots} in the catalog.`],
+  ['ARCHITECTURE-MAP.md',
+    `| Have-nots | ${counts.haveNots} documented + ${counts.mechanicalHaveNots} mechanically validated by linter |`],
+  ['references/orchestration/GOD-ORCHESTRATOR-RUNBOOK.md',
+    `\`references/HAVE-NOTS.md\` (${counts.haveNots} named\nfailure modes)`],
+  ['docs/validation.md', `the catalog of ${counts.haveNots} named failure modes`],
+  ['docs/validation.md',
+    `Of the ${counts.haveNots} documented have-nots in \`references/HAVE-NOTS.md\`:\n`
+    + `- **${counts.mechanicalHaveNots} are mechanical**`],
+  ['docs/validation.md', `- **${counts.interpretiveHaveNots} are interpretive**`],
+  ['docs/validation.md', `The mechanical ${counts.mechanicalHaveNots} are caught by`],
+  ['skills/god-lint.md',
+    `The catalog of ${counts.haveNots} have-nots is split:\n`
+    + `- ${counts.mechanicalHaveNots} mechanical (cataloged in \`lib/have-nots-validator.js\`)\n`
+    + `- ${counts.interpretiveHaveNots} interpretive (delegated to agents)`],
+  ['ARCHITECTURE-MAP.md', `HAVE-NOTS.md               <- ${counts.haveNots} named failure modes (canonical)`],
+  ['docs/concepts.md',
+    `${counts.haveNots} named failure modes. ${counts.mechanicalHaveNots} are mechanical (regex-checkable);`],
+
+  // Architecture have-not range, quoted in six places.
+  ['specialists/god-architect.md', `"A-01 through ${archTop} have-nots"`],
+  ['specialists/god-updater.md', `- Validate have-nots A-01 through ${archTop}`],
+  ['docs/command-flows.md', `- Have-nots: A-01 through ${archTop}`],
+  ['docs/agent-specs.md', `Returns when ARCH passes have-nots A-01..${archTop}.`],
+  ['docs/agent-specs.md', `(A-01..${archTop})`],
+  ['docs/agent-specs.md', `| god-architect | YES | A-01..${archTop} |`],
 
   // Pillars context files. Not shipped in the package, but they are what a
   // cold-start agent reads first, so a stale count here misleads every run.
