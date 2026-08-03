@@ -7,17 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.14.1] - 2026-08-03
+
+A dependency patch with no behavior change. It exists so the published
+`package.json` matches the repository at the tag: the fix landed on main after
+5.14.0 was already tagged, and an override recorded in the repo but absent from
+the tarball is the kind of small divergence that is only ever discovered while
+investigating something else.
+
 ### Security
 
 - `brace-expansion` is pinned to `^5.0.9` through the root `overrides` block. It
   reaches the tree as `c8` -> `test-exclude` -> `minimatch` -> `brace-expansion`
   and versions below 5.0.9 carry two unbounded-expansion denial-of-service
   advisories, GHSA-mh99-v99m-4gvg and GHSA-rgw5-rvv9-x895, both CVSS 7.5. This
-  is a development dependency, so the published package is unaffected and
-  `npm audit --omit=dev` never saw it; the exposure is to anyone running the
-  coverage gate. A plain `npm audit` over the full 141-package tree is now
-  clean, verified against the registry advisory API rather than the locally
-  cached audit response.
+  is a development dependency, so no installed copy of Godpowers was ever
+  exposed and `npm audit --omit=dev` never saw it; the exposure is to anyone
+  running the coverage gate from a clone. A plain `npm audit` over the full
+  141-package tree is now clean, verified against the registry advisory API
+  rather than the locally cached audit response.
+- `hono` is pinned to `^4.12.34` through the same block. It reaches the tree as
+  `@godpowers/mcp` -> `@modelcontextprotocol/sdk` -> `hono`, and versions below
+  4.12.34 carry GHSA-8j4g-w8fx-2239, a moderate ReDoS in the CORS middleware via
+  `Access-Control-Request-Headers`. This one is a production dependency. The
+  advisory was published between cutting 5.14.0 and cutting this release, which
+  is the argument for checking the registry at tag time rather than trusting a
+  gate that passed an hour ago.
 
 ## [5.14.0] - 2026-08-03
 
