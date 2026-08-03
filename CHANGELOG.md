@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- `brace-expansion` is pinned to `^5.0.9` through the root `overrides` block. It
+  reaches the tree as `c8` -> `test-exclude` -> `minimatch` -> `brace-expansion`
+  and versions below 5.0.9 carry two unbounded-expansion denial-of-service
+  advisories, GHSA-mh99-v99m-4gvg and GHSA-rgw5-rvv9-x895, both CVSS 7.5. This
+  is a development dependency, so the published package is unaffected and
+  `npm audit --omit=dev` never saw it; the exposure is to anyone running the
+  coverage gate. A plain `npm audit` over the full 141-package tree is now
+  clean, verified against the registry advisory API rather than the locally
+  cached audit response.
+
 ## [5.14.0] - 2026-08-03
 
 The architecture tier could describe a system but not its behavior. C4 Levels 1
