@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.15.1] - 2026-08-04
+
+Documentation release. Rewrites the public documentation surface for a broader,
+less technical audience without changing a single runtime behavior, command, or
+agent.
+
+### Changed
+
+- Public documentation now leads with the reader's problem rather than the
+  system's mechanism. README, getting-started, concepts, quick-proof, the first
+  project tutorial, SUPPORT, USERS, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT,
+  and the docs index were rewritten; loop-engineering, mcp, host-capabilities,
+  extension-authoring, brownfield-bluefield, automation-providers, validation,
+  recipes, reference, and command-flows were revised.
+- Jargon moved after the on-ramp, with each term glossed on first use. Product
+  vocabulary that appears in real tool output (arc, tier, gate, have-nots) is
+  retained, because the output is unreadable without it.
+- Reference-grade material keeps its precision. Per-command flows, validation
+  internals, and recipe tables gained entry points and audience signposts
+  rather than being rewritten for a non-technical reader, which would degrade
+  them for the person who needs them.
+- README gained "Who this is for" and "Honest limits" sections. The latter
+  states plainly what Godpowers does not claim: it does not know whether a
+  product idea is good, it is not a penetration test, it does not behave
+  identically on every host, and it does not remove the need to read its output.
+- USERS.md keeps "zero recorded production users" as its opening line and now
+  frames why that sentence stays until it is false.
+
+### Added
+
+- Mermaid diagrams for the gate loop (README) and the tier model (concepts).
+  These render natively on GitHub and require no image assets. The brownfield
+  decision tree moved from box-drawing ASCII to Mermaid.
+
+### Fixed
+
+- `docs/concepts.md` claimed both 25 and 30 mechanical have-nots in the same
+  section. The mechanical count derived from `lib/have-nots-validator.js` is 25.
+- `docs/reference.md` listed `/god-build` and `/god-fix` twice in the verb
+  dispatcher sentence.
+- `docs/mcp.md` documented 5 of the 9 tools exported by
+  `packages/mcp/lib/tools.js`, pinned `4.0.2` in its setup commands, and
+  described the mutation boundary as scoped to the 4.0.0 release.
+- `USERS.md` described the 3.0 line as the current release in a stale run-on
+  paragraph.
+
 ## [5.15.0] - 2026-08-04
 
 Turns the improvement-loop network from mutual confirmation into anchored
