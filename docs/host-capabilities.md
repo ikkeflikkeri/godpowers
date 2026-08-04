@@ -1,5 +1,13 @@
 # Host Capabilities
 
+Godpowers relies on your AI tool to do things: spawn specialist workers, run
+shell commands, reach git and npm. Not every tool can do all of it.
+
+Rather than assuming the best case and quietly producing worse results, Godpowers
+checks what your setup can actually do and tells you. If it cannot spawn a real
+fresh-context agent, it says the word "simulated" out loud instead of letting
+you believe otherwise.
+
 ## Purpose
 
 - [DECISION] Godpowers reports runtime guarantees instead of assuming every AI
@@ -11,7 +19,13 @@
 - [DECISION] MCP availability appears in the host guarantee line without
   changing whether the host is `full`, `degraded`, or `unknown`.
 
-## Levels
+## The three levels
+
+| Level | What it means |
+|---|---|
+| `full` | Everything works. Shell, git, npm, and real fresh-context agent spawning all confirmed. |
+| `degraded` | The basics work, but specialists cannot get genuinely fresh contexts. Output is still useful; the isolation guarantee is not there. |
+| `unknown` | Something baseline could not be confirmed. Treat results with suspicion until you know why. |
 
 - [DECISION] `full` means shell, git, npm, and fresh-context Godpowers agent
   metadata are detected.
@@ -20,7 +34,10 @@
 - [DECISION] `unknown` means one or more baseline runtime capabilities could
   not be confirmed.
 
-## Detected Surfaces
+## What gets detected
+
+`lib/host-capabilities.js` works this out from local signals only. No network
+access is required, and nothing is sent anywhere.
 
 - [DECISION] `lib/host-capabilities.js` detects host identity from environment
   signals.
@@ -40,13 +57,20 @@
   `[mcp_servers.godpowers]` registration.
 - [DECISION] It reports extension authoring and suite release dry-run support
   from shipped runtime files.
+
+### Installed is not the same as working
+
+This distinction is the reason the detection is fussier than it looks. Finding
+agent metadata on disk proves the files are there. It does not prove that the
+session you are sitting in can actually spawn one.
+
 - [DECISION] Installed agent metadata proves availability on disk, not that the
   active host session can spawn a fresh agent.
 - [DECISION] A full guarantee requires an identified active host plus explicit
   active-session spawn evidence.
 - [DECISION] An unidentified active host cannot receive a full guarantee.
 
-## Dashboard Behavior
+## What you see
 
 ```text
 Action brief:
@@ -64,6 +88,10 @@ Action brief:
   output still tells the truth about autonomy.
 - [DECISION] MCP unavailability is reported as host context, not as a blocker
   for non-MCP workflows.
+
+That last point matters when output gets compressed: the honesty survives the
+squeeze. A compact view that dropped the host line would be a view that quietly
+overstates what just happened.
 
 ## Tests
 

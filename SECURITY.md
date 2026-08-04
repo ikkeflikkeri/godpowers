@@ -2,19 +2,22 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Godpowers, please report it
-responsibly.
+Found something? Thank you. Please report it privately so users are not exposed
+during the window before a fix ships.
 
 ### How to Report
 
-1. Do NOT open a public GitHub issue
-2. Use GitHub's private vulnerability reporting:
-   https://github.com/hannsxpeter/godpowers/security/advisories/new
-3. Include:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested remediation if you have one
+**Do not open a public GitHub issue.**
+
+Use GitHub's private vulnerability reporting instead:
+https://github.com/hannsxpeter/godpowers/security/advisories/new
+
+Include what you have. A partial report is far better than no report:
+
+- What the vulnerability is
+- How to reproduce it
+- What the impact could be
+- A suggested fix, if one occurs to you
 
 ### What to Expect
 
@@ -26,7 +29,9 @@ responsibly.
 
 ## Scope
 
-Godpowers is a meta-prompting framework. Security concerns include:
+Godpowers is a meta-prompting framework: it ships instructions and a small
+runtime, not a server or a hosted service. That shapes what counts as a
+vulnerability here.
 
 ### In scope
 - Vulnerabilities in `bin/install.js` (file system access, path traversal)
@@ -41,7 +46,8 @@ Godpowers is a meta-prompting framework. Security concerns include:
 
 ## Hardening Recommendations
 
-When using Godpowers in a sensitive context:
+Read this if you are running Godpowers anywhere sensitive. Several items below
+describe things that look like security boundaries and are not.
 
 1. **Review `--yolo` decisions**: Before merging or deploying, read
    `.godpowers/YOLO-DECISIONS.mdx` to verify auto-picked defaults match intent

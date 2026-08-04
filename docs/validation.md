@@ -1,7 +1,26 @@
 # Validation System
 
-How Godpowers validates artifacts and code against decisions. Three
-orthogonal axes, all running in parallel:
+There are three genuinely different ways a project can be wrong, so Godpowers
+checks along three independent axes.
+
+A document can be **badly formed**: missing fields, wrong shape, generic filler.
+A document can be well-formed and **lying**: it describes a system that no longer
+matches the code. And code can pass every test and still **not work** when a real
+browser loads it.
+
+No single check catches all three. Running one and calling it validated is how
+projects end up confidently broken.
+
+| Axis | What it catches | When it runs | Speed |
+|---|---|---|---|
+| **Static** | Document-level have-nots, format violations, missing fields | Every artifact write; `/god-lint` | < 1s |
+| **Linkage** | Drift between artifacts and code; orphans; cross-artifact impact | Every code-touching workflow; `/god-scan`; `/god-sync` | < 5s |
+| **Runtime** | Rendered styles vs design tokens; PRD acceptance flows; real-DOM contrast | `/god-test-runtime`; `/god-launch` gate | 30s - 2min |
+
+They are ordered by cost. Static runs constantly because it is nearly free.
+Runtime runs at gates because it is not.
+
+The rest of this page is the detailed maintainer view of each axis.
 
 | Axis | What it catches | When it runs | Speed |
 |---|---|---|---|

@@ -1,11 +1,19 @@
 # Automation Providers
 
-Godpowers supports host-native automation surfaces when the user explicitly
-chooses them. The installer only installs support files. It does not create
-schedules, routines, background agents, API triggers, CI workflows, commits,
-pushes, releases, npm publishes, deployments, or provider-dashboard checks.
+Godpowers can run on a schedule, using whatever scheduling your AI tool already
+provides. This page explains which tools can do it and how well.
+
+**Nothing is scheduled without you asking.** Installing Godpowers puts support
+files on disk and stops there. It does not create schedules, routines,
+background agents, API triggers, CI workflows, commits, pushes, releases, npm
+publishes, deployments, or provider-dashboard checks. Automation is opt-in, one
+choice at a time.
 
 ## Provider Classes
+
+Scheduling means different things in different tools, and the differences
+matter. A "schedule" that dies when you close your laptop is not the same
+product as one that runs on someone else's server.
 
 | Class | Providers | Behavior |
 |-------|-----------|----------|

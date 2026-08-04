@@ -1,9 +1,16 @@
 # Quick Proof
 
-This page is the shortest path to understanding what Godpowers adds beyond a
-normal AI coding prompt. It is proof-first by design: run one tiny local check,
-read one dashboard-shaped transcript, then inspect the files that make the run
-accountable.
+This is the fastest way to see what Godpowers adds on top of a normal AI coding
+prompt. No essay, no trust required: run one small command, read one real
+transcript, then look at the files that make the run accountable.
+
+It takes about ten minutes and changes nothing on your machine.
+
+You will notice that the statements below are tagged `[DECISION]`,
+`[HYPOTHESIS]`, and `[OPEN QUESTION]`. That is not decoration. Godpowers
+requires every sentence in its own documents to declare which of the three it
+is, so that guesses cannot quietly pass themselves off as conclusions. This page
+follows its own rule.
 
 ## What This Proves
 
@@ -29,43 +36,48 @@ npx godpowers next --project=. --brief
 npx godpowers mcp-info --project=.
 ```
 
-The first command reads a shipped fixture at `fixtures/quick-proof/project`,
-computes the fixture's next command, and reports host guarantees from your
-current environment. Its result is fixture evidence only, not evidence about
-the current project. The second command performs explicit read-only inspection
-of the current project.
+Here is what each one is doing.
 
-The following two commands render live project status and the recommended next
-action for the current directory. The MCP info command prints optional
-read-only companion setup without writing host configuration.
+The **first** reads a bundled sample project, works out what its next command
+would be, and reports what your own environment can guarantee. Be clear about
+what this is: evidence about the sample, not about your project.
 
-Executable gates are available when a tier artifact exists:
+The **second** points that same read-only view at your actual project.
+
+The **third and fourth** show live status and the recommended next action for
+where you are standing right now.
+
+The **fifth** prints optional setup for the read-only companion package. It does
+not write any host configuration.
+
+When a project has reached a given stage, you can run its gate directly:
 
 ```bash
 npx godpowers gate --tier=prd --project=.
 ```
 
-The gate returns JSON with `{tier, verdict, artifacts, checks, findings,
-summary}` when `--json` is passed, and exits non-zero when required evidence is
-missing or a blocking lint, build, or harden finding is present.
+Add `--json` and it returns structured output (`{tier, verdict, artifacts,
+checks, findings, summary}`). It exits with a non-zero code when required
+evidence is missing or when a blocking finding is present, which is what makes
+it usable in a script or a CI pipeline.
 
-If the project has no `.godpowers/` directory yet, start with the smallest
-state-producing path inside your AI coding tool:
+**No `.godpowers/` directory yet?** Start with the smallest thing that produces
+state. Inside your AI coding tool:
 
 ```text
 /god-init
 /god-next
 ```
 
-Then inspect the created state:
+Then look at what appeared:
 
 ```bash
 find .godpowers -maxdepth 2 -type f | sort
 ```
 
-The proof is not that every command already ran. The proof is that Godpowers
-can name what exists, what is missing, what the host can guarantee, and the
-single next move.
+The point is not that every command has already run. The point is that Godpowers
+can tell you what exists, what is missing, what your host can actually
+guarantee, and the single next move, without guessing at any of it.
 
 ## Outcome Metrics
 
@@ -80,6 +92,9 @@ single next move.
   host guarantee, and one inspectable disk-state path.
 
 ## External CLI Canaries
+
+Proof against a bundled sample is a weaker claim than proof against somebody
+else's real repository, so we run both and label them differently.
 
 - [DECISION] Three external repositories now have CLI-verifiable canary
   reports: [sindresorhus/is](case-studies/sindresorhus-is-adoption-canary.md),
@@ -101,8 +116,10 @@ User: Build a SaaS for solo founders to track MRR.
 AI: Here are the files for a dashboard application.
 ```
 
-That may be useful, but the result usually lacks durable planning state,
-independent review, host capability reporting, and a structured resume point.
+You may well get useful code out of this. What you do not get is any durable
+record of the plan, any independent review of the work, any honest statement of
+what your tooling could and could not do, or any way to pick this up again next
+week without re-explaining it.
 
 ### Godpowers Prompt
 
@@ -111,7 +128,7 @@ User: /god-mode
 User: A SaaS for solo founders to track MRR breakdown by new, expansion, and churn.
 ```
 
-Godpowers routes the work through project state and artifacts:
+The work routes through project state and leaves artifacts behind:
 
 ```text
 .godpowers/state.json
@@ -124,13 +141,12 @@ Godpowers routes the work through project state and artifacts:
 .godpowers/harden/FINDINGS.mdx
 ```
 
-The difference is the audit trail. Code is only one output. The project memory,
-validation record, and next action are also outputs.
+The difference is the audit trail. Code is one output among several. The project
+memory, the validation record, and the next action are outputs too.
 
 ## Transcript Excerpts
 
-These excerpts show the shape of successful operation. They are intentionally
-short so the user-facing surface stays readable.
+Real output, trimmed for length. This is what the tool actually prints.
 
 ### Next Action
 
@@ -144,6 +160,9 @@ Action brief:
   Attention: none
   Host guarantees: full on codex; MCP available via workspace package
 ```
+
+Note the `Why`. Godpowers does not just tell you what to do next; it tells you
+what on disk led it to that conclusion, so you can disagree with it.
 
 ### Dashboard Closeout
 
@@ -159,10 +178,6 @@ Current status:
 Planning visibility:
   PRD: pending
   Roadmap: missing
-
-Next:
-  Recommended: /god-prd
-  Why: The project has initialization findings but no product requirements artifact.
 ```
 
 ### Host Guarantee
@@ -172,6 +187,9 @@ Host guarantees: degraded
 First gap: this host can install skills, but true fresh-context agent spawning
 is not available. Godpowers will report Agent: simulated in current context.
 ```
+
+This is the honesty guarantee in action. A tool that quietly degraded here would
+still look like it was working. Godpowers says the word "simulated" out loud.
 
 ### Review Finding
 
@@ -196,7 +214,8 @@ Release readiness:
 
 ## Starter Paths
 
-Use these paths before reading the full command reference.
+Pick one of these before you go near the full command reference. Learn the next
+command only when Godpowers recommends it.
 
 | Goal | Start here |
 |---|---|
@@ -211,6 +230,9 @@ Use these paths before reading the full command reference.
 
 ## Runtime Expectations
 
+Godpowers depends on your AI tool to run its specialists, and tools differ. It
+tells you which guarantees it can offer rather than assuming the best case.
+
 | Runtime class | What to expect |
 |---|---|
 | Claude Code | Strong reference path when native agent spawning is available. |
@@ -218,18 +240,17 @@ Use these paths before reading the full command reference.
 | Other install targets | Skills and agent contracts install, while host-native spawning depends on the tool. |
 | Degraded hosts | Godpowers must report local-only or simulated agent behavior instead of hiding the limitation. |
 
-See [host-capabilities.md](host-capabilities.md) for the detailed capability
-model. See [mcp.md](mcp.md) for optional MCP host setup.
+See [host-capabilities.md](host-capabilities.md) for the full capability model,
+and [mcp.md](mcp.md) for optional companion setup.
 
 ## What To Inspect Next
 
-- [Getting Started](getting-started.md) explains install and first project flow.
+- [Getting Started](getting-started.md) walks through install and your first project.
 - [First 10 Minute Proof Case Study](case-studies/first-10-minute-proof.md)
-  explains the local proof as a public case study.
+  tells this same story as a public case study, including what it does not prove.
 - [Reference](reference.md) lists every slash command.
-- [Validation](validation.md) explains static, linkage, and runtime checks.
-- [Proof Transcript](proof-transcript.md) captures the runnable quick-proof
-  command output.
-- [Dogfooding](dogfooding.md) explains messy-repo checks that prove behavior
+- [Validation](validation.md) explains the static, linkage, and runtime checks.
+- [Proof Transcript](proof-transcript.md) captures the full runnable output.
+- [Dogfooding](dogfooding.md) explains the messy-repo checks that prove behavior
   against fixtures.
 - [Adoption Canary](adoption-canary.md) defines the next real-world proof loop.

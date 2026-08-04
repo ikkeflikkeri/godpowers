@@ -1,16 +1,20 @@
 # Godpowers Recipes
 
-> Every scenario in a full dev cycle, with the exact commands to use.
-> Most flows compose existing primitives; extension authoring starts with its
-> scaffold command.
+**"I want to do X. What do I type?"** That is what this page answers.
 
-If you can't find your scenario, check `command-flows.md` for the canonical
-per-command reference, or `arc-integrations.md` for cross-workflow flows.
+It walks the whole life of a project, from the first idea to the incident review
+eighteen months later, and gives you the exact commands for each situation. Find
+your scenario, copy the commands, move on.
+
+Cannot find your scenario? Two places to look next: `command-flows.md` has the
+detailed per-command reference, and `arc-integrations.md` covers flows that span
+several workflows.
 
 ## Quick triage
 
-Use `/god` or `/god-help` when you do not know the command name. Godpowers
-presents families first, then leaf commands:
+**If you do not know the command name, do not look it up.** Type `/god` and
+describe what you want, or `/god-help` to browse. Godpowers shows you families
+first, then the specific commands inside them:
 
 | Intent | Route shape |
 |---|---|

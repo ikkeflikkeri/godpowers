@@ -1,10 +1,16 @@
 # E2E Command Flows
 
-> Per-command flow showing prerequisites, execution, subagent spawning,
-> standards check, success path, and endoff.
->
-> Source of truth: `<runtimeRoot>/routing/<command>.yaml` files. This document
-> is the human-readable view.
+This is the detailed technical view: exactly what each command requires before
+it runs, what it spawns, what it reads and writes, and what happens on success
+or failure.
+
+**Looking for "what do I type to do X"?** That is [recipes.md](recipes.md), and
+it is almost certainly the page you want. This one is for when you need to know
+precisely what a command does to your project, or you are debugging why a
+prerequisite is not satisfied.
+
+The definitive source is the `routing/<command>.yaml` files. This document is
+the human-readable view of them.
 
 ---
 

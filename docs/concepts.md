@@ -1,51 +1,63 @@
 # Godpowers Concepts
 
-Four things to understand: the Quarterback, tiers, agents, and quality gates.
+This page explains how Godpowers thinks, so its output makes sense to you.
 
-## The Quarterback
+You can use Godpowers without reading any of it. But if you have ever wondered
+why it refused to call something done, or why it spawned a second reviewer to
+check the first one, the answers are here.
 
-There is exactly one orchestrator: `god-orchestrator`. Think of it as the
-quarterback. It reads the defense (mode + scale detection), calls the play
-(spawns the right specialist for each tier sub-step), owns the playbook
-(`state.json`, generated `PROGRESS.mdx` view, `intent.yaml`, `events.jsonl`),
-and manages the clock (mandatory final sync at end of project run).
+Four ideas carry most of the weight: **one boss**, **four stages**,
+**specialists**, and **checks that cannot be talked out of**.
 
-Three skills sit on the sideline and read the same playbook without calling
-plays:
+---
 
-| Skill | Role |
-|-------|------|
-| `/god` | Front door. Maps free-text intent to a recipe and proposes the right command. |
-| `/god-next` | Pre-flight + post-flight routing. Checks prereqs and announces what's next. |
-| `/god-status` | Re-derives state from disk. Reports inconsistencies. |
+## One boss, and only one
 
-These skills do not own state. They read recipes
-(`<runtimeRoot>/routing/recipes/*.yaml`) and routing definitions
-(`<runtimeRoot>/routing/*.yaml`) and propose commands. The
-quarterback (and the agents it spawns) is the only writer to the load-bearing
-artifacts.
+Godpowers has exactly one thing in charge: an orchestrator called
+`god-orchestrator`. Think of it as a quarterback. It reads the situation, calls
+the play, owns the playbook, and manages the clock. Every other worker is
+brought in by it, does one job, and leaves.
 
-Command families are the catalog layer above individual slash commands. They
-make `/god-help` and `/god` easier to scan while keeping every leaf command as
-a direct shortcut. Families cover start, continue, build, verify, operate,
-maintain, capture, recover, extend, collaborate, and configure.
+This matters more than it sounds. The most common way these systems fail is
+having two things that both believe they are in charge, which produces
+contradictory decisions nobody can trace.
 
-Some families use ladders instead of flat lists. Capture routes to note, todo,
-backlog, or seed. Build routes by work size from fast to hotfix. Verify routes
-from cheapest artifact lint to release dogfood. Continue treats `/god-status`
-as the hub and keeps `/god-progress`, `/god-lifecycle`, `/god-locate`, and
-`/god-next` as direct views.
+Three commands sit on the sideline. They read the playbook but never call a
+play:
 
-We deliberately do not stack a meta-orchestrator above `god-orchestrator`.
-Stacking orchestrators is a known anti-pattern: it creates ambiguity about
-who owns state, who decides when to pause, and whose error is authoritative.
-If we ever need parallel cross-tier coordination, it goes in as a peer at
-Tier 0 (e.g., `god-coordinator` for Mode D), never above.
+| Command | What it does |
+|---|---|
+| `/god` | The front door. You describe what you want; it works out which command you actually need. |
+| `/god-next` | Checks whether you are ready for the next step, and tells you what it is. |
+| `/god-status` | Re-reads the project from disk and reports anything that does not add up. |
 
-## Tiers
+None of these three can change anything. They only read and suggest. The
+orchestrator, and the specialists it brings in, are the only writers.
 
-A development arc has 4 tiers. Each tier has sub-steps. Each sub-step has
-a slash command and a specialist agent.
+**Why no boss above the boss?** Stacking orchestrators is a known trap. As soon
+as you have two, it becomes unclear who owns the project state, who decides when
+to stop and ask a human, and whose error message you should believe. If
+Godpowers ever needs coordination across several repositories at once, that goes
+in as a *peer* at the same level (`god-coordinator`), never as a layer on top.
+
+### Families and ladders
+
+Commands are grouped into **families** so the list stays scannable: start,
+continue, build, verify, operate, maintain, capture, recover, extend,
+collaborate, and configure. Every individual command still works as a direct
+shortcut; families are just a nicer way to find them.
+
+Some families are **ladders** rather than flat lists, because the right choice
+depends on size. Capture routes you to a note, a todo, a backlog item, or a
+seed. Build routes by how big the job is, from fast to hotfix. Verify climbs
+from the cheapest possible check to a full release rehearsal.
+
+---
+
+## Four stages
+
+A project runs through four stages, called **tiers**. Each has sub-steps, and
+each sub-step has one command and one specialist behind it.
 
 | Tier | Sub-steps |
 |------|-----------|
@@ -54,206 +66,261 @@ a slash command and a specialist agent.
 | 2: Building | Repo, Build |
 | 3: Shipping | Deploy, Observe, Launch, Harden |
 
-Each sub-step gates on the previous. You can't run /god-arch without a
-passing /god-prd.
+```mermaid
+flowchart TD
+    T0["Tier 0: Orchestration<br/><i>what kind of job is this?</i>"]
+    T1["Tier 1: Planning<br/><i>what are we building, and why?</i>"]
+    T2["Tier 2: Building<br/><i>make it, test it, review it</i>"]
+    T3["Tier 3: Shipping<br/><i>deploy, watch, secure, launch</i>"]
 
-## Agents
+    T0 --> T1 --> T2 --> T3
 
-A skill is the user-facing slash command. An agent is the specialist that
-does the work. Skills are thin; agents are deep.
+    T1 -.->|"gate must pass"| T2
+    T2 -.->|"gate must pass"| T3
+```
 
-- `/god-prd` is a skill. It spawns `god-pm` (the agent) in a fresh context.
-- `god-pm` reads state.json, intent.yaml, and prep artifacts, then writes PRD.md.
-- The agent has its own context window, instructions, and have-nots checks.
-- The skill verifies the agent's output and updates state through `godpowers state advance` or an owning command wrapper.
+Each sub-step depends on the one before it. You cannot run `/god-arch` until
+`/god-prd` has passed. This is deliberate: designing a system before anyone has
+written down what it is for is how projects end up solving the wrong problem
+very elegantly.
 
-Why fresh contexts? It defeats context rot. Each agent gets a clean 200K
-window with only what it needs. The orchestrator stays thin.
+---
 
-## Quality gates
+## Skills and agents: the receptionist and the specialist
 
-Three mechanical tests applied to artifact-producing agents:
+Two words that sound similar and are not:
 
-### Substitution test
-Replace the product name with a competitor's. If the sentence still reads
-true, it decides nothing.
+- A **skill** is the slash command you type. It is thin. It does almost nothing.
+- An **agent** is the specialist that does the actual work. It is deep.
 
-Example that fails the test (rewrite):
+Here is the handoff in full:
+
+- You type `/god-prd`. That is the skill.
+- The skill brings in `god-pm`, an agent, with a completely fresh memory.
+- `god-pm` reads the project state and writes the plan document.
+- The skill checks the file really exists and passes its quality checks, then
+  records what happened.
+
+**Why a fresh memory every time?** Because long conversations decay. Details
+from twenty messages ago get fuzzy, contradicted, or silently dropped. Giving
+each specialist a clean window containing only what its job requires means the
+quality of its work does not depend on how long you have been chatting.
+
+---
+
+## Checks that cannot be talked out of
+
+This is the part that makes Godpowers different from asking an AI nicely to do
+a good job.
+
+### The substitution test
+
+Take a sentence. Swap your product's name for a competitor's. If it still reads
+true, the sentence decided nothing and gets rewritten.
+
+Fails the test:
+
 > Our app is the future of project management.
-> -> "the future of [project management|MRR tracking|task tracking]" works for any product
 
-Example that passes the test (keep):
-> Solo SaaS founders running between $1k and $10k MRR can't decompose
-> revenue change between new customers and price increases.
-> -> can't substitute another product without breaking the meaning
+"The future of project management" works equally well for any product in the
+category. It is a sentence shaped like a claim that contains no claim.
 
-### Three-label test
-Every sentence is exactly one of:
-- `[DECISION]`: a grounded choice with rationale
-- `[HYPOTHESIS]`: a testable assumption with validation plan
-- `[OPEN QUESTION]`: an unresolved item with owner and due date
+Passes the test:
 
-Anything unlabeled is theater. Rewrite.
+> Solo SaaS founders running between $1k and $10k MRR cannot decompose revenue
+> change between new customers and price increases.
 
-### Domain precision
-`/god-discuss` can create `.godpowers/domain/GLOSSARY.mdx` when a discussion
-resolves project-specific language. The glossary stores canonical terms,
-avoided aliases, relationships, example dialogue, and flagged ambiguities. It
-is preparation context for PRD, ARCH, ROADMAP, STACK, and docs. It does not
-replace those artifacts.
+You cannot swap another product in without breaking the meaning, because the
+sentence is about something specific and real.
+
+### The three-label test
+
+Every sentence in a Godpowers document must be exactly one of three things:
+
+- `[DECISION]` - a choice that was made, with the reasoning attached
+- `[HYPOTHESIS]` - an assumption, with a plan for testing whether it holds
+- `[OPEN QUESTION]` - something unresolved, with an owner and a due date
+
+Anything unlabeled is theater and gets rewritten. The purpose is to stop guesses
+from quietly graduating into decisions just because nobody wrote down which was
+which.
 
 ### Have-nots
+
+A **have-not** is a named, specific way a document can be bad. There are
 183 named failure modes. 25 are mechanical (regex-checkable);
-the rest are interpretive. Examples:
-- P-01: Generic problem statement (passes substitution test)
-- A-04: ADR without flip point
-- DG-01: Glossary term without avoided aliases
-- B-01: Code before test (TDD violation)
-- L-04: Silent launch (no source attribution)
-- H-07: Critical finding without remediation options
+the rest need judgment. A few examples:
 
-The catalog: `references/HAVE-NOTS.md`.
-The mechanical 30 are wired into `lib/have-nots-validator.js` and
-caught by `/god-lint`.
+| Code | The failure |
+|---|---|
+| P-01 | A problem statement so generic it passes the substitution test |
+| A-04 | An architecture decision with no stated point at which you would reverse it |
+| DG-01 | A glossary term that does not say which alternative words to avoid |
+| B-01 | Code written before its test |
+| L-04 | A launch with no source attribution |
+| H-07 | A critical security finding recorded with no remediation options |
 
-## Three verification axes
+The full catalog lives in `references/HAVE-NOTS.md`. The mechanical 25 are wired
+into `lib/have-nots-validator.js` and enforced by `/god-lint`, which means they
+are not opinions. They either pass or they do not.
 
-Validation runs on three orthogonal axes:
+### Domain precision
 
-| Axis | Catches | Speed |
+When a discussion settles what particular words mean on your project,
+`/god-discuss` can write a project glossary: the terms you use, the near-synonyms
+to avoid, how they relate, and which ones are still ambiguous. It is background
+material for later documents, not a replacement for them.
+
+---
+
+## Three ways to be wrong, three ways to check
+
+Verification runs on three independent axes, because there are three genuinely
+different ways a project can be wrong.
+
+| Axis | What it catches | How long it takes |
 |---|---|---|
-| **Static** | Document-level have-nots, format violations, missing fields | < 1s |
-| **Linkage** | Drift between artifacts and code; orphans; cross-artifact impact | < 5s |
-| **Runtime** | Rendered styles vs design tokens; PRD acceptance flows; real-DOM contrast | 30s-2min |
+| **Static** | Bad form: missing fields, format violations, document-level have-nots | Under 1 second |
+| **Linkage** | Lying: documents that no longer match the code, orphans, unnoticed knock-on effects | Under 5 seconds |
+| **Runtime** | Breakage: what the built app actually does when you load it | 30 seconds to 2 minutes |
 
-Static catches form. Linkage catches lying. Runtime catches breakage.
-See [validation.md](./validation.md) for the complete picture.
+Static catches sloppiness. Linkage catches documents that have quietly become
+fiction. Runtime catches the thing that passes every test and still does not
+work. The complete picture is in [validation.md](./validation.md).
 
-## Five external integrations (detect-and-delegate, none vendored)
+---
 
-These are other people's tools. Godpowers works without every one of them; when
-one is installed, Godpowers hands the relevant job over instead of doing a worse
-version of it itself.
+## What Godpowers keeps on disk
 
-| Tool | What it is | What Godpowers uses it for |
-|---|---|---|
-| Google Labs design.md | a published format spec for describing a design system in one file | the shape of `DESIGN.md` |
-| Impeccable | a design skill pack (7 domain references, 23 commands) | deeper design guidance during `/god-design` |
-| awesome-design-md | a curated catalog of 71 sites with published design systems | source material for `/god-design from <site>` |
-| SkillUI | a static analyzer that reads a site's design out of its markup | extracting a design from an arbitrary URL |
-| agent-browser (or Playwright) | a headless browser driver | actually loading the built app to verify it renders |
-
-Each is detected via `lib/<name>-detector` or `lib/<name>-bridge`. None of their
-content is copied into Godpowers. When one is absent, the run continues on a
-reduced internal path: a smaller built-in design reference, or a message saying
-runtime verification needs a browser driver.
-
-## The three load-bearing artifacts (designed for v0.5+)
+Three files carry the load:
 
 ```
-.godpowers/intent.yaml    INTENT   what you want (hand-edited)
-.godpowers/state.json     FACTS    what was resolved (machine-managed)
-.godpowers/runs/<id>/events.jsonl  HISTORY  what happened (append-only)
+.godpowers/intent.yaml             WHAT YOU WANT     you edit this by hand
+.godpowers/state.json              WHAT IS RESOLVED  machine-managed
+.godpowers/runs/<id>/events.jsonl  WHAT HAPPENED     append-only history
 ```
 
-This is the Cargo + Poetry + OpenTelemetry pattern applied to AI workflows.
+Separating these three is a borrowed idea: intent, resolved facts, and an
+append-only history is the same split that package managers and tracing systems
+landed on, for the same reason. Wishes, facts, and history rot at different
+rates and should not share a file.
 
-## Workflows
+---
 
-The arc isn't just "/god-mode". 13 core workflows handle different
-real-world scenarios:
+## Workflows: the arc is not just one thing
 
-| Workflow | When |
-|----------|------|
+`/god-mode` is the headline, but real projects arrive in many shapes. 13 core
+workflows cover them:
+
+| Workflow | When you want it |
+|----------|------------------|
 | full-arc | Greenfield, idea to launch |
-| bluefield-arc | Org-context-constrained greenfield |
+| bluefield-arc | Greenfield, but constrained by existing organization standards |
 | brownfield-arc | Existing codebase, full reverse-engineering |
-| feature-arc | Add feature to existing project |
-| hotfix-arc | Urgent production bug |
-| refactor-arc | Safe refactor, no behavior change |
+| feature-arc | Adding a feature to something that exists |
+| hotfix-arc | Production is broken right now |
+| refactor-arc | Cleanup with no behavior change |
 | spike | Time-boxed research |
-| postmortem | After-incident investigation |
+| postmortem | Investigating after an incident |
 | migration-arc | Framework or version migration |
 | docs-arc | Documentation work |
 | deps-audit | Dependency updates |
-| audit-only | Score artifacts, build nothing |
-| hygiene | Periodic health check |
+| audit-only | Score what exists, build nothing |
+| hygiene | Routine health check |
 
-Story-file workflow (`/god-story` family) and Mode D suite workflows
-(`/god-suite-*`) layer on top of these. Each is a declarative YAML in
-`workflows/`. The orchestrator reads them.
+Each is a declarative file in `workflows/` that the orchestrator reads. Story
+files (`/god-story`) and multi-repo suites (`/god-suite-*`) layer on top.
 
-## Dashboard And Local Helpers
+---
 
-Every command closeout should be traceable to disk state. The dashboard reports
-workflow progress, the current phase, the action brief, host guarantees, and
-proactive checks for docs, repo surface, runtime, security, dependencies, and
-hygiene.
+## Modes: what kind of situation is this?
 
-Some automatic work is local helper work, not agent work. Checkpoint sync,
-repo documentation sync, repo surface sync, feature awareness, host capability
-detection, and dogfood fixture execution run as visible local runtime steps
-when their triggers are direct. Specialist agents are reserved for bounded
-work that needs judgment, such as docs drift review, design review, browser
-testing, or dogfood failure triage.
+Godpowers works out the shape of your project from what it finds on disk.
 
-## Modes
+| Mode | The situation |
+|------|---------------|
+| A | Greenfield: no code, no history, blank slate |
+| B | Gap-fill or brownfield: a project exists, its documentation is missing or partial |
+| C | Audit only: score what is there, write nothing |
+| E | Bluefield: empty directory, but organization standards apply |
 
-| Mode | When |
-|------|------|
-| A | Greenfield (no existing code, no .godpowers/) |
-| B | Gap-fill or brownfield (existing project, missing or partial artifacts) |
-| C | Audit-only (score existing artifacts, write nothing) |
-| E | Bluefield (empty dir plus org-context.yaml; org standards apply) |
+Mode D sits at a right angle to the others. It marks a multi-repo suite and adds
+`god-coordinator` alongside the orchestrator, regardless of what mode each
+individual repo is in.
 
-god-orchestrator detects the project mode automatically from disk signals.
-Mode D is orthogonal to A/B/C/E: it marks a multi-repo suite (hub plus
-siblings) and adds `god-coordinator` as a Tier-0 peer, never above, regardless
-of each repo's mode.
+---
 
-## Pauses
+## When it stops to ask you
 
-Five legitimate reasons to pause for the user:
-1. Ambiguous intent
-2. Human-only flip-point
-3. Statistical tie
-4. Critical security finding
-5. Brand voice
+Five legitimate reasons to interrupt a human:
 
-`--yolo` auto-resolves the first four. Critical security still pauses (the
-one carve-out, by design).
+1. Your intent could mean two different things.
+2. A hard-to-reverse decision depends on something only you know.
+3. Two options are statistically tied.
+4. A critical security finding needs judgment.
+5. Brand voice needs to sound like you.
 
-## Recovery
+`--yolo` resolves the first four automatically. Critical security findings still
+stop and wait. That carve-out is deliberate and not configurable.
 
-Forward-only with compensation (Flyway pattern). Operations append to
-`.godpowers/log` (the reflog). `/god-undo` reverts. Destructive ops move
-files to `.godpowers/.trash/` (recoverable).
+---
+
+## Undoing things
+
+Godpowers moves forward and compensates rather than rewinding. Operations are
+appended to a log, `/god-undo` reverts them, and anything destructive is moved
+to `.godpowers/.trash/` rather than deleted, so it can be recovered.
+
+---
 
 ## Extensions
 
-Skill packs from npm. Each declares `apiVersion: godpowers/v1` and
-`engines.godpowers: "^1.0.0"`. Lazy-activated: pack files don't load until
-their slash command is invoked.
+Skill packs are installed from npm and add specialists for particular domains.
+They are lazily activated: a pack's files are not loaded until you invoke one of
+its commands, so installing several costs you nothing until you use them.
 
-First-party pack examples:
+First-party examples:
+
 - `@godpowers/security-pack` - SOC 2, HIPAA, PCI
-- `@godpowers/launch-pack` - Show HN, PH, IH, OSS
-- `@godpowers/data-pack` - ETL, ML features, dashboards
+- `@godpowers/launch-pack` - Show HN, Product Hunt, Indie Hackers, open source
+- `@godpowers/data-pack` - ETL, machine learning features, dashboards
 
-Use `/god-extension-scaffold --name=@scope/pack --output=.` to create
-the manifest, package, README, skill, agent, and workflow skeleton for a new
-pack.
+To build your own:
 
-## How it composes with other AI workflow systems
+```bash
+/god-extension-scaffold --name=@scope/pack --output=.
+```
 
-Godpowers does not assume it's the only AI workflow tool installed.
-It keeps its state in `.godpowers/` and never writes outside it.
+That generates the manifest, package, README, skill, agent, and workflow
+skeleton.
 
-`/god-init`, `/god-migrate`, and feature awareness detect legacy planning, BMAD, and
-Superpowers context. Imported context becomes preparation material for native
-Godpowers artifacts, while `/god-sync` can write managed companion files back
-to the source system so teams can return to that workflow if needed.
+---
 
-See [references/shared/ORCHESTRATORS.md](../references/shared/ORCHESTRATORS.md)
-for the coexistence rules and migration paths. For acknowledgement of
-the prior-art that shaped godpowers, see [INSPIRATION.md](../INSPIRATION.md).
+## Some work does not need a specialist
+
+Not everything deserves an agent. Routine, deterministic jobs run as plain local
+steps you can watch: syncing checkpoints, keeping repo documentation in step,
+detecting what your host can do, running fixtures. Specialists are reserved for
+work that genuinely needs judgment, such as reviewing whether documentation has
+drifted from reality, or triaging why a test failed.
+
+The dashboard ties this together, reporting progress, the current phase, what to
+do next, what your host guarantees, and proactive checks across docs, security,
+dependencies, and hygiene.
+
+---
+
+## Living with other AI tools
+
+Godpowers does not assume it is the only workflow tool you have installed. It
+keeps its state inside `.godpowers/` and never writes outside it.
+
+`/god-init`, `/god-migrate`, and feature detection will spot planning context
+from other systems, including BMAD and Superpowers. Imported context becomes
+background material for native Godpowers documents, and `/god-sync` can write
+companion files back to the original system, so you are never locked in.
+
+The coexistence rules and migration paths are in
+[references/shared/ORCHESTRATORS.md](../references/shared/ORCHESTRATORS.md). For
+credit to the prior art that shaped Godpowers, see
+[INSPIRATION.md](../INSPIRATION.md).

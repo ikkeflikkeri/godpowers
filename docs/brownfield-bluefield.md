@@ -1,6 +1,11 @@
 # Greenfield, Brownfield, Bluefield
 
-> Three project archetypes. Each needs a different starting workflow.
+Starting a project from nothing is a different job from inheriting one, which is
+different again from starting fresh inside a company that already has opinions
+about how things are done.
+
+Godpowers names these three situations and starts differently in each. This page
+helps you work out which one you are in.
 
 ## The three modes
 
@@ -10,23 +15,19 @@
 | **Brownfield** | Existing legacy code | Existing | Existing (tribal) |
 | **Bluefield** | New code, established context | New | Existing (org-level) |
 
-## Decision tree
+The distinction that catches people out is bluefield. It feels like greenfield,
+because the directory is empty. It is not, because the decisions have largely
+been made for you already and discovering that halfway through is expensive.
 
-```
-                    Where are you starting?
-                            |
-                            v
-                   ┌── Existing code? ──┐
-                   |                    |
-                   YES                  NO
-                   |                    |
-                   v                    v
-              BROWNFIELD          ┌── Existing org context? ──┐
-                                  |                            |
-                                  YES (bluefield)          NO (greenfield)
-                                  |                            |
-                                  v                            v
-                            BLUEFIELD                    GREENFIELD
+## Which one are you?
+
+```mermaid
+flowchart TD
+    Q1{"Is there existing code?"}
+    Q1 -->|Yes| BROWN["<b>BROWNFIELD</b><br/>Inherited code, undocumented decisions"]
+    Q1 -->|No| Q2{"Are there existing<br/>organization standards?"}
+    Q2 -->|Yes| BLUE["<b>BLUEFIELD</b><br/>Empty directory, but constraints apply"]
+    Q2 -->|No| GREEN["<b>GREENFIELD</b><br/>Genuinely free choice"]
 ```
 
 ## Greenfield (most familiar)

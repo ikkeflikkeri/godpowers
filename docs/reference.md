@@ -2,12 +2,22 @@
 
 Complete command, agent, and artifact reference for v5.15.0.
 
+**This page is a dictionary, not a tutorial.** It lists everything, which makes
+it useful for looking things up and a poor place to start. If you are new, read
+[Getting Started](getting-started.md) first, or just type `/god` and describe
+what you want in plain English.
+
+Nobody uses all of this. Most people use six or seven commands and let
+`/god-next` suggest the rest when they become relevant.
+
 ## Slash commands (123 total)
 
 The 123 total is 122 `god-*` commands plus the `/god` natural-language front
 door (a thin router that classifies intent rather than doing work itself).
 
 ### Command families
+
+Commands are grouped into families so the list stays scannable.
 All 123 commands remain direct entry points, but the user-facing map starts
 with likely next moves and families:
 
@@ -29,7 +39,10 @@ with likely next moves and families:
 matching leaf commands. `/god-help all` shows the full catalog.
 
 ### Decision ladders
-For common ambiguous intents, Godpowers chooses the smallest fitting command:
+
+Some intents are ambiguous by nature. "Capture this" could mean four different
+things, and "build it" depends entirely on how big "it" is. For these, Godpowers
+picks the smallest command that fits rather than making you choose:
 
 | Intent | Ladder |
 |---|---|
@@ -41,9 +54,9 @@ For common ambiguous intents, Godpowers chooses the smallest fitting command:
 The default `core` install starts with first-run guidance, the front door,
 surface control, and verb dispatchers: `/god-first-run`, `/god-demo`, `/god`,
 `/god-surface`, `/god-init`, `/god-plan`, `/god-build`, `/god-fix`,
-`/god-build`, `/god-fix`, `/god-ship`, `/god-sync`, and `/god-undo`. These commands route to existing leaf commands
-through routing metadata and do not remove direct shortcuts from the `full`
-profile.
+`/god-ship`, `/god-sync`, and `/god-undo`. These commands route to existing leaf
+commands through routing metadata and do not remove direct shortcuts from the
+`full` profile.
 
 `/god-status` is the continue hub. `/god-progress`, `/god-status --lifecycle`,
 `/god-status --locate`, and `/god-next` remain direct shortcuts for narrower
