@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.14.3] - 2026-08-04
+
+Clears the last two open Dependabot pull requests and removes the reason one of
+them could not go green on its own.
+
+### Fixed
+
+- The roadmap's Evidence Provenance block no longer hashes `package.json`. It
+  asserted a derivation that does not exist: `god-roadmapper` is spawned with
+  the PRD and ARCH paths and never reads the manifest, `ROADMAP.mdx` derives no
+  content from it, and the one value it does take, the version, is already
+  asserted by `roadmap:source-version`. What the hash did in practice was fail
+  every pull request that touched a root dependency, because Dependabot cannot
+  run `npm run version:sync`. PR #78 failed exactly this way with all three Node
+  jobs green and coverage complete. The three genuine sources (PRD, ARCH, stack
+  decision) keep whole-file hashes at full strength, and a regression test now
+  proves that a devDependency bump alone leaves the roadmap evidence valid.
+- `scripts/version-sync.js` loses the step that re-stamped that hash. The
+  documented remedy for a red `roadmap:hash:package.json` was to run
+  `version:sync`, which rewrote the hash blind; across 151 commits touching
+  `package.json` it never once caused anybody to read a diff. That is have-not
+  U-07 inside a guard: the mechanism existed and the review it implied was
+  auto-dismissed by the standard fix.
+
+### Added
+
+- A "root manifest keeps its declared shape" check in `scripts/static-check.js`
+  asserts the exact top-level key set of `package.json` and that
+  `dependencies`, `optionalDependencies`, and `peerDependencies` are all empty.
+  The existing check read only `dependencies`, so ARCH ADR-002's claim that the
+  core package needs no production dependency could have been violated through
+  `optionalDependencies` with nothing noticing: the override guard reads the
+  lockfile, and `npm audit` fires only on a known advisory, so a clean
+  production dependency passed every gate in the repository. Adding a top-level
+  field now requires updating the allowlist in the same commit.
+
+### Changed
+
+- `c8` moves to 12.0.0 via Dependabot PR #78. It declares
+  `engines.node: ^20.19 || ^22.12 || >=23`, but it is a devDependency and only
+  the coverage job runs it, on Node 20, so `engines.node` stays at `>=18` and
+  the Node 18 test job is unaffected. Coverage holds at 94.78 percent lines and
+  79.56 percent branches, above the 90 and 75 floors.
+- The pinned GitHub Actions move via Dependabot PR #89:
+  `actions/checkout` to v7.0.1, `actions/setup-node` to v7.0.0, and
+  `actions/setup-python` to v7.0.0, across all four workflows. The regenerated
+  pull request picked up `security-audit.yml`, so no workflow is left behind on
+  an older pin.
+
 ## [5.14.2] - 2026-08-04
 
 Hands the advisory response back to Dependabot, which was doing the job

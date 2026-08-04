@@ -21,6 +21,16 @@ The lint layer. Mechanical checks against the catalog of failure modes.
   checks, YAML parser coverage, route checks, repo surface checks, installer
   smoke tests, Mode D tests, dogfood tests, package extension tests, and the
   integration smoke test.
+- [DECISION] `scripts/static-check.js` asserts the root manifest's exact
+  top-level key set and that `dependencies`, `optionalDependencies`, and
+  `peerDependencies` are all empty, which is the mechanical enforcement of ARCH
+  ADR-002. The previous guard read only `dependencies`, so a production
+  dependency declared as optional or peer passed every check in the repository.
+- [DECISION] The roadmap's evidence hashes cover its genuine upstream inputs
+  (PRD, ARCH, stack decision) and not `package.json`, which the roadmapper never
+  reads. Hashing it asserted a derivation that does not exist and made every
+  pull request touching a root dependency structurally red, because Dependabot
+  cannot run `npm run version:sync`.
 - [DECISION] `scripts/test-dependency-overrides.js` fails the suite when an npm
   `override` is absent from the lockfile, carries no advisory id in
   `overrides-rationale`, or is no longer load-bearing because every parent that

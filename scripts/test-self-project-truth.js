@@ -102,11 +102,29 @@ test('self-project truth blocks stale version, lifecycle, and requirement counts
 test('self-project truth blocks missing artifacts and stale roadmap hashes', () => {
   const root = validProject();
   fs.unlinkSync(path.join(root, '.godpowers', 'arch', 'ARCH.mdx'));
-  writeRel(root, 'package.json', JSON.stringify({ name: 'godpowers', version: '9.9.9', description: '2 slash commands', changed: true }));
+  // Mutating a genuine roadmap source must invalidate the roadmap hash. This
+  // used to be asserted against package.json, which the roadmap never derived
+  // from; PRD.mdx is an actual input, so the assertion now proves the thing it
+  // always claimed to.
+  writeRel(root, '.godpowers/prd/PRD.mdx', '# Evidence changed\n');
   const result = truth.check(root);
   assert(result.verdict === 'fail', 'stale evidence should fail');
   assert(result.findings.some((item) => item.id === 'artifact:tier-1.arch'), truth.render(result));
-  assert(result.findings.some((item) => item.id === 'roadmap:hash:package.json'), truth.render(result));
+  assert(result.findings.some((item) => item.id === 'roadmap:hash:.godpowers/prd/PRD.mdx'), truth.render(result));
+});
+
+test('a root dependency bump alone leaves the roadmap evidence valid', () => {
+  const root = validProject();
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  pkg.devDependencies = { c8: '^12.0.0' };
+  writeRel(root, 'package.json', JSON.stringify(pkg));
+  const result = truth.check(root);
+  // Dependabot cannot run version:sync, so a dependency bump that invalidated
+  // roadmap evidence made every root-manifest pull request structurally red.
+  assert(
+    !result.findings.some((item) => String(item.id).startsWith('roadmap:hash:')),
+    truth.render(result)
+  );
 });
 
 test('self-project truth blocks a reduced lifecycle step inventory', () => {

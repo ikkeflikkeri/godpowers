@@ -111,6 +111,14 @@ When an override really is required, record the advisory id in
 the suite when an override is unjustified, absent from the lockfile, or no
 longer load-bearing because its parents have caught up.
 
+The root manifest's top-level shape is asserted by the "root manifest keeps its
+declared shape" check in `scripts/static-check.js`, so adding a top-level field
+(including the `overrides` and `overrides-rationale` pair a security pin needs)
+means updating the allowlist in that guard in the same commit. The check also
+asserts that `dependencies`, `optionalDependencies`, and `peerDependencies` are
+all empty, which is the mechanical enforcement of ARCH ADR-002's claim that the
+core package needs no production dependency.
+
 ## Releasing
 
 Releases are explicit, and publication is tag-triggered so the npm artifact

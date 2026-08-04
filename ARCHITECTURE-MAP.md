@@ -642,7 +642,7 @@ godpowers/
 ├── README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, USERS.md
 ├── ARCHITECTURE.md                <- Design doc
 ├── ARCHITECTURE-MAP.md            <- This file
-├── package.json (v5.14.2)
+├── package.json (v5.14.3)
 ├── .github/workflows/              <- CI, npm publish, daily security audit
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
@@ -738,7 +738,7 @@ godpowers/
 
 ---
 
-## Numbers (as of v5.14.2)
+## Numbers (as of v5.14.3)
 
 | Component | Count |
 |-----------|-------|

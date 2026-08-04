@@ -4,9 +4,9 @@
 // Single source of version truth: package.json. This writes that version into
 // every version surface godpowers self-truth and surface-count checks assert -
 // docs, the MCP package and lockfile, the SECURITY supported series, the
-// RELEASE header, and the two self-referential hashes (roadmap package.json hash
-// and the state roadmap artifact hash) - so a release never hand-edits ~15 places
-// in lockstep. Run `npm run version:sync`; `--check` verifies without writing.
+// RELEASE header, and the self-referential state roadmap artifact hash - so a
+// release never hand-edits ~15 places in lockstep. Run `npm run version:sync`;
+// `--check` verifies without writing.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -91,19 +91,7 @@ for (const [rel, regex, slots] of surfaces) {
   }
 }
 
-// 5. Roadmap package.json source hash (after package.json is final).
-{
-  const rel = '.godpowers/roadmap/ROADMAP.mdx';
-  const want = sha(rd('package.json'));
-  let text = rd(rel);
-  const next = text.replace(/(Source hash `package\.json`: `)(sha256:[0-9a-f]+)(`)/, `$1${want}$3`);
-  if (next !== text) {
-    if (check) mismatches.push(`${rel}: package.json source hash is stale`);
-    else { wr(rel, next); text = next; process.stdout.write(`  synced ${rel} package.json hash\n`); }
-  }
-}
-
-// 6. State roadmap artifact hash (after ROADMAP.mdx is final).
+// 5. State roadmap artifact hash (after ROADMAP.mdx is final).
 {
   const rel = '.godpowers/state.json';
   const want = sha(rd('.godpowers/roadmap/ROADMAP.mdx'));

@@ -622,6 +622,45 @@ test('MCP companion stays outside main package dependencies', () => {
   }
 });
 
+// ARCH ADR-002 records that the core package needs no production dependency.
+// The check above reads only `dependencies`, so `optionalDependencies` and
+// `peerDependencies` could have carried one with nothing in the repository
+// noticing: the override guard inspects the lockfile, and `npm audit` fires only
+// on a KNOWN advisory, so a clean production dependency slipped through every
+// gate. This names the invariant instead of hoping a file hash notices the diff.
+const ROOT_MANIFEST_KEYS = [
+  'name', 'version', 'description', 'bin', 'engines', 'files', 'license',
+  'author', 'repository', 'homepage', 'bugs', 'keywords', 'scripts',
+  'workspaces', 'devDependencies'
+];
+// Present only while a security pin is in force; see the dependency policy in
+// CONTRIBUTING.md and scripts/test-dependency-overrides.js.
+const ROOT_MANIFEST_OPTIONAL_KEYS = ['overrides', 'overrides-rationale'];
+
+test('root manifest keeps its declared shape', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  const allowed = new Set([...ROOT_MANIFEST_KEYS, ...ROOT_MANIFEST_OPTIONAL_KEYS]);
+
+  const unexpected = Object.keys(pkg).filter(key => !allowed.has(key));
+  if (unexpected.length > 0) {
+    throw new Error(
+      `package.json has unexpected top-level key(s): ${unexpected.join(', ')}. `
+      + 'Add them to ROOT_MANIFEST_KEYS in this file in the same commit, or remove them.'
+    );
+  }
+
+  const missing = ROOT_MANIFEST_KEYS.filter(key => pkg[key] === undefined);
+  if (missing.length > 0) {
+    throw new Error(`package.json is missing required top-level key(s): ${missing.join(', ')}`);
+  }
+
+  for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+    if (pkg[field] && Object.keys(pkg[field]).length > 0) {
+      throw new Error(`ADR-002: root package must declare no ${field}`);
+    }
+  }
+});
+
 test('publish workflow includes MCP companion package', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   const workflow = fs.readFileSync(path.join(ROOT, '.github', 'workflows', 'publish.yml'), 'utf8');
