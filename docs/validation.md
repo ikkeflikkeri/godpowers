@@ -21,6 +21,18 @@ The lint layer. Mechanical checks against the catalog of failure modes.
   checks, YAML parser coverage, route checks, repo surface checks, installer
   smoke tests, Mode D tests, dogfood tests, package extension tests, and the
   integration smoke test.
+- [DECISION] `scripts/test-dependency-overrides.js` fails the suite when an npm
+  `override` is absent from the lockfile, carries no advisory id in
+  `overrides-rationale`, or is no longer load-bearing because every parent that
+  declares the package already permits the resolved version. An override that
+  changes nothing is a permanent major-version ceiling, and Dependabot reads
+  overrides: one that caps resolution below a fix produces no pull request, only
+  an error against the alert.
+- [DECISION] `.github/workflows/security-audit.yml` runs `npm audit` on a daily
+  cron in both the production and full-tree scopes. `npm run test:audit` audits
+  with `--omit=dev` and runs only on push and pull request, so without the cron
+  a development-scope advisory could never fail any gate and a production one
+  waited for the next push.
 - [DECISION] `npm run lint` delegates to `scripts/static-check.js`.
 - [DECISION] `scripts/static-check.js` runs `node --check` across JavaScript
   files and verifies the release gate still includes parser coverage and

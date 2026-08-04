@@ -47,7 +47,11 @@ npm run release:check
 This includes:
 
 - Full test suite through `npm test`.
-- Security and surface audit through `npm run test:audit`.
+- Security and surface audit through `npm run test:audit`. This audits with
+  `--omit=dev`; the full-tree scope is covered daily by
+  `.github/workflows/security-audit.yml` rather than at release time.
+- Dependency override justification through
+  `node scripts/test-dependency-overrides.js`.
 - Package contents assertion through `npm run pack:check`.
 - Repository documentation sync tests through `node scripts/test-repo-doc-sync.js`.
 - Repository surface sync tests through `node scripts/test-repo-surface-sync.js`.

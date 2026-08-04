@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.14.2] - 2026-08-04
+
+Hands the advisory response back to Dependabot, which was doing the job
+correctly all along. Alerts and automated security fixes were already enabled,
+and Dependabot opened a pull request within about a minute of each 5.14.x
+advisory. Both were closed unmerged because a hand-written `overrides` pin
+landed first. The pins are gone and the gaps that let an advisory go unnoticed
+between pushes are closed instead.
+
 ### Changed
 
 - The npm `overrides` block is gone. Four of its five entries were never
@@ -41,7 +50,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ecosystems, so a day that publishes advisories against several packages
   produces one pull request rather than one per package. Security updates ignore
   `schedule` and `open-pull-requests-limit` entirely, so grouping is the only
-  lever this file has over them.
+  lever this file has over them. The effect was immediate: three separate
+  GitHub Actions pull requests were replaced by one grouped request.
+
+### Removed
+
+- `codeaudit.md`, `secaudit.md`, and `uxaudit.md` are no longer tracked. They are
+  point-in-time auditor-skill output, and the committed copies described branch
+  `codex/product-trust-hardening` at 5.3.0 while presenting as current at the
+  repository root. `.gitignore` already listed `codeaudit.md`, but the file had
+  been committed before that rule existed, so the rule did nothing. All the
+  auditor report names are ignored now.
 
 ## [5.14.1] - 2026-08-03
 
