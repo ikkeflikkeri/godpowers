@@ -83,32 +83,35 @@ test('package test script delegates to scripts/run-tests.js', () => {
   }
 });
 
-test('full test runner includes YAML parser coverage', () => {
+// Every scripts/test-*.js on disk must run in the full suite. A hand-curated
+// allowlist here once guarded only 9 of ~90 suites, so the most load-bearing
+// suites (install smoke, dogfood, doc surface counts) could have been dropped
+// from the runner silently. Deriving the invariant from disk means new suites
+// are covered automatically and a removal requires a named tombstone entry.
+const TEST_SUITE_TOMBSTONES = new Set([
+  'test-harness.js' // shared assertion harness, not a runnable suite
+]);
+
+test('full test runner includes every on-disk test suite', () => {
   const runner = require('./run-tests');
   const commands = runner.TEST_COMMANDS.map(([command, args]) => [command, ...args].join(' '));
-  if (!commands.some(command => command.includes('scripts/test-yaml-parser.js'))) {
-    throw new Error('scripts/test-yaml-parser.js is missing from TEST_COMMANDS');
+  const onDisk = fs.readdirSync(path.join(ROOT, 'scripts'))
+    .filter(name => /^test-.*\.js$/.test(name))
+    .filter(name => !TEST_SUITE_TOMBSTONES.has(name))
+    .sort();
+  const missing = onDisk.filter(name => !commands.some(command => command.includes(`scripts/${name}`)));
+  if (missing.length > 0) {
+    throw new Error(
+      `test suites on disk but missing from TEST_COMMANDS: ${missing.join(', ')}. `
+      + 'Add them to scripts/run-tests.js, or add a tombstone entry here with a reason.'
+    );
   }
-  if (!commands.some(command => command.includes('scripts/test-frontmatter.js'))) {
-    throw new Error('scripts/test-frontmatter.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-agent-refs.js'))) {
-    throw new Error('scripts/test-agent-refs.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-skill-source-sync.js'))) {
-    throw new Error('scripts/test-skill-source-sync.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-cli-dispatch.js'))) {
-    throw new Error('scripts/test-cli-dispatch.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-gate.js'))) {
-    throw new Error('scripts/test-gate.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-state-views.js'))) {
-    throw new Error('scripts/test-state-views.js is missing from TEST_COMMANDS');
-  }
-  if (!commands.some(command => command.includes('scripts/test-state-advance.js'))) {
-    throw new Error('scripts/test-state-advance.js is missing from TEST_COMMANDS');
+  const ghosts = commands
+    .map(command => (command.match(/scripts\/(test-[^ ]+\.js)/) || [])[1])
+    .filter(Boolean)
+    .filter(name => !fs.existsSync(path.join(ROOT, 'scripts', name)));
+  if (ghosts.length > 0) {
+    throw new Error(`TEST_COMMANDS references missing suites: ${ghosts.join(', ')}`);
   }
   if (!commands.some(command => command.includes('--workspace @godpowers/mcp test'))) {
     throw new Error('@godpowers/mcp protocol test is missing from TEST_COMMANDS');
@@ -423,6 +426,76 @@ test('prompts do not direct-edit generated STATE views', () => {
   }
   if (offenders.length > 0) {
     throw new Error(`direct generated STATE view edit prompts in ${offenders.join(', ')}`);
+  }
+});
+
+test('loop parameters have one home and the runbook quotes it', () => {
+  // The repair budget once existed twice with two values (runbook: 3,
+  // executor-repair inline default: 2), so whether a failure got a third try
+  // depended on which layer classified it. lib/loop-config.js is now the only
+  // home; code resolves through it and the runbook prose is asserted against
+  // the exported default (the derive-from-code pattern from
+  // test-doc-surface-counts.js).
+  const loopConfig = require('../lib/loop-config');
+  const repairAttempts = loopConfig.DEFAULTS['repair-attempts'];
+
+  const executorRepair = fs.readFileSync(path.join(ROOT, 'lib', 'executor-repair.js'), 'utf8');
+  if (!executorRepair.includes("require('./loop-config')")) {
+    throw new Error('lib/executor-repair.js must resolve its budget default through lib/loop-config.js');
+  }
+  if (/input\.budget\s*:\s*\d/.test(executorRepair)) {
+    throw new Error('lib/executor-repair.js must not carry an inline numeric budget default');
+  }
+
+  const runbook = fs.readFileSync(
+    path.join(ROOT, 'references', 'orchestration', 'GOD-ORCHESTRATOR-RUNBOOK.md'), 'utf8');
+  const quoted = [...runbook.matchAll(/(\d+)\s+(?:repair\s+)?attempts/g)].map((m) => Number(m[1]));
+  if (quoted.length === 0) {
+    throw new Error('runbook no longer quotes the repair-attempt budget; keep prose and loop-config in sync');
+  }
+  const forked = quoted.filter((n) => n !== repairAttempts);
+  if (forked.length > 0) {
+    throw new Error(
+      `runbook quotes repair-attempt value(s) ${[...new Set(forked)].join(', ')} but `
+      + `lib/loop-config.js repair-attempts is ${repairAttempts}. One number, one home.`
+    );
+  }
+
+  for (const [rel, forbidden] of [
+    ['lib/change-metrics.js', /DEFAULT_TARGET\s*=\s*[\d.]/],
+    ['lib/reaudit.js', /DEFAULT_CADENCE_DAYS\s*=\s*\d/]
+  ]) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    if (!text.includes("require('./loop-config')")) {
+      throw new Error(`${rel} must resolve its default through lib/loop-config.js`);
+    }
+    if (forbidden.test(text)) {
+      throw new Error(`${rel} must not carry an inline numeric default; lib/loop-config.js owns it`);
+    }
+  }
+});
+
+test('harden findings parsing stays in the shared verdict module', () => {
+  // lib/findings-verdict.js is the only verdict authority for
+  // .godpowers/harden/FINDINGS.mdx. Two independent parsers of that artifact
+  // once disagreed on accepted risk and one trusted the auditor's own
+  // "Launch gate: PASSED" summary line; this guard keeps the parser singular.
+  const allowed = new Set(['lib/findings-verdict.js']);
+  const parseMarkers = [/Launch gate/, /CRITICAL-/];
+  const offenders = [];
+  for (const file of walkMatching(path.join(ROOT, 'lib'), f => f.endsWith('.js'))) {
+    const rel = path.relative(ROOT, file);
+    if (allowed.has(rel)) continue;
+    const text = fs.readFileSync(file, 'utf8');
+    if (parseMarkers.some(pattern => pattern.test(text))) {
+      offenders.push(rel);
+    }
+  }
+  if (offenders.length > 0) {
+    throw new Error(
+      `harden findings parse markers outside lib/findings-verdict.js: ${offenders.join(', ')}. `
+      + 'Resolve findings verdicts through findings-verdict.verdict(projectRoot, policy).'
+    );
   }
 });
 

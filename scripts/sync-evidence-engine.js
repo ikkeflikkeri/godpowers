@@ -12,7 +12,7 @@
  * needs to be folded back in.
  *
  * Usage:
- *   node scripts/sync-evidence-engine.js [--source=<path to upstream index.js>] [--write] [--json]
+ *   node scripts/sync-evidence-engine.js [--source=<path to upstream index.js>] [--write] [--json] [--check]
  *
  * Source resolution order:
  *   1. --source=<path>
@@ -23,6 +23,11 @@
  * Exit code is non-zero when the upstream record shape changed (and --write was
  * not given), when an adaptation is missing from lib/evidence.js, or when the
  * upstream source cannot be found.
+ *
+ * --check is the release-gate mode: local adaptation checks always run, the
+ * upstream shape diff runs only when a source resolves, and a missing upstream
+ * is a soft skip (exit 0) so CI runners without the sibling checkout stay
+ * green while the maintainer machine still blocks release on real drift.
  */
 
 const fs = require('fs');
@@ -149,6 +154,22 @@ function checkLocalAdaptations(rawSource) {
   return problems;
 }
 
+/**
+ * Read the upstream engine source for shape extraction. Upstream refactored
+ * verify_run / verify_claim out of index.js into verification-tools.js while
+ * verificationStepContext stayed behind in index.js, so when the sibling
+ * module exists both files are concatenated: the record literals come from
+ * verification-tools.js and the spread context function from index.js.
+ */
+function readUpstreamEngineSource(upstreamPath) {
+  const source = fs.readFileSync(upstreamPath, 'utf8');
+  const sibling = path.join(path.dirname(upstreamPath), 'verification-tools.js');
+  if (path.basename(upstreamPath) === 'index.js' && fs.existsSync(sibling)) {
+    return `${source}\n${fs.readFileSync(sibling, 'utf8')}`;
+  }
+  return source;
+}
+
 function readUpstreamVersion(upstreamPath) {
   let version = null;
   let commit = null;
@@ -159,6 +180,15 @@ function readUpstreamVersion(upstreamPath) {
   } catch (_) {
     version = null;
   }
+  if (!version) {
+    // Upstream now derives VERSION from its package.json instead of a literal.
+    try {
+      const pkgPath = path.resolve(path.dirname(upstreamPath), '..', 'package.json');
+      version = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version || null;
+    } catch (_) {
+      version = null;
+    }
+  }
   const repoRoot = path.resolve(path.dirname(upstreamPath), '..', '..');
   const git = spawnSync('git', ['-C', repoRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' });
   if (git.status === 0 && git.stdout) commit = git.stdout.trim();
@@ -166,10 +196,11 @@ function readUpstreamVersion(upstreamPath) {
 }
 
 function parseArgs(argv) {
-  const opts = { source: null, write: false, json: false };
+  const opts = { source: null, write: false, json: false, check: false };
   for (const arg of argv.slice(2)) {
     if (arg === '--write') opts.write = true;
     else if (arg === '--json') opts.json = true;
+    else if (arg === '--check') opts.check = true;
     else if (arg.startsWith('--source=')) opts.source = arg.slice('--source='.length);
   }
   return opts;
@@ -190,13 +221,15 @@ function buildReport(opts) {
     ok: false
   };
 
+  const localSource = fs.readFileSync(EVIDENCE_PATH, 'utf8');
+  report.adaptationProblems = checkLocalAdaptations(localSource);
+
   if (!upstreamPath) {
     report.error = 'upstream engine source not found; pass --source=<path to mcp-server/src/index.js>';
     return { report, provenance, upstreamPath: null };
   }
 
-  const upstreamSource = fs.readFileSync(upstreamPath, 'utf8');
-  const localSource = fs.readFileSync(EVIDENCE_PATH, 'utf8');
+  const upstreamSource = readUpstreamEngineSource(upstreamPath);
 
   const actualShape = extractRecordShape(upstreamSource);
   const expectedShape = provenance.upstreamRecordShape || {};
@@ -205,7 +238,6 @@ function buildReport(opts) {
     attested: diffShapes(expectedShape.attested, actualShape.attested)
   };
   report.actualShape = actualShape;
-  report.adaptationProblems = checkLocalAdaptations(localSource);
   report.upstream = readUpstreamVersion(upstreamPath);
 
   const shapeChanged = report.shapeDiff.executed.changed || report.shapeDiff.attested.changed;
@@ -222,6 +254,13 @@ function renderReport(report) {
   lines.push(`Recorded: mythify-mcp@${report.recorded.version} (${report.recorded.commit}) synced ${report.recorded.syncedAt}`);
   lines.push(`Upstream source: ${report.upstreamPath || '(not found)'}`);
   if (!report.upstreamFound) {
+    lines.push('');
+    if (report.adaptationProblems.length === 0) {
+      lines.push('Adaptations: all recorded adaptations still present in lib/evidence.js');
+    } else {
+      lines.push('Adaptations: PROBLEMS - review needed');
+      for (const problem of report.adaptationProblems) lines.push(`  ${problem}`);
+    }
     lines.push('');
     lines.push(`Error: ${report.error}`);
     return lines.join('\n');
@@ -278,6 +317,19 @@ function main() {
   } else {
     console.log(renderReport(report));
     if (report.written) console.log('\nWrote updated provenance to lib/evidence/.provenance.json.');
+  }
+
+  if (opts.check) {
+    // Release-gate mode: adaptation drift always blocks; shape drift blocks
+    // only when an upstream source resolved. A missing upstream is a soft
+    // skip so runners without the sibling checkout stay green.
+    if (report.adaptationProblems.length > 0) process.exit(1);
+    if (!report.upstreamFound) {
+      console.log('\nUpstream source not found: shape-drift check skipped (adaptations verified).');
+      return;
+    }
+    if (!report.ok) process.exit(1);
+    return;
   }
 
   if (!report.upstreamFound) process.exit(1);

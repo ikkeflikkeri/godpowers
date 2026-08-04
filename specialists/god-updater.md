@@ -116,6 +116,12 @@ After feature work, every artifact that was impacted needs to reflect reality.
 - Update `last-hash` fields in state.json after the gate runs.
 - This is the same gate god-orchestrator uses for mid-arc detection;
   god-updater enforces it at sync time so manual edits don't bypass it.
+- The general rule behind this gate is the artifact cadence map
+  (`lib/artifact-map.js`): slow-cadence artifacts (PRD, ARCH, ROADMAP, stack
+  DECISION, DESIGN, PRODUCT) are stewarded by their owning tier. When a
+  mechanical loop finds a slow artifact's hash stale, the remedy is review
+  (this gate, or a `.godpowers/REVIEW-REQUIRED.mdx` entry), never a re-stamp.
+  `scripts/version-sync.js` applies the same rule to the roadmap hash.
 
 ### Reverse-sync (Phase 6) - the load-bearing add
 - Call `lib/reverse-sync.run(projectRoot)`. This:

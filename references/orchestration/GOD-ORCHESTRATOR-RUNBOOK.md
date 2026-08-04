@@ -221,8 +221,12 @@ order suggests the command is structurally next. If `safe-sync-clear` fails,
 route to `/god-reconcile Release Truth And Safe Sync` before deploy, observe,
 harden, launch, broad migration, or resume work. If `no-critical-findings`
 fails, public activation remains blocked until harden is fixed and re-verified
-or public activation is removed from scope. The pre-publication gate does not
-treat accepted Critical risk as a pass.
+or public activation is removed from scope. Both consumers of the harden
+findings resolve verdicts through `lib/findings-verdict.js` under one
+precedence rule: accepted risk resumes the arc, it never authorizes
+publication. The pre-publication gate does not treat accepted Critical risk
+as a pass, and no auditor-authored summary line ("Launch gate: PASSED")
+satisfies either policy; only per-finding statuses count.
 
 Between every tier, run god-standards-check on the produced artifact (if
 the routing config has a `standards` section). Standards check uses fresh
@@ -415,10 +419,16 @@ Do this:
    failing diagnostics, touched files, relevant artifact excerpts, and the
    command to re-run.
 4. Re-run the failing command after each repair attempt.
-5. Repeat until green or until the same root failure survives 3 repair attempts.
-6. If repair succeeds, continue the same `/god-mode` run. Do not hand off a
+5. Treat green as provisional until integrity holds: snapshot the test surface
+   with `lib/repair-integrity.js` before the first repair attempt and compare
+   after any green re-run. A SUSPECT green (test files deleted, skip markers
+   added, coverage thresholds lowered) is not green: escalate with the
+   standard pause format, naming the shrunken counter
+   (`classifyFailure({ integrity })` returns ESCALATE).
+6. Repeat until green or until the same root failure survives 3 repair attempts.
+7. If repair succeeds, continue the same `/god-mode` run. Do not hand off a
    "next recommended delivery increment" while required verification is red.
-7. If the same root failure survives 3 attempts, pause with a precise blocker,
+8. If the same root failure survives 3 attempts, pause with a precise blocker,
    attempted fixes, and the smallest human question needed to continue.
 
 Under `--yolo`, the repair loop auto-runs. It may commit atomic repair commits
@@ -883,6 +893,15 @@ Auto-resolve all pause categories EXCEPT:
 **Impossible preflight routing contradictions pause, even with --yolo.**
 
 **Unresolved safe sync blockers pause or route to reconcile, even with --yolo.**
+
+Judgment-grade failures never vanish under --yolo. When god-standards-check
+returns FAIL or god-design-reviewer returns WARN and --yolo suppresses the
+pause, append the failure as a batch to `.godpowers/REVIEW-REQUIRED.mdx` via
+`lib/review-required.js appendBatch` (source `yolo-deferred-judgment`) in
+addition to the YOLO-DECISIONS.mdx log line. The pending review queue blocks
+Tier 3 work through the safe-sync-clear prerequisite, so --yolo can keep
+building but cannot reach deploy, harden, or launch past an unreviewed
+judgment failure.
 
 Rationale: shipping with a known Critical vulnerability is a category of risk
 that should never be auto-accepted. A preflight contradiction means the repo

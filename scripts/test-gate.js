@@ -251,6 +251,135 @@ test('build gate fails without passed command evidence', () => {
     'build evidence finding absent');
 });
 
+test('claimed pass with an empty ledger raises the attestation-gap finding', () => {
+  const project = mkProject('godpowers-gate-attestation-gap-');
+  initState(project, (current) => {
+    current.tiers['tier-2'].build = {
+      status: 'done',
+      updated: '2026-06-10T18:06:00.000Z',
+      verification: {
+        commands: [
+          { command: 'npm test', status: 'pass', exitCode: 0, ranAt: '2026-06-10T18:05:00.000Z' }
+        ]
+      }
+    };
+  });
+  const result = gateResult('build', project);
+  assert(result.verdict === 'pass', `attestation gap should warn, not fail (staged): ${errorSummary(result)}`);
+  const gap = result.findings.find((finding) => finding.id === 'build-attestation-gap');
+  assert(gap, 'attestation-gap finding absent for claimed pass with empty ledger');
+  assert(gap.severity === 'warning', `attestation gap should be a warning, got ${gap.severity}`);
+  assert(gap.reason.includes('Attested, not executed'), 'gap reason should name the failure mode');
+  assert(Array.isArray(result.summary.buildVerificationExecutedBacked)
+    && result.summary.buildVerificationExecutedBacked.length === 0,
+  'executed-backed summary should be empty with no ledger');
+});
+
+test('claimed pass backed by a fresh executed ledger record clears the attestation check', () => {
+  const project = mkProject('godpowers-gate-attestation-backed-');
+  initState(project, (current) => {
+    current.tiers['tier-2'].build = {
+      status: 'done',
+      updated: '2026-06-10T18:06:00.000Z',
+      verification: {
+        commands: [
+          { command: 'npm test', status: 'pass', exitCode: 0, ranAt: '2026-06-10T18:07:00.000Z' }
+        ]
+      }
+    };
+  });
+  writeRel(project, '.godpowers/ledger/verifications.jsonl', JSON.stringify({
+    kind: 'executed',
+    claim: null,
+    command: 'npm test',
+    exit_code: 0,
+    verified: true,
+    timestamp: '2026-06-10T18:07:30.000Z',
+    substep: 'tier-2.build',
+    substep_status: 'in-flight'
+  }) + '\n');
+  const result = gateResult('build', project);
+  assert(result.verdict === 'pass', `backed build gate should pass: ${errorSummary(result)}`);
+  assert(!result.findings.some((finding) => finding.id === 'build-attestation-gap'),
+    'no attestation gap should fire when the ledger backs the claim');
+  assert(result.checks.some((check) => check.id === 'build-attestation-gap' && check.status === 'pass'),
+    'attestation check should record the backed pass');
+  assert(result.summary.buildVerificationExecutedBacked.includes('npm test'),
+    'executed-backed summary should include the corroborated command');
+});
+
+test('a fresh fail after a fresh pass un-backs the claim (latest verdict wins)', () => {
+  const project = mkProject('godpowers-gate-attestation-latest-');
+  initState(project, (current) => {
+    current.tiers['tier-2'].build = {
+      status: 'done',
+      updated: '2026-06-10T18:06:00.000Z',
+      verification: {
+        commands: [
+          { command: 'npm test', status: 'pass', exitCode: 0, ranAt: '2026-06-10T18:07:00.000Z' }
+        ]
+      }
+    };
+  });
+  writeRel(project, '.godpowers/ledger/verifications.jsonl', [
+    JSON.stringify({ kind: 'executed', command: 'npm test', exit_code: 0, verified: true, timestamp: '2026-06-10T18:07:00.000Z', substep: 'tier-2.build' }),
+    JSON.stringify({ kind: 'executed', command: 'npm test', exit_code: 1, verified: false, timestamp: '2026-06-10T18:08:00.000Z', substep: 'tier-2.build' })
+  ].join('\n') + '\n');
+  const result = gateResult('build', project);
+  assert(result.findings.some((finding) => finding.id === 'build-attestation-gap'),
+    'a later failed execution must not leave the claim backed by the stale pass');
+  assert(result.summary.buildVerificationExecutedBacked.length === 0,
+    'no command should count as executed-backed when its latest fresh record failed');
+});
+
+test('the dashboard evidence pairing covers deploy', () => {
+  const dashboard = require('../lib/dashboard');
+  const project = mkProject('godpowers-gate-deploy-pair-');
+  initState(project, (current) => {
+    current.tiers['tier-3'].deploy = {
+      status: 'done',
+      updated: '2026-06-10T18:06:00.000Z',
+      verification: {
+        commands: [
+          { command: 'deploy --check', status: 'pass', exitCode: 0, ranAt: '2026-06-10T18:07:00.000Z' }
+        ]
+      }
+    };
+  });
+  const currentState = state.read(project);
+  const pairs = dashboard.verificationEvidencePairs(project, currentState);
+  const deployPair = pairs.find((pair) => pair.tier === 'deploy');
+  assert(deployPair, `deploy pair missing: ${JSON.stringify(pairs)}`);
+  assert(deployPair.claimed === 1 && deployPair.backed === 0,
+    `deploy pair should be 1 claimed / 0 backed: ${JSON.stringify(deployPair)}`);
+});
+
+test('a stale executed record from before in-flight does not back the claim', () => {
+  const project = mkProject('godpowers-gate-attestation-stale-');
+  initState(project, (current) => {
+    current.tiers['tier-2'].build = {
+      status: 'done',
+      updated: '2026-06-10T18:06:00.000Z',
+      verification: {
+        commands: [
+          { command: 'npm test', status: 'pass', exitCode: 0, ranAt: '2026-06-10T18:07:00.000Z' }
+        ]
+      }
+    };
+  });
+  writeRel(project, '.godpowers/ledger/verifications.jsonl', JSON.stringify({
+    kind: 'executed',
+    command: 'npm test',
+    exit_code: 0,
+    verified: true,
+    timestamp: '2026-06-01T00:00:00.000Z',
+    substep: 'tier-2.build'
+  }) + '\n');
+  const result = gateResult('build', project);
+  assert(result.findings.some((finding) => finding.id === 'build-attestation-gap'),
+    'stale ledger record must not satisfy the freshness requirement');
+});
+
 test('build gate ignores markdown state and fails from state.json failed command evidence', () => {
   const project = mkProject('godpowers-gate-build-failed-command-');
   writeRel(project, '.godpowers/build/STATE.mdx', [

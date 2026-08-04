@@ -195,9 +195,69 @@ for (const name of fs.readdirSync(routingDir).sort()) {
   }
 }
 
+// --- Severity overrides: the fork registry --------------------------------
+// The catalog grades what a NEW artifact owes; the mechanical validator may
+// apply a softer severity to EXISTING artifacts only through a row in the
+// "Severity Overrides" table. This block parses the table and asserts the
+// validator's actual behavior matches the registered enforced severity, so
+// the two graders of the catalog can only diverge on declared terms.
+const OVERRIDE_MARKER = '## Severity Overrides';
+const overrideIndex = content.indexOf(OVERRIDE_MARKER);
+if (overrideIndex === -1) {
+  throw new Error(`${HAVE_NOTS} is missing its "${OVERRIDE_MARKER}" section.`);
+}
+const overrideText = content.slice(overrideIndex, markerIndex);
+const overrides = [];
+for (const line of overrideText.split('\n')) {
+  const row = line.match(/^\|\s*([A-Z]{1,3}-\d{2})\s*\|\s*(\w+)\s*\|\s*(\w+)\s*\|/);
+  if (row) overrides.push({ code: row[1], catalog: row[2].toLowerCase(), enforced: row[3].toLowerCase() });
+}
+if (overrides.length === 0) {
+  throw new Error(`${HAVE_NOTS}: the Severity Overrides table has no parseable rows.`);
+}
+for (const override of overrides) {
+  if (!catalogCodes.has(override.code)) {
+    throw new Error(`Severity Overrides lists ${override.code}, which is not a catalog entry.`);
+  }
+  if (!['error', 'warning', 'info'].includes(override.enforced)) {
+    throw new Error(`Severity Overrides row ${override.code} has invalid enforced severity "${override.enforced}".`);
+  }
+}
+
+// Behavioral parity for the registered ARCH compatibility downgrades: run the
+// actual check functions against an artifact missing the section and assert
+// the emitted severity equals the registered enforced severity.
+const validator = require('../lib/have-nots-validator');
+const OVERRIDE_CHECK_FNS = {
+  'A-14': validator.checkArchCriticalFlows,
+  'A-15': validator.checkArchCapacityEnvelope,
+  'A-16': validator.checkArchFailureDegradation
+};
+for (const code of Object.keys(OVERRIDE_CHECK_FNS)) {
+  const override = overrides.find((row) => row.code === code);
+  if (!override) {
+    throw new Error(`${code} is a known compatibility downgrade but has no Severity Overrides row.`);
+  }
+  const findings = OVERRIDE_CHECK_FNS[code]('# ARCH\n\nNo relevant sections here.\n');
+  const finding = findings.find((f) => f.code === code);
+  if (!finding) {
+    throw new Error(`${code}: check function emitted no finding for a missing section.`);
+  }
+  if (finding.severity !== override.enforced) {
+    throw new Error(
+      `${code}: validator emits severity "${finding.severity}" but the Severity Overrides table `
+      + `registers "${override.enforced}". Update the table (with owner and rationale) or the validator; `
+      + 'an unregistered fork between the two graders is not allowed.'
+    );
+  }
+}
+
 console.log(
   `  + HAVE-NOTS reference tally matches body: ${countingSections.length} sections, ${declaredTotal} named have-nots; validator header in sync`
 );
 console.log(
   `  + ${routesChecked} routing have-not lists resolve to the catalog with no prefix gaps`
+);
+console.log(
+  `  + ${overrides.length} severity override(s) registered; validator behavior matches the table`
 );

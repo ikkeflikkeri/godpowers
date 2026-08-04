@@ -66,6 +66,50 @@ a Sentry error, by delegating to the connectors the host already exposes over MC
   connector into write scope in `.godpowers/connectors.json`, optionally narrowed
   to an action allowlist.
 
+## From one loop to a graph of loops
+
+A single improvement loop fails in four known ways: it games its own metric
+(Goodhart), it cannot question its own target, it fights sibling loops, and
+its measurement quietly decays into paperwork confirming paperwork. Godpowers
+answers each failure structurally rather than with more prompting:
+
+- **A metric never travels alone.** Every claimed-pass verification command is
+  paired with its executed-backed count from the evidence ledger
+  (`lib/gate.js` attestation pairing; `attested, not executed` findings).
+  Workflow percent travels with built percent when steps were skipped
+  (`lib/state.js`), a roadmap-declared done travels with its declared-only
+  provenance (`lib/requirements.js`), and a repair-loop green travels with a
+  test-surface integrity verdict (`lib/repair-integrity.js`): a green that
+  deleted tests, added skips, or lowered coverage floors is SUSPECT and
+  escalates instead of continuing.
+- **Anchors, not mutual confirmation.** The one measurement that cannot be
+  argued with is a command that actually ran: `lib/evidence.js` records
+  spawnSync-backed executed verifications, and the tier gate corroborates
+  agent-authored state against that ledger. `fixtures/tripwires/` is the
+  held-out set: known-bad artifacts that each release-blocking sensor must
+  FAIL, so a gate that has gone blind is distinguishable from one that works.
+- **Frozen rules.** No auditor-authored summary line ever satisfies a gate;
+  verdicts derive from per-finding statuses through the single shared parser
+  (`lib/findings-verdict.js`, with the launch and publication policies pinned
+  as a tested contract). A static check keeps the parser singular.
+- **Speed separation.** Artifacts carry a cadence tier (`lib/artifact-map.js`):
+  fast loops regenerate views freely, but a mechanical stamper that finds a
+  slow artifact (PRD, ARCH, ROADMAP) drifted can only escalate to the review
+  queue (`scripts/version-sync.js`, `lib/cadence-guard.js`), never re-bless
+  it. Error-severity review items block Tier 3 routes until a human clears
+  them.
+- **The slow loop owns the knobs.** Fast-loop parameters (repair attempts,
+  outcome budgets, freshness windows) live in one registry
+  (`lib/loop-config.js`, `intent.yaml > loop-params`, edited via
+  `/god-budget --loop` with a logged reason) instead of inline constants that
+  fork across layers.
+- **Audit the auditor.** `npm run evidence:drift` verifies the vendored
+  verification engine against its pinned upstream on every release check, the
+  full-suite guard is derived from disk (every `scripts/test-*.js` must run,
+  removals need a named tombstone), and the have-nots severity-override table
+  in `references/HAVE-NOTS.md` keeps the mechanical and LLM graders provably
+  applying one severity per check.
+
 ## Keeping the loop safe: permission re-audit
 
 An unattended loop accumulates permission creep. `lib/reaudit.js` tracks how

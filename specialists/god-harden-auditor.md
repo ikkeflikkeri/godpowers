@@ -115,6 +115,11 @@ Reviewer: god-harden-auditor
 
 Launch gate: PASSED / BLOCKED
 
+(The summary line is for human readers only. Gate verdicts derive from
+per-finding statuses via `lib/findings-verdict.js`; a PASSED line never
+satisfies a gate, and a PASSED line above an unresolved Critical is itself
+reported as a summary conflict.)
+
 ## Findings
 
 ## OWASP Web Top 10:2025 Coverage
@@ -122,6 +127,12 @@ Launch gate: PASSED / BLOCKED
 | Category | Manual procedure | Result | Evidence or finding |
 |---|---|---|---|
 | A01:2025 through A10:2025 | one row per category | pass, fail, or justified Not Applicable | exact artifact, log, command, or finding |
+
+Prefer execution-cited evidence: run each executable probe through
+`npx godpowers verify "<probe>" --substep=tier-3.harden` so it lands in the
+evidence ledger, then cite `ledger:<timestamp>` or the exact probe command in
+backticks in the evidence cell. The harden gate warns on evidence cells that
+cite no resolvable executed-ledger record (`harden-owasp-citation`).
 
 ### [CRITICAL-001] [Title]
 - **Category**: OWASP A01:2025

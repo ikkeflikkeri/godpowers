@@ -1,6 +1,6 @@
 {
   "name": "godpowers",
-  "version": "5.14.3",
+  "version": "5.15.0",
   "description": "AI-powered development system: 123 slash commands and 41 specialist agents that take a project from raw idea to hardened production, then run it as an autonomous loop. Runs inside Claude Code, Codex, Cursor, Windsurf, Gemini, and 10+ other AI coding tools.",
   "bin": {
     "godpowers": "./bin/install.js"
@@ -39,7 +39,8 @@
     "pack:mcp:check": "npm --workspace @godpowers/mcp run pack:check",
     "release:prepublication:record": "node lib/prepublication-gate.js --record --project=.",
     "release:prepublication:check": "node lib/prepublication-gate.js --check --project=.",
-    "release:check": "npm run release:standards && npm run coverage:lib && node scripts/check-per-file-coverage.js && npm run test:audit && npm run test:self-truth && npm run pack:check && npm run pack:mcp:check",
+    "evidence:drift": "node scripts/sync-evidence-engine.js --check",
+    "release:check": "npm run release:standards && npm run coverage:lib && node scripts/check-per-file-coverage.js && npm run test:audit && npm run test:self-truth && npm run evidence:drift && npm run pack:check && npm run pack:mcp:check",
     "lint": "node scripts/static-check.js"
   },
   "workspaces": [

@@ -220,6 +220,9 @@ test('progressSummary treats skipped imported and not-required as complete', () 
   // exposed for honest dashboard annotation. imported is a real completion and
   // must NOT be counted as skipped.
   assert(p.skipped === 2, `skipped: ${p.skipped}`);
+  // builtPercent is the paired counter-metric: completed minus skipped over
+  // total, so the headline percent never travels alone.
+  assert(p.builtPercent === 8, `builtPercent: ${p.builtPercent}`);
 });
 
 test('renderProgressLine includes percent and current step', () => {

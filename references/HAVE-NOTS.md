@@ -790,6 +790,25 @@ new file, and god-executor trusts it.
 
 ---
 
+## Severity Overrides
+
+The catalog severity above is what a NEW artifact owes its author. The
+enforced severity is what the mechanical validator
+(`lib/have-nots-validator.js`) applies to an EXISTING artifact at the gate.
+The two may differ only through a row in this table: an undocumented
+divergence is a fork between the two graders of this catalog and fails
+`scripts/test-have-nots-tally.js`. god-standards-check grades at the enforced
+severity and reports the catalog severity as advisory, so the LLM gate and
+the mechanical gate cannot split on the same artifact.
+
+| Check | Catalog severity | Enforced severity | Owner | Rationale | Sunset |
+|---|---|---|---|---|---|
+| A-14 | Fail | warning | maintainer | Section added to the ARCH anatomy in 5.14.0; an error would retroactively fail every earlier in-flight ARCH at a tier it already passed | Promote to error once a migration path stamps existing ARCH artifacts |
+| A-15 | Fail | warning | maintainer | Same 5.14.0 compatibility downgrade as A-14 | Promote to error together with A-14 |
+| A-16 | Fail | warning | maintainer | Same 5.14.0 compatibility downgrade as A-14 | Promote to error together with A-14 |
+
+---
+
 ## Reference Tally
 
 - Universal: 14

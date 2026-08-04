@@ -1,11 +1,15 @@
 {
   "source": "mythify-mcp",
   "upstreamRepo": "mythify",
-  "upstreamPath": "mcp-server/src/index.js",
+  "upstreamPath": "mcp-server/src/index.js + mcp-server/src/verification-tools.js",
   "engine": "verify_run + verify_claim (verification tools)",
-  "version": "3.6.3",
-  "commit": "7cbd601f9c4d5328a54921a051d450703e44c514",
-  "syncedAt": "2026-06-15",
+  "version": "5.1.0",
+  "commit": "2cbb2fe6d670e02f1a4547d287a2c6ba40e962e8",
+  "syncedAt": "2026-08-04",
+  "reviewNotes": [
+    "2026-08-04: upstream refactored the engine out of index.js into verification-tools.js; extraction now spans both files.",
+    "2026-08-04: upstream added a provenance key to executed records (state-dir provenance). Reviewed and deferred: the Godpowers gate consumes kind/command/verified/timestamp, and the vendored engine already rebinds its state dir to .godpowers/ledger/, so the key adds nothing here. Re-evaluate on the next upstream sync."
+  ],
   "adaptations": [
     "verificationStepContext (plan/step_id/step_title/step_status) rebound to substepContext (arc/substep/substep_status)",
     "state dir .mythify/ rebound to .godpowers/ledger/",
@@ -25,6 +29,7 @@
       "stderr_tail",
       "verified",
       "timestamp",
+      "provenance",
       "plan",
       "step_id",
       "step_title",

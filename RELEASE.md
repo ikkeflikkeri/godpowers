@@ -1,40 +1,44 @@
-# Godpowers 5.14.3 Release
+# Godpowers 5.15.0 Release
 
 > Status: Publishing via tag-triggered provenance workflow
 > Date: 2026-08-04
 
-- [DECISION] Godpowers 5.14.3 clears the last two open Dependabot pull requests and deletes the reason one of them could never have gone green on its own.
-- [DECISION] The public surface contains 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes; no command, agent, reference, or have-not changed since 5.14.0.
-- [DECISION] The core package contains 101 runtime library modules and keeps zero production dependencies.
-- [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.14.3.
+- [DECISION] Godpowers 5.15.0 rewires the improvement-loop network from mutual confirmation to anchored verification: metrics never travel alone, gates corroborate claims against executed evidence, no auditor grades its own gate, and fast loops can no longer close slow loops' freshness checks.
+- [DECISION] The public surface contains 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes; no command or agent was added or removed. `references/HAVE-NOTS.md` gains a Severity Overrides table without changing its 183-entry catalog.
+- [DECISION] The core package contains 105 runtime library modules and keeps zero production dependencies. Four modules are new: `findings-verdict.js`, `repair-integrity.js`, `cadence-guard.js`, and `loop-config.js`.
+- [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.15.0.
 
 ## Changes
 
-- [DECISION] The roadmap's Evidence Provenance block no longer records a `package.json` source hash. The check asserted a derivation that does not exist: `god-roadmapper` is spawned with the PRD and ARCH paths and never reads the manifest, `ROADMAP.mdx` derives no content from it, and the only value it does take, the version, is separately asserted by `roadmap:source-version`.
-- [DECISION] What the hash did in practice was fail every pull request touching a root dependency, because Dependabot cannot run `npm run version:sync`. PR #78 failed on exactly that with all three Node jobs green and the coverage gate complete; the c8 upgrade itself was never the problem.
-- [DECISION] The three genuine roadmap sources, PRD, ARCH, and the stack decision, keep whole-file hashes at full strength, and nothing about them is narrowed. A regression test proves a devDependency bump alone now leaves the roadmap evidence valid, and the existing staleness test is repointed at `PRD.mdx` rather than deleted.
-- [DECISION] `scripts/version-sync.js` loses the step that re-stamped the deleted hash. The documented remedy for a red `roadmap:hash:package.json` was to run `version:sync`, which rewrote the value blind; across 151 commits touching `package.json` it never once made anybody read a diff. That is have-not U-07 inside a guard, where the mechanism exists and the review it implies is auto-dismissed by the standard fix.
-- [DECISION] A new "root manifest keeps its declared shape" check in `scripts/static-check.js` pays for the deletion with strictly more coverage than it removes. It asserts the exact top-level key set of `package.json` and that `dependencies`, `optionalDependencies`, and `peerDependencies` are each empty.
-- [DECISION] That closes a real hole rather than a hypothetical one: the previous check read only `dependencies`, so ARCH ADR-002's no-production-dependency claim could have been violated through `optionalDependencies` with nothing noticing, because the override guard reads the lockfile and `npm audit` fires only on a known advisory. A clean production dependency passed every gate in the repository.
-- [DECISION] `c8` moves to 12.0.0 through Dependabot PR #78. It declares `engines.node: ^20.19 || ^22.12 || >=23`, but it is a devDependency that only the coverage job runs, on Node 20, so `engines.node` stays at `>=18` and the Node 18 test job is untouched.
-- [DECISION] The pinned GitHub Actions move through Dependabot PR #89: `actions/checkout` to v7.0.1, `actions/setup-node` to v7.0.0, and `actions/setup-python` to v7.0.0 across all four workflows. The regenerated pull request included `security-audit.yml`, so no workflow is left behind on an older pin.
+- [DECISION] The tier gate pairs every claimed-pass verification command in `state.json` with its executed-backed count from the evidence ledger (`lib/evidence.js` verifications.jsonl). A claimed pass with no fresh verified executed record raises `<tier>-attestation-gap` ("attested, not executed") at warning severity behind a single promotion constant, so in-flight projects do not retroactively fail while the fabrication channel becomes visible on every gate run and dashboard.
+- [DECISION] `lib/findings-verdict.js` is now the only parser of `.godpowers/harden/FINDINGS.mdx`. The launch and publication policies are pinned as one tested contract: accepted risk resumes the arc, it never authorizes publication. The `Launch gate: PASSED` short-circuit in `lib/router.js` is deleted; the harden auditor writes that file, so trusting its own summary line let the audited party grade its own gate. A static check forbids any other lib module from parsing the findings artifact.
+- [DECISION] `fixtures/tripwires/` plus `scripts/test-gate-tripwires.js` negative-test the release sensors: a self-passed Critical, an attested-not-executed state file, and an uncited OWASP table must each FAIL their sensor. The suite pins both the current warning-stage behavior and the future error-stage behavior of the attestation gap, so severity promotion is a deliberate tested transition.
+- [DECISION] The autonomous repair loop gains a test-integrity counter-metric (`lib/repair-integrity.js`): a green re-run whose repair deleted test files, added skip markers, or lowered coverage thresholds is SUSPECT and escalates via `lib/executor-repair.js` regardless of remaining budget. The signals are deliberately cross-language and high-precision; renames stay quiet.
+- [DECISION] `scripts/version-sync.js` may re-bless the roadmap artifact hash only when the delta is exactly its own managed version stamp (`lib/cadence-guard.js` classifies the delta; `lib/artifact-map.js` records each artifact's cadence tier). Content drift is queued to `.godpowers/REVIEW-REQUIRED.mdx` and reported red instead of re-stamped; a human blesses deliberately with `--bless-roadmap="<reason>"`, logged to SYNC-LOG.mdx. This generalizes the 5.14.3 fix: the blind re-stamp of commit 1e99b1b is now structurally impossible, not just patched once.
+- [DECISION] Error-severity review-queue items mechanically block Tier 3 routes through the safe-sync-clear prerequisite until `/god-review-changes` clears them, and judgment-grade failures under `--yolo` are deferred into that queue instead of vanishing, so autonomy can keep building but cannot reach deploy, harden, or launch past an unreviewed judgment failure.
+- [DECISION] `lib/loop-config.js` is the single home for fast-loop knobs, with per-project overrides in `intent.yaml > loop-params` edited via `/god-budget --loop` with a logged reason. It closes a live defect: the runbook allowed 3 repair attempts while `lib/executor-repair.js` defaulted to 2. A static check keeps the runbook prose equal to the exported default.
+- [DECISION] Headline percentages carry their counter-metric: workflow percent travels with built percent when steps were skipped, a roadmap-declared done increment is annotated declared-only when linkage evidence does not back it, and linkage coverage of an empty requirement set reads 0 with a no-known-ids reason instead of a vacuously perfect 1.
+- [DECISION] The Severity Overrides table in `references/HAVE-NOTS.md` registers the A-14/A-15/A-16 compatibility downgrades with owner, rationale, and sunset; `scripts/test-have-nots-tally.js` asserts the validator's behavior matches the table and god-standards-check grades at the enforced severity, so the mechanical and LLM graders can no longer fork on one catalog.
+- [DECISION] `npm run evidence:drift` joins `release:check`: the vendored verification engine is compared against its pinned upstream on every release (soft-skip when the upstream checkout is absent so CI stays green). The check fired on its first run, catching a real upstream refactor and an additive record key, reviewed and recorded in `lib/evidence/.provenance.json`.
+- [DECISION] The full-suite guard in `scripts/static-check.js` is derived from disk: every `scripts/test-*.js` must be registered in the runner, with an explicit tombstone list, replacing a hand allowlist that covered 9 of ~90 suites.
 
 ## Validation
 
-- [DECISION] The fix is proven by construction, not by assertion: a simulated Dependabot root-manifest bump was applied to a clean tree and the self-project truth gate returned pass at 140 checks with no `version:sync` and no hand-edited hash.
-- [DECISION] Coverage under `c8` 12.0.0 holds at 94.78 percent lines and 79.56 percent branches, above the 90 and 75 release floors, with the per-file 70 percent gate green across 99 lib modules.
-- [DECISION] The self-project truth ledger moves from 141 checks to 140 and `.godpowers/AUDIT-REPORT.mdx` is corrected to match; nothing else in the repository quoted the old number.
-- [DECISION] The full suite, the complete release gate, the pre-publication gate, and the static check are green on the tagged commit.
+- [DECISION] The full suite (98 test scripts plus integration and MCP protocol tests) passes, and the complete release gate is green end to end: standards, coverage, per-file coverage, audit, self-project truth, evidence drift, and both package-content checks.
+- [DECISION] Coverage holds at 94.95 percent lines and 79.74 percent branches, above the 90 and 75 release floors, with the per-file 70 percent gate green across 103 lib modules.
+- [DECISION] The self-project truth gate returns pass at 140 checks on the release tree.
+- [DECISION] The tripwire suite proves each hardened sensor fails its known-bad fixture; the fixtures are frozen and the suite is protected from silent removal by the derived runner guard.
+- [DECISION] An independent Codex review at maximum reasoning effort was run over the complete change set before release; findings were triaged and addressed.
 - [DECISION] The complete release gate and the official Agent Skills validator run in the GitHub publication workflow before the artifact is published.
 
 ## Upgrade
 
-- [DECISION] Install with `npm install -g godpowers@5.14.3` or `npx godpowers@5.14.3`.
-- [DECISION] Nothing to migrate. Every change is to this repository's own gates, evidence, and development dependencies; no shipped runtime file changed.
-- [DECISION] A `.godpowers` project in the wild is unaffected. `lib/self-project-truth.js` returns early unless the package name is `godpowers`, and `templates/ROADMAP.mdx` has no provenance block at all, so the hash that was removed only ever existed in this repository's self-hosted copy.
+- [DECISION] Install with `npm install -g godpowers@5.15.0` or `npx godpowers@5.15.0`.
+- [DECISION] Nothing to migrate for existing `.godpowers` projects. The attestation gap ships as a warning, the OWASP citation check is advisory, and the roadmap re-bless guard only changes behavior in this repository's own version-sync flow. Projects that want claimed passes to become executed-backed run their verification commands through `npx godpowers verify "<command>" --substep=<id>`.
+- [DECISION] The `Launch gate: PASSED` short-circuit removal is the one behavioral tightening user projects can observe: a findings file whose summary line disagrees with its per-finding statuses no longer passes the launch prerequisite. A compliant findings file (statuses resolved or human-accepted) is unaffected.
 
 ## Publication Evidence
 
-- [DECISION] Pushing tag `v5.14.3` triggers the identity-bound provenance publication workflow, which verifies the tag against both package versions and against `origin/main`, runs the release and pre-publication gates, and publishes `godpowers@5.14.3` and `@godpowers/mcp@5.14.3` with npm provenance.
+- [DECISION] Pushing tag `v5.15.0` triggers the identity-bound provenance publication workflow, which verifies the tag against both package versions and against `origin/main`, runs the release and pre-publication gates, and publishes `godpowers@5.15.0` and `@godpowers/mcp@5.15.0` with npm provenance.
 - [DECISION] The GitHub Release is created by hand from this file after the workflow goes green; the workflow does not create it.
 - [DECISION] Post-publication registry integrity, tarball digests, and isolated exact-version install verification are recorded in a follow-up publication-evidence commit, consistent with the 5.10.x release flow.

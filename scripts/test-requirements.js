@@ -292,4 +292,37 @@ test('renderProgressLines degrades gracefully with no requirements', () => {
   assert(lines.length >= 1 && /none declared/.test(lines[0]), 'graceful empty');
 });
 
+test('a declared done increment without linkage evidence is marked declared-only', () => {
+  const root = initProject('gp-req-declared-only-');
+  writeRel(root, reqs.PRD_PATH, PRD_WITH_IDS);
+  writeRel(root, reqs.ROADMAP_PATH, roadmap('done'));
+  // No linkage map and build not complete: the declaration stands but its
+  // provenance is recorded and rendered.
+  const d = reqs.derive(root, { buildComplete: false });
+  const auth = d.increments.find(inc => inc.id === 'M-auth');
+  assert(auth.status === 'done', `declared done should stand: ${auth.status}`);
+  assert(auth.doneProvenance === 'declared-only', `provenance: ${auth.doneProvenance}`);
+  assert(d.summary.increments.declaredOnly === 1, `summary declaredOnly: ${d.summary.increments.declaredOnly}`);
+  const ledger = reqs.renderLedger(d);
+  assert(/declared-only: roadmap says done, linkage evidence does not/.test(ledger),
+    'ledger should annotate the declared-only increment');
+  const lines = reqs.renderProgressLines(d);
+  assert(lines.some(line => /declared-only, not evidence-linked/.test(line)),
+    `progress lines should carry the split: ${JSON.stringify(lines)}`);
+});
+
+test('an evidence-linked done increment carries no declared-only annotation', () => {
+  const root = initProject('gp-req-evidence-done-');
+  writeRel(root, reqs.PRD_PATH, PRD_WITH_IDS);
+  writeRel(root, reqs.ROADMAP_PATH, roadmap('done'));
+  linkage.addLink(root, 'P-MUST-01', 'src/auth/login.ts');
+  linkage.addLink(root, 'P-MUST-02', 'src/auth/logout.ts');
+  const d = reqs.derive(root, { buildComplete: true });
+  const auth = d.increments.find(inc => inc.id === 'M-auth');
+  assert(auth.status === 'done' && auth.doneProvenance === 'evidence-linked',
+    `expected evidence-linked done, got ${auth.status}/${auth.doneProvenance}`);
+  assert(d.summary.increments.declaredOnly === 0, 'no declared-only increments expected');
+  assert(!/declared-only/.test(reqs.renderLedger(d)), 'ledger should not annotate evidence-linked done');
+});
+
 report();

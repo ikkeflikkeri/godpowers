@@ -137,6 +137,16 @@ test('coverage computes linked percentage', () => {
   if (cov !== 0.5) throw new Error(`expected 0.5, got ${cov}`);
 });
 
+test('coverage of an empty ID set is 0 with an explicit reason, never vacuously perfect', () => {
+  const tmp = mkTmp();
+  if (linkage.coverage(tmp, []) !== 0) throw new Error('empty knownIds must yield 0 coverage');
+  const reportResult = linkage.coverageReport(tmp, []);
+  if (reportResult.reason !== 'no-known-ids') throw new Error(`expected no-known-ids reason, got ${reportResult.reason}`);
+  if (reportResult.known !== 0) throw new Error('known count should be 0');
+  const backed = linkage.coverageReport(tmp, ['P-MUST-01']);
+  if (backed.reason !== null || backed.known !== 1) throw new Error('non-empty set should carry its basis');
+});
+
 test('appendLog writes to LINKAGE-LOG.md', () => {
   const tmp = mkTmp();
   linkage.addLink(tmp, 'P-MUST-01', 'src/a.ts');

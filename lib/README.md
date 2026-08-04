@@ -45,6 +45,8 @@ package-level integrations.
 | `work-report.js` | Render the verification play-by-play from the evidence ledger. |
 | `adoption-metrics.js` | Derive adoption and outcome metrics from event streams. |
 | `change-metrics.js` | Derive the loop accepted-change rate (accepted vs rejected changes) from the event ledger. |
+| `loop-config.js` | Loop parameter registry: single home for fast-loop knobs (repair attempts, outcome budget, freshness windows) with per-project overrides in intent.yaml loop-params, edited through /god-budget with a logged reason. |
+| `repair-integrity.js` | Test-integrity counter-metric for the autonomous repair loop: snapshot the test surface before repair, compare after green, and mark a green SUSPECT when test files vanish, skips rise, or coverage floors drop. |
 | `outcome-metrics.js` | Derive time, cost, intervention, resume, deployment, and rollback outcomes from event evidence. |
 | `self-project-truth.js` | Block release when Godpowers source, state, Pillars, roadmap provenance, or lifecycle artifacts contradict. |
 
@@ -69,10 +71,12 @@ package-level integrations.
 
 | Module | Purpose |
 |--------|---------|
-| `artifact-map.js` | Tier gate artifact map: the per-tier required artifacts and state steps used by dashboards, gates, and doc-count checks. (Module-local paths stay in their owning module; `state.json` is named via `state.STATE_FILE`.) |
+| `artifact-map.js` | Tier gate artifact map: the per-tier required artifacts, cadence tiers (fast/managed/slow/frozen), and state steps used by dashboards, gates, and doc-count checks. (Module-local paths stay in their owning module; `state.json` is named via `state.STATE_FILE`.) |
 | `artifact-linter.js` | Check artifacts for required labels, evidence, and domain precision. |
 | `artifact-diff.js` | Compare artifact changes for review and release workflows. |
-| `gate.js` | Run executable artifact gates for Phase 1 tier completion checks. |
+| `cadence-guard.js` | Slow-artifact re-bless guard: classify a stale roadmap hash as a managed version stamp or content drift, so mechanical loops escalate drift for review instead of re-stamping it. |
+| `gate.js` | Run executable artifact gates for Phase 1 tier completion checks, including the claimed-vs-executed-backed attestation pairing against the evidence ledger. |
+| `findings-verdict.js` | Shared verdict authority for harden FINDINGS.mdx: one parser, two named policies (launch honors human-accepted risk, publication never does); no auditor-authored summary line satisfies a gate. |
 | `have-nots-validator.js` | Check artifacts against known failure modes. |
 | `voice-lint.js` | Detect sycophancy and gratitude-loop filler (have-not U-14); backs the artifact linter and the shipped-prose self-dogfood. |
 | `meta-linter.js` | Validate Godpowers documentation and skill metadata. |

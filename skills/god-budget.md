@@ -57,6 +57,22 @@ Enable/disable the agent-output cache. Default off.
 ### `/god-budget --cache-ttl=<hours>`
 Set cache entry TTL.
 
+### `/god-budget --loop <key>=<value> [--reason="why"]`
+Tune a loop parameter. The loop-parameter registry
+(`lib/loop-config.js`, block `loop-params` in `.godpowers/intent.yaml`) is the
+single home for every fast loop's operating knobs; editing it here is the
+slow loop owning the fast loops' parameters instead of inline constants.
+
+Keys: `repair-attempts` (autonomous repair budget before a human pause,
+default 3), `outcome-budget` (outcome-verify iterations, default 3),
+`accepted-change-target` (accepted-change ratio target, default 0.5),
+`checkpoint-fresh-hours` (dashboard freshness window, default 24),
+`hygiene-fresh-days` (hygiene nudge window, default 30),
+`reaudit-cadence-days` (permission reaudit cadence, default 30).
+
+With `--reason`, the change is appended to `.godpowers/SYNC-LOG.mdx`
+(old value, new value, reason) via `loopConfig.set(root, partial, { reason })`.
+
 ## Output (view mode)
 
 ```

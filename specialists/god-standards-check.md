@@ -69,6 +69,13 @@ For each sentence:
 Read the relevant section of references/HAVE-NOTS.md. For each have-not in
 the list, run its grep-testable check.
 
+Also read the "Severity Overrides" table at the bottom of the catalog. When a
+check appears there, grade it at the enforced severity (report the catalog
+severity as advisory context, not as the verdict). This keeps this gate and
+the mechanical validator (lib/have-nots-validator.js) applying one effective
+severity per check; an artifact must never fail here on a check the
+mechanical gate deliberately downgrades.
+
 ## Output
 
 Return to the orchestrating skill:

@@ -10,12 +10,14 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const crypto = require('node:crypto');
 
 const root = path.resolve(__dirname, '..');
 const check = process.argv.includes('--check');
+const blessArg = process.argv.find((arg) => arg.startsWith('--bless-roadmap='));
+const blessReason = blessArg ? blessArg.slice('--bless-roadmap='.length).trim() : null;
 const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
-const sha = (text) => `sha256:${crypto.createHash('sha256').update(text).digest('hex')}`;
+
+const cadenceGuard = require('../lib/cadence-guard');
 
 const mismatches = [];
 const rd = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
@@ -39,6 +41,11 @@ const surfaces = [
   ['.godpowers/roadmap/ROADMAP.mdx', new RegExp('(Source version: `)(' + V + ')(`)'), [2]],
   ['RELEASE.md', new RegExp(`(# Godpowers )(${V})( Release)`), [2]],
 ];
+const ROADMAP_REL = '.godpowers/roadmap/ROADMAP.mdx';
+// The version the roadmap's managed line held before this run stamped it;
+// step 5 uses it to tell a mechanical stamp apart from content drift.
+const roadmapVersionBefore = cadenceGuard.roadmapSourceVersion(rd(ROADMAP_REL));
+
 for (const [rel, regex, slots] of surfaces) {
   const text = rd(rel);
   const match = text.match(regex);
@@ -92,15 +99,60 @@ for (const [rel, regex, slots] of surfaces) {
 }
 
 // 5. State roadmap artifact hash (after ROADMAP.mdx is final).
+// The roadmap is a slow-cadence artifact (lib/artifact-map.js): this stamper
+// may re-bless the recorded hash only when the delta is exactly its own
+// managed Source-version stamp. Any other delta is content drift; it is
+// queued to .godpowers/REVIEW-REQUIRED.mdx and reported as a failure instead
+// of being re-stamped blind (the 1e99b1b incident; see RELEASE.md 5.14.3).
+// A human re-blesses deliberately with --bless-roadmap="<reason>", which
+// records the reason in .godpowers/SYNC-LOG.mdx.
 {
   const rel = '.godpowers/state.json';
-  const want = sha(rd('.godpowers/roadmap/ROADMAP.mdx'));
+  const roadmapText = rd(ROADMAP_REL);
   const text = rd(rel);
-  const next = text.replace(/("artifact":\s*"roadmap\/ROADMAP\.mdx",\s*\n\s*"artifact-hash":\s*")(sha256:[0-9a-f]+)(")/,
-    `$1${want}$3`);
-  if (next !== text) {
-    if (check) mismatches.push(`${rel}: roadmap artifact hash is stale`);
-    else { wr(rel, next); process.stdout.write(`  synced ${rel} roadmap artifact hash\n`); }
+  const recorded = text.match(/"artifact":\s*"roadmap\/ROADMAP\.mdx",\s*\n\s*"artifact-hash":\s*"(sha256:[0-9a-f]+)"/);
+  const delta = cadenceGuard.classifyRoadmapDelta({
+    recordedHash: recorded ? recorded[1] : null,
+    roadmapText,
+    version,
+    previousVersion: roadmapVersionBefore
+  });
+  const rebless = () => {
+    const next = text.replace(/("artifact":\s*"roadmap\/ROADMAP\.mdx",\s*\n\s*"artifact-hash":\s*")(sha256:[0-9a-f]+)(")/,
+      `$1${delta.currentHash}$3`);
+    wr(rel, next);
+  };
+  if (delta.verdict === 'managed-stamp') {
+    if (check) mismatches.push(`${rel}: roadmap artifact hash is stale (managed version stamp pending)`);
+    else { rebless(); process.stdout.write(`  synced ${rel} roadmap artifact hash (managed version stamp)\n`); }
+  } else if (delta.verdict === 'content-drift') {
+    if (check) {
+      mismatches.push(`${rel}: roadmap content changed outside the managed version line. `
+        + 'Review the ROADMAP.mdx diff (or run /god-roadmap update), then bless deliberately with '
+        + '`node scripts/version-sync.js --bless-roadmap="<reason>"`.');
+    } else if (blessReason) {
+      rebless();
+      const syncLog = path.join(root, '.godpowers', 'SYNC-LOG.mdx');
+      fs.appendFileSync(syncLog,
+        `\n- ${new Date().toISOString()} roadmap hash re-blessed deliberately via version-sync `
+        + `--bless-roadmap: ${blessReason}\n`);
+      process.stdout.write(`  re-blessed ${rel} roadmap artifact hash (reason logged to SYNC-LOG.mdx)\n`);
+    } else {
+      const reviewRequired = require('../lib/review-required');
+      reviewRequired.appendBatch(root, {
+        source: 'version-sync-roadmap-drift',
+        summary: 'ROADMAP.mdx content changed outside the managed version line; the recorded state hash was NOT re-blessed.',
+        items: [{
+          id: 'roadmap-hash-drift',
+          file: ROADMAP_REL,
+          severity: 'error',
+          message: 'Roadmap body drifted from the blessed hash through a mechanical run. A fast loop must not close a slow artifact\'s freshness check.',
+          suggestion: 'Review the ROADMAP.mdx diff (or run /god-roadmap update), then bless deliberately with `node scripts/version-sync.js --bless-roadmap="<reason>"`.'
+        }]
+      });
+      mismatches.push(`${rel}: roadmap content drift queued to .godpowers/REVIEW-REQUIRED.mdx; hash NOT re-blessed. `
+        + 'Bless deliberately with --bless-roadmap="<reason>" after review.');
+    }
   }
 }
 

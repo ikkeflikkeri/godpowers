@@ -7,6 +7,92 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.15.0] - 2026-08-04
+
+Turns the improvement-loop network from mutual confirmation into anchored
+verification: metrics never travel alone, gates corroborate against executed
+evidence, no auditor grades its own gate, and fast loops can no longer close
+slow loops' freshness checks.
+
+### Added
+
+- Attestation pairing in the tier gate: every claimed-pass verification
+  command in `state.json` is corroborated against the executed-evidence
+  ledger (`lib/evidence.js` verifications.jsonl). The gate reports the
+  claimed count and the executed-backed count side by side and raises an
+  `attested, not executed` finding (`<tier>-attestation-gap`) for any claimed
+  pass with no fresh verified executed record. Ships at warning severity
+  behind a single promotion constant so in-flight projects do not
+  retroactively fail; the dashboard renders the pair and queues an open item
+  on any gap.
+- `lib/findings-verdict.js`: the single verdict authority for
+  `.godpowers/harden/FINDINGS.mdx`, with two named policies pinned as a
+  tested contract: accepted risk resumes the arc (launch), it never
+  authorizes publication. The `Launch gate: PASSED` short-circuit in
+  `lib/router.js` is deleted; no auditor-authored summary line ever satisfies
+  a gate, and a static check keeps the parser singular.
+- `fixtures/tripwires/`: known-bad fixtures plus
+  `scripts/test-gate-tripwires.js`, asserting each release-blocking sensor
+  still FAILS on its adversarial case (self-passed Critical, attested-not
+  -executed state, uncited OWASP table). A gate that always passes is
+  indistinguishable from one that has gone blind; these are the held-out set
+  that tells them apart.
+- `lib/repair-integrity.js`: a test-surface counter-metric for the
+  autonomous repair loop. A green re-run whose repair deleted test files,
+  added skip markers, or lowered coverage thresholds is SUSPECT and
+  escalates (`lib/executor-repair.js`) instead of continuing; the cheapest
+  way to turn a failing command green must never be to shrink the thing
+  being measured.
+- `lib/loop-config.js`: one registry for fast-loop knobs (repair attempts,
+  outcome budget, accepted-change target, freshness windows, reaudit
+  cadence) with per-project overrides in `intent.yaml > loop-params`, edited
+  via `/god-budget --loop` with a logged reason. Closes a live fork: the
+  runbook allowed 3 repair attempts while `lib/executor-repair.js` defaulted
+  to 2, so whether a failure got a third try depended on which layer
+  classified it. A static check keeps the runbook prose and the exported
+  default in lockstep.
+- Cadence tiers in `lib/artifact-map.js` (fast/managed/slow/frozen) and
+  `lib/cadence-guard.js`: `scripts/version-sync.js` may re-bless the roadmap
+  hash only when the delta is exactly its own managed version stamp. Content
+  drift is queued to `.godpowers/REVIEW-REQUIRED.mdx` and never re-stamped
+  (the 1e99b1b incident, generalized from the 5.14.3 fix); a human blesses
+  deliberately with `--bless-roadmap="<reason>"`, logged to SYNC-LOG.mdx.
+- Error-severity review-queue items now mechanically block Tier 3 routes
+  through the safe-sync-clear prerequisite until `/god-review-changes`
+  clears them, and judgment-grade failures under `--yolo` (standards-check
+  FAIL, design WARN) are deferred into that queue instead of vanishing.
+- A Severity Overrides table in `references/HAVE-NOTS.md` registers every
+  deliberate catalog-vs-validator severity downgrade (A-14/A-15/A-16, with
+  owner, rationale, and sunset); `scripts/test-have-nots-tally.js` asserts
+  the validator's behavior matches the table, and god-standards-check grades
+  at the enforced severity so the two graders cannot split on one artifact.
+- `npm run evidence:drift` in the release gate: the vendored verification
+  engine is checked against its pinned upstream on every `release:check`
+  (soft-skip when the upstream checkout is absent, so CI stays green). The
+  check fired on its first run and caught a real upstream refactor plus an
+  additive record key, reviewed and recorded in
+  `lib/evidence/.provenance.json`.
+- An advisory OWASP citation check (`harden-owasp-citation`): evidence cells
+  that cite no resolvable executed-ledger record are flagged, and the harden
+  auditor contract now prefers probes run through `npx godpowers verify`.
+
+### Changed
+
+- Headline percentages no longer travel alone: `progressSummary` adds
+  `builtPercent` (completed minus skipped) and the dashboard shows both when
+  steps were skipped; a roadmap-declared done increment is annotated
+  `declared-only` when linkage evidence does not back the declaration, in
+  the ledger, the dashboard, and the release-truth detail; and linkage
+  coverage of an empty requirement set is 0 with a `no-known-ids` reason
+  instead of a vacuously perfect 1.
+- The full-suite guard in `scripts/static-check.js` is derived from disk:
+  every `scripts/test-*.js` must be registered in the runner, with a named
+  tombstone list for intentional exclusions, replacing a hand-curated
+  allowlist that covered 9 of ~90 suites.
+- `docs/loop-engineering.md` documents the graph-of-loops model these
+  changes implement (paired counter-metrics, anchors, frozen rules, cadence
+  separation, owned knobs, audit-the-auditor).
+
 ## [5.14.3] - 2026-08-04
 
 Clears the last two open Dependabot pull requests and removes the reason one of

@@ -14,7 +14,7 @@ description: |
 license: MIT
 compatibility: "Works with Agent Skills compatible file-system agents. Supported hosts include Claude Code, Codex, Cursor, Windsurf, Gemini, OpenCode, Copilot, Augment, Trae, Cline, Kilo, Antigravity, Qwen, CodeBuddy, and Pi."
 metadata:
-  version: "5.14.3"
+  version: "5.15.0"
   updated: "2026-07-13"
   changelog: "CHANGELOG.md"
   tier: "full-arc"
@@ -744,6 +744,13 @@ If any finding is classified Critical:
   - Time estimate per option
 - Launch resumes only after Critical findings are resolved or explicitly
   accepted as risk by the human
+- Precedence rule (one policy, two scopes, both resolved by
+  `lib/findings-verdict.js`): accepted risk resumes the arc; it never
+  authorizes publication. The hash-bound pre-publication gate still blocks
+  on an accepted Critical.
+- No auditor-authored summary line ever satisfies a gate: verdicts derive
+  from per-finding statuses, never from a "Launch gate: PASSED" line in the
+  findings file the auditor itself wrote
 
 ---
 
