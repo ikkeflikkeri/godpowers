@@ -28,6 +28,9 @@
 
 ## Publication Evidence
 
-- [DECISION] Pushing tag `v5.17.1` triggers the identity-bound provenance publication workflow, which verifies the tag against both package versions and against `origin/main`, runs the release and pre-publication gates, and publishes `godpowers@5.17.1` and `@godpowers/mcp@5.17.1` with npm provenance.
-- [DECISION] The GitHub Release is created by hand from this file after the workflow goes green; the workflow does not create it.
-- [DECISION] Post-publication registry integrity, tarball digests, and isolated exact-version install verification are recorded in a follow-up publication-evidence commit, consistent with the 5.17.0 release flow.
+- [DECISION] Tag `v5.17.1` resolves to `main` commit `f2215bade61fb2dec44ec5438c121c81d96bb70d`.
+- [DECISION] Provenance workflow 31109012123 verified the release identity, ran the release and pre-publication gates, and published `godpowers@5.17.1` and `@godpowers/mcp@5.17.1` under the `latest` tag with npm provenance.
+- [DECISION] The root registry integrity is `sha512-sTsoYdBKOeDETEDcro80iATGzpl2n8RmBvAMp8ZGv8opD3hASvMBE2yYsZuNLLZ0v1HuEcocTqjh4iEtHVkEOA==` (shasum `81e302262026de43318277ae11ed0514ec03d2fc`).
+- [DECISION] The MCP registry integrity is `sha512-IKZ9OCn2E0t3nPS8rm14IlcqFWtrsRCtOVfbWY0rd5Ydzvo7lAMwwRgSuloYp587AIFDaj7oPFswmWRw12P09g==` (shasum `5bb5861a8e2329b574b776e4108c5821d292a51b`).
+- [DECISION] Isolated exact-version verification (`scripts/verify-published-install.js godpowers@5.17.1`) passes against the registry artifact: Quick Proof, read-only project inspection, dashboard, next route, Claude install surface, and Codex install surface.
+- [DECISION] GitHub Release `v5.17.1` was created by hand from this file after the workflow went green, notes only, no tarball assets.
