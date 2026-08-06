@@ -157,6 +157,68 @@ test('visualRegression captures a baseline, then detects a size change', () => {
 });
 
 // ---------------------------------------------------------------------------
+// referenceFromDesign + captureReferenceComparison
+// ---------------------------------------------------------------------------
+
+const DESIGN_WITH_REFERENCE = `---
+name: T
+reference:
+  name: Linear
+  url: "https://linear.app"
+  focus: "marketing density"
+colors:
+  primary: "#3366ff"
+---
+# Rationale
+`;
+
+test('referenceFromDesign reads a declared anchor and rejects unusable ones', () => {
+  const ref = audit.referenceFromDesign(DESIGN_WITH_REFERENCE);
+  assert(ref.name === 'Linear' && ref.url === 'https://linear.app' && ref.focus === 'marketing density', 'anchor parsed');
+  assert(audit.referenceFromDesign(DESIGN) === null, 'no anchor -> null');
+  assert(audit.referenceFromDesign('') === null, 'empty content -> null');
+  assert(audit.referenceFromDesign('---\nname: T\nreference: Linear\n---\n') === null, 'scalar anchor -> null');
+  const noUrl = audit.referenceFromDesign('---\nname: T\nreference:\n  name: Linear\n  url: "not-a-url"\n---\n');
+  assert(noUrl.name === 'Linear' && noUrl.url === null, 'bad url normalized to null');
+});
+
+asyncTest('captureReferenceComparison seals a blind pair against the candidate shot', async () => {
+  const outDir = mkProject('godpowers-runtime-audit-ref-');
+  const candidateShot = path.join(outDir, 'candidate.png');
+  fs.writeFileSync(candidateShot, 'PNG:candidate');
+  const page = { goto: async () => {}, screenshot: async ({ path: p }) => fs.writeFileSync(p, 'PNG:reference') };
+
+  const captured = await audit.captureReferenceComparison(page, {
+    reference: { name: 'Linear', url: 'https://linear.app', focus: null },
+    candidateShot,
+    outDir,
+    salt: 'run-1'
+  });
+  assert(captured.pair && captured.pair.status === 'sealed', 'pair sealed');
+  assert(captured.reference.pairDir === captured.pair.pairDir, 'report points at the pair');
+  assert(captured.findings.some((f) => f.kind === 'reference-comparison-pending' && f.severity === 'info'), 'pending finding is info');
+  assert(captured.screenshots.length === 1 && fs.existsSync(captured.screenshots[0]), 'reference shot written');
+  const manifest = JSON.parse(fs.readFileSync(path.join(captured.pair.pairDir, 'pair.json'), 'utf8'));
+  assert(!JSON.stringify(manifest).includes('reference'), 'manifest carries no roles');
+});
+
+asyncTest('captureReferenceComparison degrades to a warning when the reference is unreachable', async () => {
+  const outDir = mkProject('godpowers-runtime-audit-ref-down-');
+  const candidateShot = path.join(outDir, 'candidate.png');
+  fs.writeFileSync(candidateShot, 'PNG:candidate');
+  const page = { goto: async () => { throw new Error('dns fail'); } };
+
+  const captured = await audit.captureReferenceComparison(page, {
+    reference: { name: 'Linear', url: 'https://linear.app' },
+    candidateShot,
+    outDir
+  });
+  assert(captured.pair === null, 'no pair on failure');
+  const finding = captured.findings.find((f) => f.kind === 'reference-unreachable');
+  assert(finding && finding.severity === 'warning' && /dns fail/.test(finding.message), 'warning finding, never an error');
+});
+
+// ---------------------------------------------------------------------------
 // auditPage mock injection (deterministic, no real browser)
 // ---------------------------------------------------------------------------
 

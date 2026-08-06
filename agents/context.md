@@ -39,7 +39,7 @@ see_also: [arch, quality, deploy]
 ## Watchouts
 
 - [HYPOTHESIS] User adoption risk concentrates around whether agent spawning, installed runtime metadata, and local validation behave the same across supported AI coding tools.
-- [HYPOTHESIS] Documentation drift risk is high because the public surface includes 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes.
+- [HYPOTHESIS] Documentation drift risk is high because the public surface includes 124 slash commands, 41 specialist agents, 13 workflows, and 45 recipes.
 - [HYPOTHESIS] Adoption risk also concentrates around whether executable gates, dogfood, host guarantees, extension authoring, and suite release dry-runs behave consistently across supported hosts.
 
 ## Touchpoints
@@ -63,7 +63,7 @@ see_also: [arch, quality, deploy]
 From `RELEASE.md`:
 - [DECISION] Godpowers 5.5.0 is the Arc-Ready and Pillars conformance release.
 - [DECISION] The public surface contains 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes.
-- [DECISION] The core package contains 107 runtime library modules and keeps zero production dependencies.
+- [DECISION] The core package contains 108 runtime library modules and keeps zero production dependencies.
 - [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.5.0.
 - [DECISION] Product routing selects one of six forms before applying product archetype, industry, or regulatory overlays.
 - [DECISION] Each product form carries a distinct vertical slice and completion-evidence contract, so web assumptions do not leak into API, CLI, mobile, data, or infrastructure work.

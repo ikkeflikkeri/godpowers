@@ -188,6 +188,29 @@ test('spec.validate flags missing name', () => {
   if (!result.findings.find(f => f.code === 'D-NAME')) throw new Error('D-NAME missing');
 });
 
+test('spec.validate accepts a well-formed reference anchor', () => {
+  const result = spec.validate({
+    frontmatter: {
+      name: 'T',
+      reference: { name: 'Linear', url: 'https://linear.app', focus: 'density, motion restraint' }
+    }
+  });
+  if (result.findings.find(f => f.code && f.code.startsWith('D-REFERENCE'))) {
+    throw new Error('valid reference anchor should not be flagged');
+  }
+});
+
+test('spec.validate flags malformed reference anchors', () => {
+  const shape = spec.validate({ frontmatter: { name: 'T', reference: 'Linear' } });
+  if (!shape.findings.find(f => f.code === 'D-REFERENCE-SHAPE')) throw new Error('D-REFERENCE-SHAPE missing');
+
+  const noName = spec.validate({ frontmatter: { name: 'T', reference: { url: 'https://linear.app' } } });
+  if (!noName.findings.find(f => f.code === 'D-REFERENCE-NAME')) throw new Error('D-REFERENCE-NAME missing');
+
+  const badUrl = spec.validate({ frontmatter: { name: 'T', reference: { name: 'Linear', url: 'linear.app' } } });
+  if (!badUrl.findings.find(f => f.code === 'D-REFERENCE-URL')) throw new Error('D-REFERENCE-URL missing');
+});
+
 test('spec.resolveTokens accepts resolved references', () => {
   const parsed = spec.parse(VALID_DESIGN);
   const r = spec.resolveTokens(parsed);

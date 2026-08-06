@@ -343,8 +343,8 @@ the AI coding tool.
 
 ### Route Topology And Automation Audit (2026-07-31)
 
-[DECISION] The route graph is currently complete at the file level: 123
-`skills/*.md` command files match 123 `routing/*.yaml` route files, including
+[DECISION] The route graph is currently complete at the file level: 124
+`skills/*.md` command files match 124 `routing/*.yaml` route files, including
 the `god` front door and every shipped `god-*` command.
 
 [DECISION] The source surface also includes 41 `specialists/god-*.md` specialist
@@ -366,8 +366,8 @@ recipe command reference resolves to a shipped command route.
 
 | Surface | Current count | Automation interpretation |
 |---------|---------------|---------------------------|
-| Skills | 123 | Every command has a user-facing skill file |
-| Routes | 123 | Every command has machine-readable routing metadata |
+| Skills | 124 | Every command has a user-facing skill file |
+| Routes | 124 | Every command has machine-readable routing metadata |
 | Agents | 41 | Spawn targets are available for specialist work |
 | Workflows | 13 | Arc execution has declarative DAGs |
 | Recipes | 45 | Fuzzy intent can route into command sequences |
@@ -944,7 +944,7 @@ Lazy activation: extensions don't load until their skill is invoked.
 
 | Package | Contains |
 |---------|----------|
-| `godpowers` | Core: 123 skills, 41 agents, 13 workflows, base have-nots, 5 external integrations |
+| `godpowers` | Core: 124 skills, 41 agents, 13 workflows, base have-nots, 5 external integrations |
 | `@godpowers/security-pack` | SOC2, HIPAA, PCI auditors |
 | `@godpowers/launch-pack` | Show HN, Product Hunt, Indie Hackers strategists |
 | `@godpowers/data-pack` | Data engineering tier (ETL, ML, dashboards) |

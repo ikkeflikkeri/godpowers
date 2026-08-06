@@ -63,6 +63,26 @@ Beyond what was inherited, godpowers added:
   the load-bearing stable-id contract that `lib/linkage.js` depends on, and
   the single-map constraint would require dismantling `/god-reconcile`).
 
+- **Reference-anchored blind comparison and the bounded polish loop**
+  (`references/design/BLIND-COMPARISON.md`, `lib/blind-compare.js`, the
+  optional `reference:` anchor in DESIGN.md consumed by
+  `lib/runtime-audit.js`, `/god-polish`). Three framings were influenced by
+  the gauntlet-loop skill by duolahypercho
+  ([github.com/duolahypercho/gauntlet-loop](https://github.com/duolahypercho/gauntlet-loop),
+  MIT), which packages Matt Shumer's aim prompt: a named shipped product as
+  the quality bar instead of self-authored criteria, blind side-by-side
+  judgment so the critic cannot flatter the work it sits next to, and an
+  iterative climb toward that bar with the human as the brake. No code or
+  prose is vendored, there is no runtime dependency, and godpowers asserts
+  nothing about its internals or published results. Godpowers implements
+  the ideas on its own substrate and inverts the parts that conflict with
+  its load-bearing contracts: pairs are sealed with a mechanical
+  verdict-before-unseal ordering rather than trusted procedure alone, the
+  reference verdict is advisory and never trips the critical-finding gate,
+  and the polish loop rejects "the human is the only brake" outright: a
+  rounds cap (`polish-rounds-limit`) and a dry-round detector close the
+  loop on their own, because unbounded iteration is also unbounded cost.
+
 ## Why this is the only mention
 
 Acknowledging influences once, in a single dedicated file, keeps the

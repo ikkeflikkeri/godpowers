@@ -115,6 +115,29 @@ fetch the curated DESIGN.md as the starting frontmatter, then run
 `/impeccable polish` to refine. god-design-reviewer must gate the
 result before applying.
 
+## Reference anchor
+
+When the user (or PRD / PRODUCT.md) names a shipped product as the bar
+("it should hold up next to Linear"), record it in DESIGN.md frontmatter:
+
+```yaml
+reference:
+  name: "Linear"
+  url: "https://linear.app"
+  focus: "marketing density, motion restraint"
+```
+
+This is a verification anchor, not a token source: `lib/runtime-audit`
+captures it during design audits and seals a blind screenshot pair that
+god-browser-tester judges per `references/design/BLIND-COMPARISON.md`.
+The two paths are independent: choosing awesome-design starter tokens
+does not create an anchor, and an anchor copies nothing. `url` is
+optional; without it the anchor stays a named standard with no capture.
+`focus` names what gets judged, so verdicts do not drift into overall
+taste. Anchor changes go through god-design-reviewer like any other
+DESIGN.md change. Never add an anchor the user did not name; the bar
+belongs to the project, not to you.
+
 ## Output
 
 - `DESIGN.md` at project root, conformant to the Google Labs design.md spec

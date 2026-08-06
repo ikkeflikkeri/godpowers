@@ -276,6 +276,6 @@ agent. There is nothing T3-specific to install: the existing `--codex`,
 ## Where to next
 
 - [Concepts](concepts.md) - the vocabulary and the mental model behind it
-- [Reference](reference.md) - all 123 slash commands and CLI helpers
+- [Reference](reference.md) - all 124 slash commands and CLI helpers
 - [Tutorial: First Project](tutorials/first-project.md) - a full end-to-end walkthrough
 - [Composing with other tools](../references/shared/ORCHESTRATORS.md) - living alongside other AI workflow systems

@@ -71,7 +71,8 @@ default 3), `outcome-budget` (outcome-verify iterations, default 3),
 `reaudit-cadence-days` (permission reaudit cadence, default 30),
 `lessons-recall-limit` (recent lessons the planner recalls before slicing,
 default 10), `proposal-open-limit` (open improvement proposals allowed at
-once, default 1).
+once, default 1), `polish-rounds-limit` (rounds one `/god-polish` loop may
+run before it closes, default 3, hard max 10).
 
 With `--reason`, the change is appended to `.godpowers/SYNC-LOG.mdx`
 (old value, new value, reason) via `loopConfig.set(root, partial, { reason })`.

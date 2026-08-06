@@ -36,7 +36,7 @@ and State. Here is how each stage lands in Godpowers:
   records opt-in automations in `.godpowers/automations.json`.
 - **Context** - the project context files (`AGENTS.md` plus routed
   `agents/*.md`, in the Pillars layout) and
-  the 123 skills carry durable project knowledge across runs.
+  the 124 skills carry durable project knowledge across runs.
 - **Agent** - fresh-context specialists, spawned per sub-step.
 - **Verification** - the three-axis system: static lint, linkage drift, and
   runtime browser audit.
@@ -112,7 +112,7 @@ more nicely:
   escalate to the review queue. It can never re-bless the artifact itself.
   Error-severity review items block shipping until a human clears them.
 - **The slow loop owns the knobs.** Fast-loop parameters (repair attempts,
-  outcome budgets, freshness windows) live in one registry
+  outcome budgets, freshness windows, polish rounds) live in one registry
   (`lib/loop-config.js`), edited via `/god-budget --loop` with a logged reason,
   rather than as inline constants that fork across layers.
 - **Audit the auditor.** `npm run evidence:drift` checks the vendored

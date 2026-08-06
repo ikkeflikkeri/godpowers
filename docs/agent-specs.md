@@ -746,12 +746,12 @@ added during the production-ready + design + linkage push.
 | Field | Value |
 |---|---|
 | **File** | `specialists/god-browser-tester.md` |
-| **Triggers** | `/god-test-runtime`, `/god-build` (post-wave, optional), `/god-launch` (mandatory gate), `/god-harden` (a11y portion), `/god-design` (post-change runtime audit) |
-| **Inputs** | URL (live dev server, deploy preview, or production); DESIGN.md (for design audit); PRD.md (for acceptance criteria); project root |
-| **Outputs** | `.godpowers/runtime/<run-id>/audit-report.json` (design verification), `test-report.json` (functional verification), `screenshots/<page>.png`, `summary.md` |
+| **Triggers** | `/god-test-runtime`, `/god-build` (post-wave, optional), `/god-launch` (mandatory gate), `/god-harden` (a11y portion), `/god-design` (post-change runtime audit), `/god-polish` (per-round audit) |
+| **Inputs** | URL (live dev server, deploy preview, or production); DESIGN.md (for design audit, including its optional `reference:` anchor); PRD.md (for acceptance criteria); project root |
+| **Outputs** | `.godpowers/runtime/<run-id>/audit-report.json` (design verification), `test-report.json` (functional verification), `screenshots/<page>.png`, `blind/pair-*/` (sealed reference pairs, judged per `references/design/BLIND-COMPARISON.md`), `summary.md` |
 | **Downstream consumers** | god-orchestrator (launch gate), god-updater (REVIEW-REQUIRED population), state.json runtime slot |
 | **Artifact awareness** | Reads DESIGN, PRD; writes runtime reports; populates REVIEW-REQUIRED.mdx |
-| **Standards check** | WCAG AA contrast on real DOM; component drift > 10%; P-MUST-* acceptance flow failures (all are critical-finding gate triggers) |
+| **Standards check** | WCAG AA contrast on real DOM; component drift > 10%; P-MUST-* acceptance flow failures (all are critical-finding gate triggers; a lost reference comparison is advisory and never one) |
 | **Handoff** | Returns to spawner with run ID, backend used, audit + test summaries, paths to reports; suggested next is `/god-review-changes` if findings populated |
 
 ### god-context-writer

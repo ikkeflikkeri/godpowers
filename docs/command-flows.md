@@ -407,6 +407,29 @@ Auto-complete: `/god-init`
 
 ---
 
+## /god-polish (Tier 3)
+
+**Prerequisites**:
+- `state:tier-2.build.status == done`
+  - Auto-complete: `/god-build` (with user confirmation)
+- `DESIGN.md`
+
+**Execution**:
+- `god-browser-tester` (mode=audit, blind reference comparison when
+  DESIGN.md declares a `reference:` anchor)
+- `god-executor` per round (design-scoped fix slice)
+- `god-spec-reviewer` + `god-quality-reviewer`
+- Writes: `.godpowers/polish/POLISH.mdx`
+
+**Stop conditions**: rounds cap (`polish-rounds-limit`, default 3), human
+stop, dry round, or critical finding. First hit wins.
+
+**Standards**: have-nots U-01 through U-14
+
+**Success path**: `/god-review-changes`
+
+---
+
 ## /god-spike (Tier 0: Beyond Greenfield)
 
 **Prerequisites**: none

@@ -1,8 +1,8 @@
 # Godpowers Architecture Map
 
 > Visual reference for how everything connects.
-> 4 layers, 123 slash commands, 41 agents, 13 workflows, 45 recipes, executable release gates.
-> (123 = 122 `god-*` commands + the `/god` natural-language front door.)
+> 4 layers, 124 slash commands, 41 agents, 13 workflows, 45 recipes, executable release gates.
+> (124 = 123 `god-*` commands + the `/god` natural-language front door.)
 
 ---
 
@@ -647,7 +647,7 @@ godpowers/
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
 │
-├── skills/                        <- 123 slash-command skill files
+├── skills/                        <- 124 slash-command skill files
 │   ├── god-mode.md, god-init.md, god-prd.md, god-arch.md, ...
 │   └── (one .md per slash command)
 │
@@ -675,7 +675,7 @@ godpowers/
 │   ├── events.v1.json
 │   └── workflow.v1.json
 │
-├── lib/                           <- Real JS runtime (107 modules)
+├── lib/                           <- Real JS runtime (108 modules)
 │   ├── state.js                   <- state model + drift detection
 │   ├── events.js                  <- OTel-shape event log + hash chain
 │   ├── router.js                  <- command routing
@@ -745,20 +745,20 @@ godpowers/
 | Layers | 4 |
 | Tiers | 4 (0-3) |
 | Sub-steps (per tier) | 13: PRD, ARCH, ROADMAP, STACK, **DESIGN, PRODUCT**, REPO, BUILD, DEPLOY, OBSERVE, LAUNCH, HARDEN, plus orchestration |
-| Slash commands | 123 |
+| Slash commands | 124 |
 | Specialist agents | 41 |
 | Workflows (core YAMLs) | 13 |
 | Intent recipes | 45 |
 | Have-nots | 183 documented + 25 mechanically validated by linter |
 | Templates | 15 |
-| Reference documents | 52 |
+| Reference documents | 53 |
 | JSON Schemas | 7 |
-| **JS runtime modules** | **107** |
+| **JS runtime modules** | **108** |
 | **External integrations** | **5** (all detect-and-delegate; none vendored): Google Labs design.md, Impeccable, awesome-design-md, SkillUI, vercel-labs/agent-browser + Playwright |
 | Hooks | 2 |
 | Dogfood scenarios | 5 |
 | Documentation pages | 35 under docs/ plus reference material |
-| **Test suites** | **101 script files plus integration tests** |
+| **Test suites** | **102 script files plus integration tests** |
 | **Tests** | **Full behavioral suite gated by npm test** |
 | Supported AI runtimes | 15+ |
 | Verification axes | **3**: static (lint, design-spec, have-nots), linkage (drift, reverse-sync), runtime (headless browser audit + functional test) |

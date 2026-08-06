@@ -4,8 +4,8 @@
 > Date: 2026-08-06
 
 - [DECISION] Godpowers 5.16.0 closes the learning loop. Lessons extracted after a milestone now feed the next build plan, the learning loop gained ledger-backed telemetry, and prompt changes gained a human-gated improvement-proposal pipeline plus a frozen eval corpus for the artifact grader.
-- [DECISION] The public surface contains 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes; no command, agent, workflow, or recipe was added, removed, or renamed.
-- [DECISION] The core package contains 107 runtime library modules and keeps zero production dependencies. Two runtime modules were added: `lib/learning-metrics.js` and `lib/improvement-proposals.js`.
+- [DECISION] The public surface contains 124 slash commands, 41 specialist agents, 13 workflows, and 45 recipes; `/god-polish` was added after 5.16.0 shipped, ahead of the 5.17.0 release notes.
+- [DECISION] The core package contains 108 runtime library modules and keeps zero production dependencies. Two runtime modules were added: `lib/learning-metrics.js` and `lib/improvement-proposals.js`.
 - [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.16.0.
 
 ## Changes

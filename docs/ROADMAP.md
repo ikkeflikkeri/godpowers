@@ -62,7 +62,7 @@ What works today:
   detection and import, generated and legacy MDX fallback, compiled score and
   coverage signals, typed GA remediation dispatch, managed todo synchronization,
   and JSON-based staleness.
-- **123 slash commands** as thin orchestrators (front door, first-run, demo, surface control, lifecycle, planning,
+- **124 slash commands** as thin orchestrators (front door, first-run, demo, surface control, lifecycle, planning,
   building, shipping, design, runtime, linkage, story-file, suite, recovery,
   observability, capture, knowledge, process, configuration, utility,
   automation, migration, extension management, release support)

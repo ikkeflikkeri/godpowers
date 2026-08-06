@@ -135,6 +135,26 @@ is half as long" and "inversion". Always include one lens that is uncomfortable
 for the decision, because that is the one producing candidates the caller would
 not have written.
 
+## Blind judging for rendered candidates
+
+When the widened pool is design-shaped and the candidates actually render
+(theme variants, layout directions, landing-page treatments), the
+convergence step inherits a second anchoring risk on top of generation:
+the judge knows which variant the caller drafted and grades the label.
+Strip it. Pair the rendered candidates and judge each pair blind through
+`lib/blind-compare.js` per `references/design/BLIND-COMPARISON.md`:
+prepare with role names that mean something (`baseline`/`lens-3am`),
+record the verdict before reading the assignment, unseal, and put the
+resolved winner plus rationale in the candidates table.
+
+This replaces nothing else in this file: the rubric still belongs to the
+calling specialist, traps still demote rather than delete, and the
+baseline still competes. Blind judging only decides what the eyes can
+decide; fit-for-requirements stays a sighted, cited argument. Skip it
+when candidates do not render or when one is identifiable at a glance
+(its own logo, its own copy); a blindfold that fails one glance is
+ceremony, and the protocol file says to review labeled instead.
+
 ## Rules the calling agent must not break
 
 **1. Seed the obvious answer as a labeled baseline.** Before the fan-out, write

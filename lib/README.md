@@ -39,6 +39,7 @@ package-level integrations.
 | `event-reader.js` | Read and aggregate event streams. |
 | `otel-exporter.js` | Export Godpowers events in an OpenTelemetry-shaped format. |
 | `runtime-audit.js` | Audit runtime health and expected project state. |
+| `blind-compare.js` | Prepare unlabeled A/B screenshot pairs with a sealed role assignment; enforce verdict-before-unseal ordering and verdict immutability. |
 | `runtime-test.js` | Provide runtime checks used by package tests. |
 | `evidence.js` | Enforced producer of executed/attested verification records, the state.json rollup, gate events, reflections, memory, lessons, and outcome loops. |
 | `evidence-import.js` | Import an existing `.mythify/` ledger into `.godpowers/ledger/`. |

@@ -10,15 +10,15 @@ what you want in plain English.
 Nobody uses all of this. Most people use six or seven commands and let
 `/god-next` suggest the rest when they become relevant.
 
-## Slash commands (123 total)
+## Slash commands (124 total)
 
-The 123 total is 122 `god-*` commands plus the `/god` natural-language front
+The 124 total is 123 `god-*` commands plus the `/god` natural-language front
 door (a thin router that classifies intent rather than doing work itself).
 
 ### Command families
 
 Commands are grouped into families so the list stays scannable.
-All 123 commands remain direct entry points, but the user-facing map starts
+All 124 commands remain direct entry points, but the user-facing map starts
 with likely next moves and families:
 
 | Family | Purpose |
@@ -184,6 +184,8 @@ diff churn that cannot be traced to the request or slice plan.
 - `/god-repo` - Scaffold a production-grade repository.
 - `/god-build` - Build the milestone (TDD, waves, two-stage review).
 - `/god-add-tests` - Generate tests for existing code based on UAT criteria.
+- `/god-polish` - Bounded post-green polish loop (blind-judged against the
+  DESIGN.md reference anchor; rounds cap + human are the two brakes).
 
 ### Shipping tier (Tier 3)
 - `/god-deploy` - Set up deploy pipeline.

@@ -51,6 +51,21 @@ Question: does this change fit the project's stated brand and product?
    - Is it consistent with named brand references?
 3. If impeccable is installed, dispatch `/impeccable critique` on the
    change scope. Capture findings.
+4. Blind before/after, when renderable. If the change has a rendered
+   current state and a rendered proposed state (runtime screenshots or a
+   preview build), judge them blind per
+   `references/design/BLIND-COMPARISON.md`:
+   - `lib/blind-compare.preparePair({ roles: { current, proposed } })`
+   - Judge a vs b against the register and the change's stated intent,
+     record the verdict, then unseal.
+   - Proposed losing blind to current is concrete evidence for
+     misaligned or needs-discussion; winning or tying is supporting
+     evidence for aligned. The verdict informs stage 1, it does not
+     replace it: a change can win blind and still violate an
+     anti-reference.
+   Skip when nothing renders (token-only diff with no built surface) or
+   when the two states are trivially distinguishable; note the skip and
+   reason in the review record.
 
 Verdict for stage 1: **aligned | misaligned | needs-discussion**
 

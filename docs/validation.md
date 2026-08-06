@@ -255,6 +255,10 @@ The browser layer. Verifies the running app matches what artifacts say.
 - Rendered fonts match `typography.*.fontFamily`
 - Rendered border-radius matches `rounded.*` tokens
 - WCAG AA contrast on real DOM (real foreground/background luminance)
+- When DESIGN.md declares a `reference:` anchor with a `url`: the anchor
+  is captured beside the app and judged as a blind screenshot pair
+  (`references/design/BLIND-COMPARISON.md`). Advisory severity only:
+  losing to the reference informs the review queue, it never gates.
 
 **Functional verification** (`/god-test-runtime test`):
 - Each P-MUST/SHOULD/COULD requirement's "Acceptance:" criterion

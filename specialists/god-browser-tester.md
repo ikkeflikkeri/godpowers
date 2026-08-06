@@ -60,9 +60,21 @@ window. The bridge enforces this; do not pass `headless: false` ever.
    - Take screenshot
    - Close browser
 3. Write `audit-report.json` to `.godpowers/runtime/<run-id>/`.
-4. If critical findings (WCAG fail, > 10% component drift): emit
+4. If DESIGN.md declares a `reference:` anchor with a `url`, the audit
+   also captured the reference product and sealed a blind pair at
+   `.godpowers/runtime/<run-id>/blind/pair-*/`. Judge it per
+   `references/design/BLIND-COMPARISON.md`:
+   - Read ONLY `pair.json`, `a.*`, `b.*`. Never `assignment.json`.
+   - Grade against the anchor's `focus` line, cite concrete visual
+     evidence, then `lib/blind-compare.recordVerdict()` and `unseal()`.
+   - If the reference wins: append a warning-severity
+     `reference-comparison` finding (the rationale verbatim) to the
+     REVIEW-REQUIRED.md batch. Candidate wins or tie: record in
+     `summary.md` only. A `reference-unreachable` warning passes through
+     as-is. Advisory always; see the critical-triggers list below.
+5. If critical findings (WCAG fail, > 10% component drift): emit
    `runtime-audit.critical` event; trigger critical-finding gate.
-5. Otherwise: append findings to REVIEW-REQUIRED.md as a batch with
+6. Otherwise: append findings to REVIEW-REQUIRED.md as a batch with
    source `runtime-audit`.
 
 ### Mode 2: functional test only
@@ -122,6 +134,10 @@ or shell out to agent-browser directly.
 These pause both default mode AND --yolo. Same rationale: cannot
 auto-resolve "the running app is broken."
 
+A lost `reference-comparison` verdict is NEVER on this list. The
+reference anchor is an external, advisory bar: losing to Linear is
+information for the review queue, not evidence the app is broken.
+
 ## When you run
 
 | Trigger | Mode | Gate |
@@ -139,6 +155,8 @@ auto-resolve "the running app is broken."
 - You skipped DESIGN.md token comparison when it existed
 - You promoted P-MUST acceptance failure as a warning instead of error
 - You wrote audit-report.json with placeholder content
+- You read `assignment.json` before recording a blind verdict, or
+  escalated a lost reference comparison to the critical-finding gate
 
 ## Handoff
 

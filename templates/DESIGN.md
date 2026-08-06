@@ -1,6 +1,13 @@
 ---
 name: [Name your design system; one-word codename or product name]
 description: [One line. Visual register and feel. Brand vs product.]
+# Optional quality bar: a shipped external product the runtime audit
+# compares against via blind A/B screenshots. Verification anchor only;
+# it never supplies tokens. Delete the block if no reference is named.
+# reference:
+#   name: "[Shipped product, e.g. Linear]"
+#   url: "[https://... public page to capture, omit to skip capture]"
+#   focus: "[what to judge against it, e.g. density, motion restraint]"
 colors:
   # Use OKLCH for wide-gamut accuracy; fall back to hex sRGB if linter requires.
   ink: "oklch(20% 0.01 250)"

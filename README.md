@@ -115,7 +115,7 @@ figures out which of the specialists to bring in.
 
 ### Pick a profile so the command list stays calm
 
-You do not need all 123 commands visible at once. A profile installs only the
+You do not need all 124 commands visible at once. A profile installs only the
 ones that match how you work:
 
 | If this sounds like you | Use this profile |
@@ -376,7 +376,7 @@ Godpowers has its own vocabulary. Here is what each term means, in plain English
 - **agent** - a specialist worker (a product manager, an architect, a reviewer)
   brought in with a clean head to do one job well.
 - **skill / slash command** - something you type, like `/god-build`. There
-  are 123 of them, and you only ever need a few at a time.
+  are 124 of them, and you only ever need a few at a time.
 - **gate** - an automatic pass-or-fail check that work must clear before it
   counts as done. No gate, no "done".
 - **have-nots** - a named list of failure modes every document must avoid.
@@ -408,7 +408,7 @@ Godpowers.
 
 ### What is in the box
 
-The source contains 123 slash commands, 41 specialist agents,
+The source contains 124 slash commands, 41 specialist agents,
 13 workflows, and 45 recipes. The default `core` profile shows you 15 commands.
 
 Under those numbers, a few ideas do the heavy lifting:
@@ -512,7 +512,7 @@ runs dependency-free static checks.
 - [Quick Proof](https://github.com/hannsxpeter/godpowers/blob/main/docs/quick-proof.md)
 - [First 10 Minute Proof Case Study](https://github.com/hannsxpeter/godpowers/blob/main/docs/case-studies/first-10-minute-proof.md)
 - [Adoption Canary](https://github.com/hannsxpeter/godpowers/blob/main/docs/adoption-canary.md)
-- [Command reference (all 123 skills + 41 agents)](https://github.com/hannsxpeter/godpowers/blob/main/docs/reference.md)
+- [Command reference (all 124 skills + 41 agents)](https://github.com/hannsxpeter/godpowers/blob/main/docs/reference.md)
 - [Host capabilities](https://github.com/hannsxpeter/godpowers/blob/main/docs/host-capabilities.md)
 - [Roadmap](https://github.com/hannsxpeter/godpowers/blob/main/docs/ROADMAP.md)
 - [Release Notes](RELEASE.md)
