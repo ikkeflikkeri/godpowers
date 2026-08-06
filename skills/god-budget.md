@@ -68,7 +68,10 @@ default 3), `outcome-budget` (outcome-verify iterations, default 3),
 `accepted-change-target` (accepted-change ratio target, default 0.5),
 `checkpoint-fresh-hours` (dashboard freshness window, default 24),
 `hygiene-fresh-days` (hygiene nudge window, default 30),
-`reaudit-cadence-days` (permission reaudit cadence, default 30).
+`reaudit-cadence-days` (permission reaudit cadence, default 30),
+`lessons-recall-limit` (recent lessons the planner recalls before slicing,
+default 10), `proposal-open-limit` (open improvement proposals allowed at
+once, default 1).
 
 With `--reason`, the change is appended to `.godpowers/SYNC-LOG.mdx`
 (old value, new value, reason) via `loopConfig.set(root, partial, { reason })`.

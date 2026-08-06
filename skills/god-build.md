@@ -31,7 +31,8 @@ Orchestrate the build via specialist agents.
 ## Orchestration
 
 ### Phase 1: Plan
-Spawn **god-planner** in fresh context with ROADMAP, ARCH, DECISION.
+Spawn **god-planner** in fresh context with ROADMAP, ARCH, DECISION, plus
+prior learnings from `.godpowers/learnings/` when present.
 Output: `.godpowers/build/PLAN.mdx` with vertical slices grouped into waves.
 
 After the planner returns, run the source-grounding preflight from

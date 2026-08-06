@@ -1,46 +1,36 @@
-# Godpowers 5.15.1 Release
+# Godpowers 5.16.0 Release
 
 > Status: Publishing via tag-triggered provenance workflow
-> Date: 2026-08-04
+> Date: 2026-08-06
 
-- [DECISION] Godpowers 5.15.1 is a documentation release. It rewrites the public documentation surface for a broader, less technical audience and changes no runtime behavior.
+- [DECISION] Godpowers 5.16.0 closes the learning loop. Lessons extracted after a milestone now feed the next build plan, the learning loop gained ledger-backed telemetry, and prompt changes gained a human-gated improvement-proposal pipeline plus a frozen eval corpus for the artifact grader.
 - [DECISION] The public surface contains 123 slash commands, 41 specialist agents, 13 workflows, and 45 recipes; no command, agent, workflow, or recipe was added, removed, or renamed.
-- [DECISION] The core package contains 105 runtime library modules and keeps zero production dependencies. No runtime module changed in this release.
-- [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.15.1.
+- [DECISION] The core package contains 107 runtime library modules and keeps zero production dependencies. Two runtime modules were added: `lib/learning-metrics.js` and `lib/improvement-proposals.js`.
+- [DECISION] The `@godpowers/mcp` companion remains read-only and shares version 5.16.0.
 
 ## Changes
 
-- [DECISION] The public documentation now leads with the reader's problem rather than the system's mechanism. README, `docs/getting-started.md`, `docs/concepts.md`, `docs/quick-proof.md`, `docs/tutorials/first-project.md`, `SUPPORT.md`, `USERS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, and `docs/README.md` were rewritten. `docs/loop-engineering.md`, `docs/mcp.md`, `docs/host-capabilities.md`, `docs/extension-authoring.md`, `docs/brownfield-bluefield.md`, `docs/automation-providers.md`, `docs/validation.md`, `docs/recipes.md`, `docs/reference.md`, and `docs/command-flows.md` were revised.
-- [DECISION] Jargon moved after the on-ramp, each term glossed on first use. Vocabulary that appears in real tool output (arc, tier, gate, have-nots) is retained deliberately, because a user cannot read the dashboard without it.
-- [DECISION] Reference-grade material keeps its precision. Per-command flows, validation internals, and recipe tables gained entry points and audience signposts rather than prose simplification, which would degrade them for the reader who actually needs them at incident time.
-- [DECISION] Marketing tone for this product means concrete and specific, not superlative. A documentation surface full of unquantified decoration words would fail the substitution test that Godpowers enforces on every artifact it produces, on its own front page.
-- [DECISION] README gained a "Who this is for" audience table and an "Honest limits" section stating what Godpowers does not claim: it does not evaluate whether a product idea is good, it is not a penetration test, it does not behave identically on every host, and it does not remove the need to read its output.
-- [DECISION] `USERS.md` keeps "Godpowers has zero recorded production users" as its opening line and now frames why that sentence stays in place until it is false.
-- [DECISION] Mermaid diagrams were added for the gate loop (README) and the tier model (`docs/concepts.md`), and the brownfield decision tree moved from box-drawing ASCII to Mermaid. All three render natively on GitHub and require no image assets or external requests.
-
-## Fixed
-
-- [DECISION] `docs/concepts.md` claimed both 25 and 30 mechanical have-nots within the same section. The count derived from `lib/have-nots-validator.js` is 25.
-- [DECISION] `docs/reference.md` listed `/god-build` and `/god-fix` twice in the verb dispatcher sentence.
-- [DECISION] `docs/mcp.md` documented 5 of the 9 tools exported by `packages/mcp/lib/tools.js`, pinned `4.0.2` in its setup and serve commands, and described the mutation boundary as scoped to the 4.0.0 release.
-- [DECISION] `USERS.md` described the 3.0 line as current in a stale run-on paragraph.
+- [DECISION] The planner consumes prior learnings. `god-planner` reads the most recent milestone's `LEARNINGS.mdx` and recalls recent structured lessons (`npx godpowers lesson list`) before slicing, capped by the new `lessons-recall-limit` loop parameter (default 10, tuned via `/god-budget --loop`). `/god-extract-learnings` double-writes each Lessons Learned bullet into the evidence lessons store with a milestone tag, deduplicated on re-run. Previously the learnings pipeline was write-only: nothing ever read `LEARNINGS.mdx` back.
+- [DECISION] The learning loop is observable. New `lesson.recorded` and `lesson.recalled` ledger events, a `godpowers event emit` CLI subcommand as the concrete emission surface for skill prose, and `lib/learning-metrics.js` surfacing recorded and recalled counts in `/god-metrics`. Observability only: nothing gates on these numbers, and the accepted-change rate shown alongside is labeled correlation, not causation.
+- [DECISION] Prompt changes are proposal-gated. `lib/improvement-proposals.js` lets the learning loop DRAFT a change to a prompt surface (`skills/`, `specialists/`, `references/`, declared `frozen` cadence via the new `PROMPT_SURFACES` map in `lib/artifact-map.js`) but never apply one: proposals land in `.godpowers/proposals/` and escalate a warning-severity item into the review queue, and only a human applies them in `/god-review-changes` via the new `godpowers proposal` CLI (propose, list, decide). Staleness (target changed since drafting) refuses acceptance mechanically; dedupe and a `proposal-open-limit` cap (default 1) bound the queue; `proposal.*` events keep self-improvement telemetry out of the product accepted-change rate.
+- [DECISION] The proposal severity is staged. Proposals ship at `warning` (visible, never blocking) with a dual-state-pinned promotion path to `error` in `scripts/test-improvement-proposals.js`, cloned from the `ATTESTATION_GAP_SEVERITY` pattern, so the promotion is a deliberate tested transition rather than silent drift.
+- [DECISION] The review queue gained surgical clearing. `reviewRequired.removeItem` removes exactly one item from one batch, leaving every other byte of the ledger untouched, so deciding a proposal can never drop someone else's pending review.
+- [DECISION] A frozen eval corpus protects the artifact grader. `fixtures/evals/` holds known-good and known-bad PRD and roadmap fixtures graded by the already-frozen `lib/artifact-linter.js`, including tripwire fixtures whose self-authored "PASSED" prose must not blind the grader. Honestly framed: a frozen grader on a frozen corpus protects the sensors and gives reviewers reference examples; it cannot measure the effect of a prompt change.
 
 ## Validation
 
+- [DECISION] Three new test suites ride `npm test`: `scripts/test-learning-metrics.js`, `scripts/test-improvement-proposals.js`, and `scripts/test-eval-set.js` (101 test script files total).
 - [DECISION] The full suite passes, and the complete release gate is green end to end: standards, coverage, per-file coverage, audit, self-project truth, evidence drift, and both package-content checks.
-- [DECISION] The self-project truth gate returns pass at 140 checks on the release tree.
-- [DECISION] The documentation drift guards did their job during this work: `lib/repo-doc-sync.js` failed the suite when a rewrite dropped the `repo documentation sync` phrase from `CONTRIBUTING.md`, and the change was corrected before commit rather than shipped.
-- [DECISION] Every changed file was checked for em dashes, en dashes, and decorative emoji, per the repository style policy. None are present.
-- [DECISION] No runtime module, route, skill, agent, workflow, or recipe changed, so behavioral risk for existing projects is limited to what users read.
+- [DECISION] Every changed file was checked for em dashes, en dashes, and decorative emoji, per the repository style policy. The two `bad-*` roadmap eval fixtures contain an em dash deliberately: it is the failure mode they exist to encode, per the `fixtures/evals/README.md` contract.
 
 ## Upgrade
 
-- [DECISION] Install with `npm install -g godpowers@5.15.1` or `npx godpowers@5.15.1`.
-- [DECISION] Nothing to migrate. No state format, artifact schema, command name, or gate behavior changed.
-- [DECISION] Existing installs gain nothing functional by upgrading. Upgrade for the documentation, or skip this release safely.
+- [DECISION] Install with `npm install -g godpowers@5.16.0` or `npx godpowers@5.16.0`.
+- [DECISION] Nothing to migrate. No state format, artifact schema, command name, or gate behavior changed; the new loop parameters use built-in defaults until a project overrides them.
+- [DECISION] Existing projects gain the learnings-to-planner feed automatically on their next `/god-build` when `.godpowers/learnings/` exists; proposals and eval fixtures are opt-in surfaces.
 
 ## Publication Evidence
 
-- [DECISION] Pushing tag `v5.15.1` triggers the identity-bound provenance publication workflow, which verifies the tag against both package versions and against `origin/main`, runs the release and pre-publication gates, and publishes `godpowers@5.15.1` and `@godpowers/mcp@5.15.1` with npm provenance.
+- [DECISION] Pushing tag `v5.16.0` triggers the identity-bound provenance publication workflow, which verifies the tag against both package versions and against `origin/main`, runs the release and pre-publication gates, and publishes `godpowers@5.16.0` and `@godpowers/mcp@5.16.0` with npm provenance.
 - [DECISION] The GitHub Release is created by hand from this file after the workflow goes green; the workflow does not create it.
 - [DECISION] Post-publication registry integrity, tarball digests, and isolated exact-version install verification are recorded in a follow-up publication-evidence commit, consistent with the 5.10.x release flow.

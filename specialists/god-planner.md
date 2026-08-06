@@ -12,6 +12,7 @@ inputs:
   - ".godpowers/roadmap/ROADMAP.mdx"
   - ".godpowers/arch/ARCH.mdx"
   - ".godpowers/stack/DECISION.mdx"
+  - ".godpowers/learnings/**/LEARNINGS.mdx"
   - "references/building/BUILD-VERTICAL-SLICES.md"
   - "references/building/BUILD-WAVES.md"
 outputs:
@@ -42,13 +43,27 @@ makes a slice vertical, with examples) and `references/building/BUILD-WAVES.md`
    `Features (from PRD)` list (P-MUST-NN / P-SHOULD-NN / P-COULD-NN).
 2. Read ARCH for technical context
 3. Read stack DECISION for tooling
-4. Break the delivery increment into **vertical slices**:
+4. Read prior learnings when present. If `.godpowers/learnings/` exists, read
+   the most recent milestone's `LEARNINGS.mdx` before slicing. Also recall
+   recorded lessons mechanically: run `npx godpowers lesson list --json
+   --scope=project` and take at most the `lessons-recall-limit` most recent
+   entries (the knob lives in `lib/loop-config.js`, tuned via
+   `/god-budget --loop`). Apply lessons silently per
+   `references/shared/VOICE.md` (do the thing the lesson implies; do not
+   narrate the recall). A recorded lesson reflects what was true when it was
+   recorded, so verify any file, flag, or command it names still exists
+   before acting on it. When N > 0 lessons were injected, record the recall
+   in the event ledger: `npx godpowers event emit lesson.recalled
+   --attrs='{"count":N}'` (the emission surface for `/god-metrics`; see
+   `lib/learning-metrics.js`). Skip this step without comment when neither
+   the directory nor the store exists.
+5. Break the delivery increment into **vertical slices**:
    - Each slice delivers ONE user-visible behavior end-to-end
    - NOT "set up the database" - that's horizontal
    - YES "user can create an account" - includes DB + API + UI for that behavior
    - Every member requirement id of the increment must be covered by at least
      one slice; a slice may deliver more than one id
-5. For each slice, write a plan:
+6. For each slice, write a plan:
    - **Slice name**: user-visible behavior
    - **Requirements**: the PRD requirement ids this slice delivers (so the
      executor can annotate the code and the deliverable ledger can trace it)
@@ -63,10 +78,10 @@ makes a slice vertical, with examples) and `references/building/BUILD-WAVES.md`
    - **Implementation steps**: ordered
    - **Verification criteria**: how to know it works
    - **Dependencies**: which other slices must complete first
-6. Detect parallelism:
+7. Detect parallelism:
    - Slices touching different files with no shared state can run in parallel
    - Slices with shared state must be sequential
-7. Group into **waves**: each wave is a set of slices that can run in parallel
+8. Group into **waves**: each wave is a set of slices that can run in parallel
 
 ## Output
 

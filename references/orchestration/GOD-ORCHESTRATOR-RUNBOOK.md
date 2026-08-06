@@ -649,7 +649,8 @@ The Build sub-step is special. It requires 4 distinct agents per slice with
 strict ordering. DO NOT skip stages.
 
 ### Phase 1: Plan
-1. Spawn **god-planner** in fresh context with ROADMAP.md, ARCH.md, DECISION.md
+1. Spawn **god-planner** in fresh context with ROADMAP.md, ARCH.md, DECISION.md,
+   plus prior learnings from `.godpowers/learnings/` when present
 2. Pass `--yolo` if active
 3. Receive `.godpowers/build/PLAN.mdx` with vertical slices grouped into waves
 4. Verify PLAN.md exists on disk

@@ -533,6 +533,8 @@ Creates `pr/<original-branch>` filtering out `.godpowers/` commits. Push that br
 /god-extract-learnings   <- writes LEARNINGS.md
 [share .godpowers/learnings/<milestone>/LEARNINGS.mdx]
 ```
+Later `/god-build` runs feed the most recent milestone's learnings back to
+the planner, so lessons shape the next plan instead of sitting unread.
 
 ### Multi-perspective decision (acting like a team)
 

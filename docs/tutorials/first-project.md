@@ -175,7 +175,8 @@ just describe what you want in plain English and let it route you.
 
 Captures the decisions, the surprises, and the things you would do differently
 into `.godpowers/learnings/`. This is the institutional knowledge that normally
-evaporates the moment a feature ships.
+evaporates the moment a feature ships. The next `/god-build` reads it back:
+the planner consumes the most recent milestone's learnings before slicing.
 
 ### When production breaks
 

@@ -28,8 +28,34 @@ Capture institutional knowledge from a completed phase or milestone.
    - **Patterns established**: techniques that worked, worth reusing
    - **Surprises**: things you didn't expect (good or bad)
 3. Write to `.godpowers/learnings/<milestone>/LEARNINGS.mdx`
-4. Optionally append summary to a global `~/.godpowers-knowledge.md` for
+4. Record each **Lessons Learned** bullet in the structured lessons store so
+   later planner runs can recall it mechanically:
+   - First run `npx godpowers lesson list --json --scope=project` and skip any
+     bullet already recorded under the same milestone tag (dedupe; re-running
+     this skill must not double-write).
+   - For each new bullet: `npx godpowers lesson add "<bullet text>"
+     --tags=<milestone>` (project scope is the default; the store is
+     `.godpowers/ledger/lessons.jsonl` via `lib/evidence.js`).
+   - After each successful add, record it in the event ledger:
+     `npx godpowers event emit lesson.recorded
+     --attrs='{"milestone":"<milestone>"}'` so `/god-metrics` can prove the
+     learning loop is writing (`lib/learning-metrics.js`). The first emit
+     prints a run id; pass it back via `--run=<run-id>` on subsequent emits
+     so one extraction session stays one run instead of minting a run per
+     bullet.
+5. Optionally append summary to a global `~/.godpowers-knowledge.md` for
    cross-project learning (opt-in)
+6. Optionally draft an improvement proposal. When a lesson clearly implicates
+   a specific prompt surface (a `skills/*.md`, `specialists/*.md`, or
+   `references/**.md` file), draft the patch, but NEVER edit the file: prompt
+   surfaces carry `frozen` cadence (`lib/artifact-map.js PROMPT_SURFACES`).
+   Write a spec file `{ "targetFile": "...", "rationale": "...",
+   "patchText": "..." }` and queue it with `npx godpowers proposal propose
+   --file=<spec.json>`. That escalates a warning-severity item into
+   `.godpowers/REVIEW-REQUIRED.mdx` and emits `proposal.proposed`; only a
+   human applies it in `/god-review-changes`. The proposer never grades or
+   applies its own proposal. Skip when no lesson names a prompt surface;
+   never force one.
 
 ## Output
 

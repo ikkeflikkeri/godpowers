@@ -775,4 +775,99 @@ test('corrupt state.json yields a clean one-line error, not a stack trace (ERR-0
   assert(caught && caught.code === 'CORRUPT_STATE', `state.read should throw a typed CORRUPT_STATE error, got ${caught && caught.code}`);
 });
 
+test('event emit accepts lesson.* and refuses ledger-derived families', () => {
+  process.exitCode = 0;
+  const events = require('../lib/events');
+  const project = mkProject('godpowers-cli-event-');
+
+  const ok = capture(() => cliDispatch.runCommand({
+    command: 'event', eventAction: 'emit', eventName: 'lesson.recorded',
+    attrs: '{"milestone":"m1"}', runId: null, project, json: true
+  }));
+  assert(ok.value === true, 'event should dispatch');
+  const parsed = JSON.parse(ok.output);
+  assert(parsed.result.name === 'lesson.recorded', `unexpected: ${ok.output}`);
+  assert(process.exitCode === 0 || process.exitCode === undefined,
+    `valid emit should not set a failure exit, got ${process.exitCode}`);
+  const emitted = events.listRuns(project).flatMap((run) => events.readRun(project, run));
+  assert(emitted.some((e) => e.name === 'lesson.recorded'), 'the event must reach the ledger');
+
+  // The forgery boundary: change.*, gate.*, and state.rollback are
+  // ledger-derived evidence and must be refused even though they are valid
+  // event names (docs/loop-engineering.md: a loop cannot flatter itself).
+  for (const forged of ['change.accepted', 'gate.pass', 'state.rollback']) {
+    process.exitCode = 0;
+    const refused = capture(() => cliDispatch.runCommand({
+      command: 'event', eventAction: 'emit', eventName: forged,
+      attrs: null, runId: null, project, json: false
+    }));
+    assert(refused.output.includes('refused'), `${forged} must be refused, got: ${refused.output}`);
+    assert(process.exitCode === 1, `${forged} refusal must set exit code 1`);
+  }
+  process.exitCode = 0;
+  const after = events.listRuns(project).flatMap((run) => events.readRun(project, run));
+  assert(!after.some((e) => e.name && (e.name.startsWith('change.') || e.name.startsWith('gate.'))),
+    'no forged event may reach the ledger');
+});
+
+test('event emit --run appends to the existing run with trace continuity', () => {
+  process.exitCode = 0;
+  const events = require('../lib/events');
+  const project = mkProject('godpowers-cli-event-run-');
+  const first = capture(() => cliDispatch.runCommand({
+    command: 'event', eventAction: 'emit', eventName: 'lesson.recorded',
+    attrs: null, runId: null, project, json: true
+  }));
+  const runId = JSON.parse(first.output).result.runId;
+  capture(() => cliDispatch.runCommand({
+    command: 'event', eventAction: 'emit', eventName: 'lesson.recalled',
+    attrs: '{"count":2}', runId, project, json: true
+  }));
+  assert(events.listRuns(project).length === 1, 'reusing --run must not mint a second run');
+  const chain = events.verifyChain(events.eventsPath(project, runId));
+  assert(chain.valid === true, 'appending via --run must keep the hash chain intact');
+  const list = events.readRun(project, runId);
+  assert(new Set(list.map((e) => e.trace_id)).size === 1, 'all events must share the run trace');
+});
+
+test('proposal propose/list/decide round-trips through the CLI', () => {
+  process.exitCode = 0;
+  const project = mkProject('godpowers-cli-proposal-');
+  fs.mkdirSync(path.join(project, 'skills'), { recursive: true });
+  fs.writeFileSync(path.join(project, 'skills', 'god-x.md'), '# X\n');
+  const spec = path.join(project, 'spec.json');
+  fs.writeFileSync(spec, JSON.stringify({
+    targetFile: 'skills/god-x.md', rationale: 'cli round-trip', patchText: '+p\n'
+  }));
+
+  const proposed = capture(() => cliDispatch.runCommand({
+    command: 'proposal', proposalAction: 'propose', specFile: spec, project, json: true
+  }));
+  const id = JSON.parse(proposed.output).result.id;
+  assert(id, `propose should return an id, got: ${proposed.output}`);
+
+  const listed = capture(() => cliDispatch.runCommand({
+    command: 'proposal', proposalAction: 'list', status: null, project, json: true
+  }));
+  assert(JSON.parse(listed.output).result.some((p) => p.id === id), 'list must show the proposal');
+
+  const decided = capture(() => cliDispatch.runCommand({
+    command: 'proposal', proposalAction: 'decide', proposalId: id,
+    status: 'rejected', reason: 'cli test', project, json: true
+  }));
+  assert(JSON.parse(decided.output).result.status === 'rejected', `unexpected: ${decided.output}`);
+  assert(process.exitCode === 0 || process.exitCode === undefined,
+    `clean round-trip should not set a failure exit, got ${process.exitCode}`);
+
+  // Error paths exit 1 with a clean message, matching the family convention.
+  process.exitCode = 0;
+  const badSpec = capture(() => cliDispatch.runCommand({
+    command: 'proposal', proposalAction: 'propose', specFile: path.join(project, 'missing.json'),
+    project, json: false
+  }));
+  assert(badSpec.output.includes('unreadable spec file'), `unexpected: ${badSpec.output}`);
+  assert(process.exitCode === 1, 'a bad spec must set exit code 1');
+  process.exitCode = 0;
+});
+
 report('CLI dispatch tests');

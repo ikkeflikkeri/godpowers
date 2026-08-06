@@ -49,6 +49,8 @@ function showHelp() {
   log('  reflect              Record a structured reflection to the ledger');
   log('  memory               Set, get, list, or clear ledger memory entries');
   log('  lesson               Add or list reusable lessons in the ledger');
+  log('  event                Emit a named ledger event (lesson.*, proposal.*)');
+  log('  proposal             Draft, list, or decide human-gated prompt-change proposals');
   log('  outcome              Start, check, stop, or inspect a bounded retry loop');
   log('  import-ledger        Import an existing .mythify/ ledger into .godpowers/ledger/');
   log('');

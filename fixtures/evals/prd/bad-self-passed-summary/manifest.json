@@ -1,0 +1,5 @@
+{
+  "artifact": "PRD.mdx",
+  "mustRaise": ["P-07"],
+  "tripwire": true
+}

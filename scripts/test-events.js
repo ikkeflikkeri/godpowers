@@ -167,4 +167,20 @@ test('VALID_EVENT_NAMES exposes the vocabulary set', () => {
     'vocabulary missing host-capabilities.detect');
 });
 
+test('vocabulary and schema/events.v1.json enum are byte-for-byte in sync', () => {
+  // Spot checks above cannot catch drift; this set-diffs the two
+  // vocabularies both directions so a name added to one surface without the
+  // other fails the suite (the lesson.*/proposal.* families drifted exactly
+  // this way once).
+  const schema = JSON.parse(fs.readFileSync(
+    path.join(__dirname, '..', 'schema', 'events.v1.json'), 'utf8'));
+  const schemaNames = new Set(schema.properties.name.enum);
+  const missingFromSchema = [...events.VALID_EVENT_NAMES].filter((n) => !schemaNames.has(n));
+  const missingFromRuntime = [...schemaNames].filter((n) => !events.VALID_EVENT_NAMES.has(n));
+  assert(missingFromSchema.length === 0,
+    `schema/events.v1.json enum missing: ${missingFromSchema.join(', ')}`);
+  assert(missingFromRuntime.length === 0,
+    `lib/events.js VALID_EVENT_NAMES missing: ${missingFromRuntime.join(', ')}`);
+});
+
 report();

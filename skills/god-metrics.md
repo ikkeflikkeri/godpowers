@@ -59,12 +59,23 @@ intervention, resume success, deployment completion, and rollback proof from
 the event ledger. A metric reports `no event evidence` when the current event
 history cannot prove it.
 
+## Learning loop
+
+Counts `lesson.recorded` (a lesson entering the evidence store from
+/god-extract-learnings) and `lesson.recalled` (the planner injecting recalled
+lessons before slicing, with how many). Observability only: nothing gates on
+these numbers, and the accepted-change rate shown alongside is labeled
+correlation, not causation. `no event evidence` means the ledger holds no
+learning events, not that the loop is unhealthy.
+
 ## Implementation
 
 Built-in. Calls `lib/event-reader.js metrics(...)` for the per-tier stats and
 `lib/change-metrics.js compute(...)` / `render(...)` for the accepted-change rate
 (derived from the `change.*`, `gate.pass`/`gate.fail`, and `state.rollback`
-events in the ledger), plus `lib/outcome-metrics.js` for user outcomes.
+events in the ledger), plus `lib/outcome-metrics.js` for user outcomes and
+`lib/learning-metrics.js` for the learning loop (`lesson.recorded`,
+`lesson.recalled`).
 
 ## Related
 

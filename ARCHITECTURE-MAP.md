@@ -642,7 +642,7 @@ godpowers/
 ├── README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, USERS.md
 ├── ARCHITECTURE.md                <- Design doc
 ├── ARCHITECTURE-MAP.md            <- This file
-├── package.json (v5.15.1)
+├── package.json (v5.16.0)
 ├── .github/workflows/              <- CI, npm publish, daily security audit
 │
 ├── bin/install.js                 <- CLI installer (15 runtimes)
@@ -675,7 +675,7 @@ godpowers/
 │   ├── events.v1.json
 │   └── workflow.v1.json
 │
-├── lib/                           <- Real JS runtime (105 modules)
+├── lib/                           <- Real JS runtime (107 modules)
 │   ├── state.js                   <- state model + drift detection
 │   ├── events.js                  <- OTel-shape event log + hash chain
 │   ├── router.js                  <- command routing
@@ -738,7 +738,7 @@ godpowers/
 
 ---
 
-## Numbers (as of v5.15.1)
+## Numbers (as of v5.16.0)
 
 | Component | Count |
 |-----------|-------|
@@ -753,12 +753,12 @@ godpowers/
 | Templates | 15 |
 | Reference documents | 52 |
 | JSON Schemas | 7 |
-| **JS runtime modules** | **105** |
+| **JS runtime modules** | **107** |
 | **External integrations** | **5** (all detect-and-delegate; none vendored): Google Labs design.md, Impeccable, awesome-design-md, SkillUI, vercel-labs/agent-browser + Playwright |
 | Hooks | 2 |
 | Dogfood scenarios | 5 |
 | Documentation pages | 35 under docs/ plus reference material |
-| **Test suites** | **98 script files plus integration tests** |
+| **Test suites** | **101 script files plus integration tests** |
 | **Tests** | **Full behavioral suite gated by npm test** |
 | Supported AI runtimes | 15+ |
 | Verification axes | **3**: static (lint, design-spec, have-nots), linkage (drift, reverse-sync), runtime (headless browser audit + functional test) |

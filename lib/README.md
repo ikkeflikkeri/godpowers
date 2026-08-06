@@ -45,6 +45,8 @@ package-level integrations.
 | `work-report.js` | Render the verification play-by-play from the evidence ledger. |
 | `adoption-metrics.js` | Derive adoption and outcome metrics from event streams. |
 | `change-metrics.js` | Derive the loop accepted-change rate (accepted vs rejected changes) from the event ledger. |
+| `learning-metrics.js` | Derive learning-loop counts (lessons recorded and recalled) from the event ledger; observability only, with the accepted-change rate alongside labeled correlation, not causation. |
+| `improvement-proposals.js` | Human-gated prompt-change pipeline: draft a patch against a frozen prompt surface, escalate it into the review queue at staged severity, and record the human decide verdict; never applies a patch itself. |
 | `loop-config.js` | Loop parameter registry: single home for fast-loop knobs (repair attempts, outcome budget, freshness windows) with per-project overrides in intent.yaml loop-params, edited through /god-budget with a logged reason. |
 | `repair-integrity.js` | Test-integrity counter-metric for the autonomous repair loop: snapshot the test surface before repair, compare after green, and mark a green SUSPECT when test files vanish, skips rise, or coverage floors drop. |
 | `outcome-metrics.js` | Derive time, cost, intervention, resume, deployment, and rollback outcomes from event evidence. |

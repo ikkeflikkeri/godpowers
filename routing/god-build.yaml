@@ -21,6 +21,7 @@ execution:
   reads:
     - references/building/PRODUCT-FORM-ROUTER.md
     - references/building/DOMAIN-COMPOSITION-REGISTRY.md
+    - .godpowers/learnings/**/LEARNINGS.mdx
   secondary-spawns: [god-executor, god-spec-reviewer, god-quality-reviewer]
   writes:
     - .godpowers/build/PLAN.mdx

@@ -36,6 +36,35 @@ remediation, and let the user mark addressed (or defer).
 6. After all items in a batch are addressed: prompt to clear the batch.
 7. After all batches cleared: delete `REVIEW-REQUIRED.md`.
 
+## Improvement proposals
+
+Batches with source `improvement-proposal` carry a drafted prompt-surface
+change (a `skills/`, `specialists/`, or `references/` file) that the learning
+loop escalated instead of applying (`lib/improvement-proposals.js`). For each
+proposal item:
+
+1. Read the proposal record the suggestion points at
+   (`.godpowers/proposals/<id>.json`): target file, rationale, patch text.
+2. Check staleness first: if the target changed since drafting, the proposal
+   must be rejected or re-drafted, never applied
+   (`proposal decide <id> --status=rejected --reason="stale"` refuses stale
+   accepts mechanically too).
+3. Show the human the target, the rationale, and the full patch. "Address
+   now" here means the human explicitly approves the change BEFORE any edit
+   happens.
+4. On approval: apply the patch to the target file in-session (the human's
+   edit), run the project test suite, then record the verdict:
+   `npx godpowers proposal decide <id> --status=accepted --reason="..."`.
+   On rejection: `--status=rejected` with the reason. Either verdict emits
+   `proposal.accepted` / `proposal.rejected` and moves the record to
+   `.godpowers/proposals/decided/`.
+5. The decide step removes only that proposal's queue item
+   (`reviewRequired.removeItem`); other pending batches stay byte-identical,
+   so resolving a proposal can never drop someone else's pending review.
+
+Never batch-approve proposals; each one is read, tested, and decided on its
+own.
+
 ## Auto-clear policy
 
 Per plan question 3: REVIEW-REQUIRED.md does NOT auto-clear under
@@ -103,6 +132,8 @@ Address now / defer / mark resolved? [a/d/r]
 - Run lint or impeccable (those are separate skills)
 - Run reverse-sync (god-updater on /god-sync)
 - Auto-fix any issue (always requires human review)
+- Apply an improvement proposal the human has not explicitly approved in the
+  walkthrough (and never a stale one)
 
 ## Output
 

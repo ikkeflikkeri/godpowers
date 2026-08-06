@@ -66,6 +66,11 @@
         "cache.hit",
         "cache.miss",
         "budget.exceeded",
+        "lesson.recorded",
+        "lesson.recalled",
+        "proposal.proposed",
+        "proposal.accepted",
+        "proposal.rejected",
         "error",
         "warn"
       ]

@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.16.0] - 2026-08-06
+
+Learning-loop release. Closes the write-only learnings gap, adds ledger-backed
+learning telemetry, gates prompt changes behind human-approved improvement
+proposals, and freezes an eval corpus that protects the artifact grader.
+
+### Added
+
+- The planner consumes prior learnings: `god-planner` reads the most recent
+  milestone's `LEARNINGS.mdx` and recalls recent structured lessons before
+  slicing, capped by the new `lessons-recall-limit` loop parameter.
+  `/god-extract-learnings` double-writes Lessons Learned bullets into the
+  evidence lessons store, deduplicated on re-run.
+- Learning-loop telemetry: `lesson.recorded` and `lesson.recalled` ledger
+  events, a `godpowers event emit` CLI subcommand so skill prose can reach the
+  hash-chained ledger, and `lib/learning-metrics.js` surfaced in
+  `/god-metrics`. Observability only; nothing gates on it.
+- Human-gated improvement proposals: `lib/improvement-proposals.js` and the
+  `godpowers proposal` CLI (propose, list, decide). The learning loop drafts
+  prompt-surface patches into `.godpowers/proposals/` and escalates
+  warning-severity review items; only a human applies them in
+  `/god-review-changes`. Staleness refuses acceptance, dedupe and the
+  `proposal-open-limit` parameter (default 1) bound the queue, and the
+  `proposal.*` event family keeps self-improvement telemetry out of the
+  product accepted-change rate. The warning-to-error promotion is dual-state
+  pinned in tests.
+- Prompt-surface cadence: `PROMPT_SURFACES` in `lib/artifact-map.js` declares
+  `skills/`, `specialists/`, and `references/` as `frozen`; proposals refuse
+  targets outside it, and the tier gate map is untouched.
+- Surgical review-queue clearing: `reviewRequired.removeItem` removes one
+  item from one batch without touching any other byte of the ledger.
+- Frozen eval corpus: `fixtures/evals/` with known-good and known-bad PRD and
+  roadmap fixtures graded by `lib/artifact-linter.js`, including tripwire
+  fixtures proving a self-authored "PASSED" claim cannot blind the grader.
+- Three new test suites on `npm test`: `test-learning-metrics.js`,
+  `test-improvement-proposals.js`, `test-eval-set.js`.
+
 ## [5.15.1] - 2026-08-04
 
 Documentation release. Rewrites the public documentation surface for a broader,
