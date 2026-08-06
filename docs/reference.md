@@ -1,6 +1,6 @@
 # Godpowers Reference
 
-Complete command, agent, and artifact reference for v5.17.0.
+Complete command, agent, and artifact reference for v5.17.1.
 
 **This page is a dictionary, not a tutorial.** It lists everything, which makes
 it useful for looking things up and a poor place to start. If you are new, read

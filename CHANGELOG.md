@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.17.1] - 2026-08-06
+
+Release-gate hardening. Closes the two recorded publish-run traps
+mechanically: the npm advisory-cache gap and late version-surface drift.
+
 ### Added
 
 - Live advisory gate: `scripts/check-live-advisories.js` (and
