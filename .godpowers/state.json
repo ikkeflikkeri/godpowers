@@ -102,7 +102,7 @@
       "roadmap": {
         "status": "done",
         "artifact": "roadmap/ROADMAP.mdx",
-        "artifact-hash": "sha256:de79fb92e4439780abd641f9c77b9d1a0360505deeaf28ae4e48684fc4b7d410",
+        "artifact-hash": "sha256:b4afa7f378c59cb787fbe8426d9957a53657ca394ea290526aac4c64237f7f7e",
         "updated": "2026-07-13T16:09:44.000Z",
         "notes": "Roadmap provenance is pinned to current source hashes and the published version 5.5.0 release."
       },

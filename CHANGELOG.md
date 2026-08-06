@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.17.0] - 2026-08-06
+
+Reference-bar release. The design audit can now judge the app blind against
+a named shipped product, design reviews and divergence passes gained a
+sealed blind A/B protocol, and a new bounded polish loop climbs toward the
+bar with two brakes: the human and a rounds cap.
+
+### Added
+
+- Reference anchor in DESIGN.md: an optional `reference:` frontmatter block
+  (`name`, `url`, `focus`) naming a shipped product as the audit-time
+  quality bar. `lib/design-spec.js` validates it (`D-REFERENCE-SHAPE`,
+  `D-REFERENCE-NAME`, `D-REFERENCE-URL`), `lib/runtime-audit.js` captures
+  it beside the app during design audits, and god-browser-tester judges
+  the sealed pair blind. Advisory always: losing to the reference files a
+  warning into the review queue and never trips the critical-finding gate.
+  god-designer records anchors only when the user names one; anchors are
+  never a token source.
+- `lib/blind-compare.js`: unlabeled a/b pairs with a sealed role
+  assignment, deterministic slot placement, mechanical
+  verdict-before-unseal ordering, and verdict immutability (a judged pair
+  cannot be rebuilt, a recorded verdict cannot be edited, an unsealed pair
+  refuses new verdicts). Protocol prose in
+  `references/design/BLIND-COMPARISON.md`; honest framing included: the
+  blindness is procedural, a seatbelt rather than cryptography.
+- Blind before/after in god-design-reviewer: when a design change renders,
+  stage 1 judges current vs proposed blind and uses the resolved outcome
+  as intent-fit evidence. The divergence pass
+  (`references/planning/DIVERGENCE.md`) judges rendered candidate pairs
+  blind for the same reason: the judge should grade pixels, not labels.
+- `/god-polish`: bounded post-green polish loop (124th command, `build`
+  family, tier 3). Each round audits the running app, turns findings and
+  the blind verdict into one design-scoped fix slice, applies it under
+  unchanged TDD and review rules, and re-audits. Stops on the first of:
+  the `polish-rounds-limit` loop parameter (new, default 3, hard max 10,
+  tuned via `/god-budget --loop`), a human stop, a dry round, or a
+  critical finding. State in `.godpowers/polish/POLISH.mdx`; events
+  `polish.round` and `polish.closed`.
+- `scripts/test-blind-compare.js` rides `npm test` (102 test script files
+  total).
+- INSPIRATION.md entry acknowledging the gauntlet-loop skill (Matt
+  Shumer's aim prompt, packaged by duolahypercho) as the influence for the
+  reference bar, blind judgment, and the climb loop, with the parts
+  godpowers deliberately inverted: sealed ordering over trusted procedure,
+  advisory severity over an unreachable bar, and a rounds cap over
+  "the human is the only brake".
+
+### Changed
+
+- god-browser-tester Mode 1 judges sealed reference pairs and forwards
+  `reference-comparison` findings at warning severity;
+  `reference-unreachable` degrades gracefully. Its have-nots now include
+  reading `assignment.json` before the verdict and escalating a lost
+  comparison to the critical gate.
+- `templates/DESIGN.md` documents the optional anchor block;
+  `docs/validation.md`, `docs/reference.md`, `docs/command-flows.md`,
+  `docs/agent-specs.md`, and `skills/god-budget.md` document the new
+  surfaces. Surface counts across the count-guarded docs moved to 124
+  skills, 108 lib modules, 53 references, and 102 test scripts.
+
 ## [5.16.0] - 2026-08-06
 
 Learning-loop release. Closes the write-only learnings gap, adds ledger-backed
