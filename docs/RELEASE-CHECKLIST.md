@@ -46,10 +46,17 @@ npm run release:check
 
 This includes:
 
+- Version surface check through `npm run version:check`, first, so an edit
+  made after `release:prepare` fails in seconds with the exact remediation
+  (`npm run version:sync`) instead of minutes later mid-gate.
 - Full test suite through `npm test`.
 - Security and surface audit through `npm run test:audit`. This audits with
   `--omit=dev`; the full-tree scope is covered daily by
-  `.github/workflows/security-audit.yml` rather than at release time.
+  `.github/workflows/security-audit.yml` rather than at release time. It also
+  runs `scripts/check-live-advisories.js`, which bypasses npm's advisory
+  cache by asking the registry's bulk endpoint directly, so a local gate and
+  CI read the same live feed (`npm run audit:live` runs it alone; a blocked
+  network check reports blocked, never clean).
 - Dependency override justification through
   `node scripts/test-dependency-overrides.js`.
 - Package contents assertion through `npm run pack:check`.

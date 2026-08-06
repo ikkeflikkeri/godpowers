@@ -48,6 +48,7 @@ const TEST_COMMANDS = [
   [node, ['scripts/test-source-grounding.js']],
   [node, ['scripts/test-code-intelligence.js']],
   [node, ['scripts/test-package-legitimacy.js']],
+  [node, ['scripts/test-live-advisories.js']],
   [node, ['scripts/test-atomic-write.js']],
   [node, ['scripts/test-executor-repair.js']],
   [node, ['scripts/test-repair-integrity.js']],

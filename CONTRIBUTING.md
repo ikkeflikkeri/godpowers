@@ -155,6 +155,16 @@ both scopes. Both halves of that gap bit during 5.14.x: the `hono` advisory
 surfaced only as a failed publish run, and all three `brace-expansion`
 advisories were visible only to Dependabot.
 
+**Why the audit gate also asks the registry directly.** `npm audit` reads the
+advisory feed through npm's HTTP cache, so a local run can report zero while
+CI, minutes later, fails on an advisory published in between; that is the
+mechanism behind the `hono` failed-publish above. `test:audit` therefore also
+runs `scripts/check-live-advisories.js`, which POSTs the resolved production
+set from `package-lock.json` straight to the registry's bulk advisory
+endpoint with no npm cache in the path (`npm run audit:live` runs it alone).
+Any returned advisory fails the gate; a network failure reports blocked, never
+clean.
+
 **When to use an npm `override`.** Exactly one case: the patched version sits
 outside the range every parent declares, so no resolution can reach it. In every
 other situation npm already picks the highest in-range version, and refreshing

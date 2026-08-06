@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Live advisory gate: `scripts/check-live-advisories.js` (and
+  `npm run audit:live`) POSTs the resolved production dependency set from
+  `package-lock.json` directly to the registry's bulk advisory endpoint,
+  bypassing the npm HTTP cache that let a local `npm audit --omit=dev` pass
+  minutes before CI failed on a live advisory (the 5.14.x `hono` failed
+  publish). Wired into `test:audit`; any returned advisory fails, a blocked
+  network check reports blocked rather than clean, and
+  `scripts/test-live-advisories.js` covers it offline (103 test script
+  files total).
+
+### Changed
+
+- `release:check` runs `version:check` first, so a `package.json` edit made
+  after `release:prepare` fails in seconds with the exact remediation
+  (`npm run version:sync`) instead of surfacing minutes later as a
+  self-truth failure mid-gate.
+
 ## [5.17.0] - 2026-08-06
 
 Reference-bar release. The design audit can now judge the app blind against

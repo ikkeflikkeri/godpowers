@@ -34,13 +34,14 @@
     "test:mcp": "npm --workspace @godpowers/mcp test",
     "coverage": "c8 --reporter=text --reporter=lcov node scripts/run-tests.js",
     "coverage:lib": "c8 --all --include=lib/**/*.js --exclude=lib/agent-browser-driver.js --exclude=lib/browser-bridge.js --exclude=!lib/runtime-test.js --check-coverage --lines 90 --branches 75 --reporter=text --reporter=json-summary node scripts/run-tests.js",
-    "test:audit": "npm audit --omit=dev && git diff --check && npm run test:surface",
+    "test:audit": "npm audit --omit=dev && node scripts/check-live-advisories.js && git diff --check && npm run test:surface",
+    "audit:live": "node scripts/check-live-advisories.js",
     "pack:check": "node scripts/check-package-contents.js",
     "pack:mcp:check": "npm --workspace @godpowers/mcp run pack:check",
     "release:prepublication:record": "node lib/prepublication-gate.js --record --project=.",
     "release:prepublication:check": "node lib/prepublication-gate.js --check --project=.",
     "evidence:drift": "node scripts/sync-evidence-engine.js --check",
-    "release:check": "npm run release:standards && npm run coverage:lib && node scripts/check-per-file-coverage.js && npm run test:audit && npm run test:self-truth && npm run evidence:drift && npm run pack:check && npm run pack:mcp:check",
+    "release:check": "npm run version:check && npm run release:standards && npm run coverage:lib && node scripts/check-per-file-coverage.js && npm run test:audit && npm run test:self-truth && npm run evidence:drift && npm run pack:check && npm run pack:mcp:check",
     "lint": "node scripts/static-check.js"
   },
   "workspaces": [
